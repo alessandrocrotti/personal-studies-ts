@@ -1,9 +1,9 @@
-import { LinkedList } from "./linkedlist";
+import { DoublyLinkedList } from "./doubly-linkedlist";
 
-describe("Check linked list", () => {
-  let linkedList: LinkedList<string>;
+describe("Check doubly linked list", () => {
+  let linkedList: DoublyLinkedList<string>;
   beforeEach(() => {
-    linkedList = new LinkedList<string>();
+    linkedList = new DoublyLinkedList<string>();
     linkedList.insertAtEnd("1");
     linkedList.insertAtEnd("2");
     linkedList.insertAtEnd("3");
@@ -33,6 +33,11 @@ describe("Check linked list", () => {
 
   it("check delete() ", () => {
     linkedList.delete((el) => el === "2");
+    expect(linkedList.traverse()).toEqual(["1", "3"]);
+  });
+
+  it("check deleteNode() ", () => {
+    linkedList.deleteNode(linkedList.search((el) => el === "2")!);
     expect(linkedList.traverse()).toEqual(["1", "3"]);
   });
 });

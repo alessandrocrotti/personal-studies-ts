@@ -1,23 +1,24 @@
-interface ILinkedList<T> {
-  insertInBegin(data: T): LinkedListNode<T>;
-  insertAtEnd(data: T): LinkedListNode<T>;
-  deleteNode(node: LinkedListNode<T>): void;
-  traverse(): T[];
+interface IDoublyLinkedList<T> {
+  insertInBegin(data: T): DoublyLinkedListNode<T>;
+  deleteNode(node: DoublyLinkedListNode<T>): void;
+  insertAtEnd(data: T): DoublyLinkedListNode<T>;
+  search(comparator: (data: T) => boolean): DoublyLinkedListNode<T> | null;
+  delete(comparator: (data: T) => boolean): void;
   size(): number;
-  search(comparator: (data: T) => boolean): LinkedListNode<T> | null;
+  traverse(): T[];
 }
 
-export class LinkedListNode<T> {
-  public next: LinkedListNode<T> | null = null;
-  public prev: LinkedListNode<T> | null = null;
+export class DoublyLinkedListNode<T> {
+  public next: DoublyLinkedListNode<T> | null = null;
+  public prev: DoublyLinkedListNode<T> | null = null;
   constructor(public data: T) {}
 }
 
-export class LinkedList<T> implements ILinkedList<T> {
-  private head: LinkedListNode<T> | null = null;
+export class DoublyLinkedList<T> implements IDoublyLinkedList<T> {
+  private head: DoublyLinkedListNode<T> | null = null;
 
-  public insertInBegin(data: T): LinkedListNode<T> {
-    const node = new LinkedListNode(data);
+  public insertInBegin(data: T): DoublyLinkedListNode<T> {
+    const node = new DoublyLinkedListNode(data);
     if (!this.head) {
       this.head = node;
     } else {
@@ -28,7 +29,7 @@ export class LinkedList<T> implements ILinkedList<T> {
     return node;
   }
 
-  public deleteNode(node: LinkedListNode<T>): void {
+  public deleteNode(node: DoublyLinkedListNode<T>): void {
     if (!node.prev) {
       this.head = node.next;
     }
@@ -40,12 +41,12 @@ export class LinkedList<T> implements ILinkedList<T> {
     node.prev = null;
   }
 
-  public insertAtEnd(data: T): LinkedListNode<T> {
-    const node = new LinkedListNode(data);
+  public insertAtEnd(data: T): DoublyLinkedListNode<T> {
+    const node = new DoublyLinkedListNode(data);
     if (!this.head) {
       this.head = node;
     } else {
-      const getLast = (node: LinkedListNode<T>): LinkedListNode<T> => {
+      const getLast = (node: DoublyLinkedListNode<T>): DoublyLinkedListNode<T> => {
         return node.next ? getLast(node.next) : node;
       };
 
@@ -57,12 +58,12 @@ export class LinkedList<T> implements ILinkedList<T> {
     return node;
   }
 
-  public search(comparator: (data: T) => boolean): LinkedListNode<T> | null {
+  public search(comparator: (data: T) => boolean): DoublyLinkedListNode<T> | null {
     if (!this.head) {
       return null;
     }
 
-    const find = (node: LinkedListNode<T>): LinkedListNode<T> | null => {
+    const find = (node: DoublyLinkedListNode<T>): DoublyLinkedListNode<T> | null => {
       if (comparator(node.data)) {
         return node;
       } else {
@@ -84,7 +85,7 @@ export class LinkedList<T> implements ILinkedList<T> {
       return 0;
     }
 
-    const elementCount = (node: LinkedListNode<T>, count = 0) => {
+    const elementCount = (node: DoublyLinkedListNode<T>, count = 0) => {
       count++;
       if (node.next) {
         count = elementCount(node.next, count);
@@ -102,7 +103,7 @@ export class LinkedList<T> implements ILinkedList<T> {
       return array;
     }
 
-    const putNodeDataIntoArray = (node: LinkedListNode<T>) => {
+    const putNodeDataIntoArray = (node: DoublyLinkedListNode<T>) => {
       array.push(node.data);
       if (node.next) {
         putNodeDataIntoArray(node.next);
