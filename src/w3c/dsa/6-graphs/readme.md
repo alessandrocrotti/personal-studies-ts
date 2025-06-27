@@ -63,3 +63,5 @@ Tramite una variante di questo algoritmo, si può anche determinare il percorso 
 O(V^2)
 
 ## Algoritmo Bellman-Ford
+
+Questo algoritmo si può applicare ai grafi direzionati con anche valori negativi. Si può utilizzare anche per i grafi non direzionati ma con solo valori positivi.

@@ -174,7 +174,7 @@ export class WeightedGraph {
       }
     }
 
-    // Negative cycle detection
+    // Negative cycle detection (optional)
     for (let u = 0; u < this.size; u++) {
       for (let v = 0; v < this.size; v++) {
         const weight = this.adjMatrix[u][v];
