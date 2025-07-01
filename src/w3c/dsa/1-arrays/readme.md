@@ -9,11 +9,11 @@ Per questa ragione, i seguenti algoritmi che operano sugli array evitano lo shif
 <table>
   <tr>
     <th>Get</th>
-    <td>O(1)</td>
+    <td>$O(1)$</td>
   </tr>
   <tr>
     <th>Insert/Delete</th>
-    <td>O(n)</td>
+    <td>$O(n)$</td>
     <td>Nei linguaggi in cui si usano array a dimensione dinamica, generalmente inserire o cancellare l'elemento in ultima posizione può essere considerato O(1) "ammortizzato" (cioè che potrebbe dover richiedere ogni tanto un riallocamento di memoria, ma non ad ogni operazione e solo quella in cui si rialloca la memoria sarebbe più onerosa, quindi si ammortizza con le altre operazioni)</td>
   </tr>
 </table>
@@ -32,7 +32,7 @@ Inoltre, se ad una iterazione non hai compiuto alcuno swap, significa che anche 
 <table>
   <tr>
     <th>Operations</th>
-    <td>$(n-1)n/2$</td>
+    <td>$(n-1)*n/2$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
@@ -49,11 +49,11 @@ Scorri l'iteratore alla ricerca del valore minimo e quando lo trovi, fai lo swap
 <table>
   <tr>
     <th>Operations</th>
-    <td>n^2/2</td>
+    <td>$n^2/2$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
-    <td>O(n^2)</td>
+    <td>$O(n^2)$</td>
   </tr>
 </table>
 
@@ -66,11 +66,11 @@ Consideri il tuo array come un insieme di 2 sub array: ordinati e da ordinare. S
 <table>
   <tr>
     <th>Operations</th>
-    <td>(n-1)n/2</td>
+    <td>$(n-1)*n/2$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
-    <td>O(n^2)</td>
+    <td>$O(n^2)$</td>
   </tr>
 </table>
 
@@ -86,15 +86,15 @@ Questo algoritmo ha la stessa complessità degli altri algoritmi per il worse ca
 <table>
   <tr>
     <th>Operations</th>
-    <td>n^2/2</td>
+    <td>$n^2/2$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
-    <td>O(n^2)</td>
+    <td>$O(n^2)$</td>
   </tr>
   <tr>
     <th>Average Case</th>
-    <td>O(nLog2n)</td>
+    <td>$O(n*Log2n)$</td>
   </tr>
 </table>
 
@@ -113,16 +113,16 @@ Dipende molto quando è grande il valore più alto "k" rispetto ad "n".
 <table>
   <tr>
     <th>Operations</th>
-    <td>n*k</td>
+    <td>$n*k$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
-    <td>O(n^2)</td>
+    <td>$O(n^2)$</td>
     <td>Se k è molto maggiore di n, può anche essere peggio</td>
   </tr>
   <tr>
     <th>Best Case</th>
-    <td>O(n)</td>
+    <td>$O(n)$</td>
     <td>Se k è una frazione di n</td>
   </tr>
 </table>
@@ -145,15 +145,15 @@ Si sfrutta il modulo 10 per avere l'unità; per avere la decina si fa valore/10 
 <table>
   <tr>
     <th>Operations</th>
-    <td>2*n*k</td>
+    <td>$2*n*k$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
-    <td>O(n*k)</td>
+    <td>$O(n*k)$</td>
   </tr>
   <tr>
     <th>Average Case</th>
-    <td>O(nLogn)</td>
+    <td>$O(n*Logn)$</td>
   </tr>
 </table>
 
@@ -169,7 +169,7 @@ Questo algoritmo, è diviso in due parti:
 <table>
   <tr>
     <th>All Cases</th>
-    <td>O(nLogn)</td>
+    <td>$O(n*Logn)$</td>
   </tr>
 </table>
 
@@ -180,7 +180,7 @@ Classica ricerca scorrendo l'array fino a che non trovi un elemento col valore c
 <table>
   <tr>
     <th>Worst Cases</th>
-    <td>O(n)</td>
+    <td>$O(n)$</td>
   </tr>
 </table>
 
@@ -193,6 +193,6 @@ Confronti l'elemento a metà dell'array con l'elemento cercato: se quello che ce
 <table>
   <tr>
     <th>Worst Cases</th>
-    <td>O(nLog2n)</td>
+    <td>$O(n*Log2n)$</td>
   </tr>
 </table>
