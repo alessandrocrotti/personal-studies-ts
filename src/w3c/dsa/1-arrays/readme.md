@@ -36,7 +36,7 @@ Inoltre, se ad una iterazione non hai compiuto alcuno swap, significa che anche 
   </tr>
   <tr>
     <th>Worse Case</th>
-    <td>O(n^2)</td>
+    <td>$O(n^2)$</td>
   </tr>
 </table>
 
