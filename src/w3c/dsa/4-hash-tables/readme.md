@@ -1,5 +1,14 @@
 # Hash Tables
 
+- [Hash Tables](#hash-tables)
+  - [Descrizione](#descrizione)
+  - [Documentazione ufficiale](#documentazione-ufficiale)
+  - [Funzione di hash e buckets](#funzione-di-hash-e-buckets)
+  - [Ottimizzazione del hash table](#ottimizzazione-del-hash-table)
+  - [Implemntazioni del hash table: hash set e hash map](#implemntazioni-del-hash-table-hash-set-e-hash-map)
+
+## Descrizione
+
 Le hash table risolvono il problema che Array e Linked List hanno O(n) per trovare l'elemento, inserirlo e rimuoverlo.
 Utilizzando le hash table la complessità tende a O(1) anche se teoricamente nel worst case è sempre o(n)
 **IMPORTANTE**: nelle hash table non sono permessi valori duplicati. Questo perchè è una struttura ottimizzata per la ricerca e avere valori duplicati renderebbe più lenta questa operazione.

@@ -1,5 +1,17 @@
 # Trees
 
+- [Trees](#trees)
+  - [Descrizione](#descrizione)
+  - [Documentazione ufficiale](#documentazione-ufficiale)
+  - [Binary Tree](#binary-tree)
+    - [Struttura dati](#struttura-dati)
+    - [Traversal](#traversal)
+  - [Binary Search Tree](#binary-search-tree)
+    - [Complessità computazionale](#complessità-computazionale)
+  - [AVL Tree](#avl-tree)
+
+## Descrizione
+
 I Tree sono una struttura dati con una "root", dei nodi che hanno un parent e "n" children, dove solo "root" non ha parent e le "leaves" non hanno children.
 
 ## Documentazione ufficiale
@@ -60,17 +72,17 @@ Inoltre il vantaggio è che per insert e delete non c'è shifting
   </tr>
   <tr>
     <td>Sorted Array</td>
-    <td>O(logn)</td>
+    <td>$O(\log n)$</td>
     <td>Yes</td>
   </tr>
   <tr>
     <td>Linked List</td>
-    <td>O(n)</td>
+    <td>$O(n)$</td>
     <td>No</td>
   </tr>
   <tr>
     <td>(Balanced) Binary Search Tree</td>
-    <td>O(logn)</td>
+    <td>$O(\log n)$</td>
     <td>No</td>
   </tr>
 </table>

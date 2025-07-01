@@ -1,5 +1,18 @@
 # Graphs
 
+- [Graphs](#graphs)
+  - [Descrizione](#descrizione)
+  - [Tipi di grafi](#tipi-di-grafi)
+  - [Rappresentazione dei grafi](#rappresentazione-dei-grafi)
+  - [Traversal](#traversal)
+  - [Verifica di un ciclo nel grafo](#verifica-di-un-ciclo-nel-grafo)
+  - [Percorso più breve in un grafo](#percorso-più-breve-in-un-grafo)
+  - [Algoritmo Dijkstra](#algoritmo-dijkstra)
+    - [Complessità Computazionale](#complessità-computazionale)
+  - [Algoritmo Bellman-Ford](#algoritmo-bellman-ford)
+
+## Descrizione
+
 Sono una struttura dati composta da un insieme di vertici "v" che possono essere connessi a da 0..v vertici.
 
 La rappresentazione di un grafo è dato da una matrice quadrata VxV in cui sia in altezza che in lunghezza sono rappresentati i vertici e i numeri nella matrice rappresentano le connessioni tra i vertici col loro peso.
@@ -60,7 +73,7 @@ Tramite una variante di questo algoritmo, si può anche determinare il percorso 
 
 ### Complessità Computazionale
 
-O(V^2)
+$O(V^2)$
 
 ## Algoritmo Bellman-Ford
 

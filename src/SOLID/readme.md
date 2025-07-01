@@ -1,5 +1,15 @@
 # SOLID programming
 
+- [SOLID programming](#solid-programming)
+  - [Descrizione](#descrizione)
+  - [**S**ingle Responsibility Principle](#single-responsibility-principle)
+  - [**O**pen-Closed Principle](#open-closed-principle)
+  - [**L**iskov Substitution Principle](#liskov-substitution-principle)
+  - [**I**nterface Segregation Principle](#interface-segregation-principle)
+  - [**D**ependency Inversion Principle](#dependency-inversion-principle)
+
+## Descrizione
+
 La programmazione SOLID ha lo scopo di:
 
 - migliorare la qualità del codice in termini di leggibilità e sicurezza

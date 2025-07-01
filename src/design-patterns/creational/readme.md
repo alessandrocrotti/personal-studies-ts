@@ -1,6 +1,30 @@
 # Design Patterns creazionali
 
+- [Design Patterns creazionali](#design-patterns-creazionali)
+  - [Descrizione](#descrizione)
+  - [Singleton](#singleton)
+  - [Factory](#factory)
+    - [Factory Method](#factory-method)
+    - [Abstract Factory](#abstract-factory)
+  - [Builder](#builder)
+  - [Build Orchestrator](#build-orchestrator)
+  - [Build fluent](#build-fluent)
+  - [Prototype](#prototype)
+
+## Descrizione
+
 Gestiscono la creazione degli oggetti, rendendo il sistema indipendente da come gli oggetti vengono creati, composti e rappresentati.
+
+- [Design Patterns creazionali](#design-patterns-creazionali)
+  - [Descrizione](#descrizione)
+  - [Singleton](#singleton)
+  - [Factory](#factory)
+    - [Factory Method](#factory-method)
+    - [Abstract Factory](#abstract-factory)
+  - [Builder](#builder)
+  - [Build Orchestrator](#build-orchestrator)
+  - [Build fluent](#build-fluent)
+  - [Prototype](#prototype)
 
 ## Singleton
 
@@ -8,11 +32,11 @@ Gestiscono la creazione degli oggetti, rendendo il sistema indipendente da come 
 
 Come si ottiene:
 
-- Private constructor: in modo che solo la classe stessa possa inizializzare una istanze e nessun'altro
-- Private static variable (instance): variabile statica che conterrà l'istanza unica della classe
-- Public static method (getInstance()): metodo statico per accedere alla variabile statica in cui è presente l'oggetto
+- **Private constructor**: in modo che solo la classe stessa possa inizializzare una istanze e nessun'altro
+- **Private static variable** (instance): variabile statica che conterrà l'istanza unica della classe
+- **Public static method** (getInstance()): metodo statico per accedere alla variabile statica in cui è presente l'oggetto
 
-Variante thread-safe per Java:
+Variante thread-safe **per Java**:
 
 - La creazione e solo la creazione dell'istanza deve essere in un blocco synchronized per evitare che il multithreading possa istanzare 2 oggetti in parallelo
 
@@ -60,7 +84,7 @@ Non si occupa quindi di creare le varie istanze di oggetti con una stessa interf
 ## Build Orchestrator
 
 Questa è una versione più classica del builder che si appoggia ad un `director`.
-Quandop si ha un oggetto complesso composto da tante proprietà complesse che solitamente hanno configurazioni precise, si può creare un Builder che crei automaticamente quelle configurazioni di proprietà e quindi restituisca l'oggetto.
+Quando si ha un oggetto complesso composto da tante proprietà complesse che solitamente hanno configurazioni precise, si può creare un Builder che crei automaticamente quelle configurazioni di proprietà e quindi restituisca l'oggetto.
 
 Probabilmente meno utilizzato nei contesti moderni
 

@@ -1,5 +1,28 @@
 # Array
 
+- [Array](#array)
+  - [Descrizione](#descrizione)
+    - [Complessità Computazionale](#complessità-computazionale)
+  - [Documentazione ufficiale](#documentazione-ufficiale)
+  - [Bubble Sort](#bubble-sort)
+    - [Complessità Computazionale](#complessità-computazionale-1)
+  - [Selection Sort](#selection-sort)
+    - [Complessità Computazionale](#complessità-computazionale-2)
+  - [Insertion Sort](#insertion-sort)
+    - [Complessità Computazionale](#complessità-computazionale-3)
+- [Quick Sort](#quick-sort)
+  - [Complessità Computazionale](#complessità-computazionale-4)
+- [Counting Sort](#counting-sort)
+  - [Complessità Computazionale](#complessità-computazionale-5)
+- [Radix Sort](#radix-sort)
+  - [Complessità Computazionale](#complessità-computazionale-6)
+- [Merge Sort](#merge-sort)
+  - [Complessità Computazionale](#complessità-computazionale-7)
+- [Linear Search](#linear-search)
+- [Binary Search](#binary-search)
+
+## Descrizione
+
 Gli array sono strutture dati composte da una lista ordinata di elementi, questa lista ha una lunghezza definita o dinamica.
 Le operazioni di insert e remove sono complesse perchè richiedono lo shifting degli elementi. Quindi l'aggiunta e la rimozione alla fine dell'array rende meno onerosa l'operazione.
 Per questa ragione, i seguenti algoritmi che operano sugli array evitano lo shifting e al più fanno lo swap, cioè lo scambio di elementi all'interno dell'array

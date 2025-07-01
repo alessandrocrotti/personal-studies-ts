@@ -1,5 +1,16 @@
 # Linked Lists
 
+- [Linked Lists](#linked-lists)
+  - [Descrizione](#descrizione)
+  - [Documentazione ufficiale](#documentazione-ufficiale)
+  - [Differenza Linked List - Array](#differenza-linked-list---array)
+    - [Gestione della memoria](#gestione-della-memoria)
+    - [Operazioni](#operazioni)
+  - [Tipi di linked list](#tipi-di-linked-list)
+  - [Algoritmi di ordinamento e ricerca](#algoritmi-di-ordinamento-e-ricerca)
+
+## Descrizione
+
 Una linked list è una lista di nodi con un valore e un puntamento al nodo successivo. Ogni linked list ha una "head", cioè il nodo di partenza da cui si eseguono gli algoritmi, ma non è strettamente il primo della lista. Per esempio in una stack è l'ultimo elemento.
 Ogni linked list è una struttura dati da definire per ogni linguaggio, al contrario degli array che sono predefiniti in ogni linguaggio.
 

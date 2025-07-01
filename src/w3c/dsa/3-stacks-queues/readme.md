@@ -1,5 +1,13 @@
 # Stacks and Queues
 
+- [Stacks and Queues](#stacks-and-queues)
+  - [Descrizione](#descrizione)
+  - [Documentazione ufficiale](#documentazione-ufficiale)
+  - [Stacks](#stacks)
+  - [Queues](#queues)
+
+## Descrizione
+
 These data structure are quite similar. Both can be handled by array or linked list
 
 ## Documentazione ufficiale

@@ -1,5 +1,17 @@
 # Structural design
 
+- [Structural design](#structural-design)
+  - [Descrizione](#descrizione)
+  - [Adapter](#adapter)
+  - [Composite](#composite)
+  - [Proxy](#proxy)
+  - [Flyweight](#flyweight)
+  - [Facade](#facade)
+  - [Bridge](#bridge)
+  - [Decorator](#decorator)
+
+## Descrizione
+
 Generalmente i pattern strutturali hanno il compito di nascondere le complessità al client (cioè alla classe che chiama, solitamente tramite interfaccia) e gestirle a basso livello.
 
 ## Adapter
