@@ -15,17 +15,6 @@
 
 Gestiscono la creazione degli oggetti, rendendo il sistema indipendente da come gli oggetti vengono creati, composti e rappresentati.
 
-- [Design Patterns creazionali](#design-patterns-creazionali)
-  - [Descrizione](#descrizione)
-  - [Singleton](#singleton)
-  - [Factory](#factory)
-    - [Factory Method](#factory-method)
-    - [Abstract Factory](#abstract-factory)
-  - [Builder](#builder)
-  - [Build Orchestrator](#build-orchestrator)
-  - [Build fluent](#build-fluent)
-  - [Prototype](#prototype)
-
 ## Singleton
 
 **Permette di creare una sola istanza di in certo oggetto e sempre quella istanza verrà utilizzata.**
