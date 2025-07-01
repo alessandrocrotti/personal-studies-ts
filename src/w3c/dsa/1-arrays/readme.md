@@ -49,7 +49,7 @@ Scorri l'iteratore alla ricerca del valore minimo e quando lo trovi, fai lo swap
 <table>
   <tr>
     <th>Operations</th>
-    <td>$n^2/2$</td>
+    <td>$(n - 1) \cdot \frac{n}{2} + (n - 1)$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
@@ -66,7 +66,7 @@ Consideri il tuo array come un insieme di 2 sub array: ordinati e da ordinare. S
 <table>
   <tr>
     <th>Operations</th>
-    <td>$(n-1)*n/2$</td>
+    <td>$(n - 1) \cdot \frac{n}{2}$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
@@ -86,7 +86,7 @@ Questo algoritmo ha la stessa complessità degli altri algoritmi per il worse ca
 <table>
   <tr>
     <th>Operations</th>
-    <td>$n^2/2$</td>
+    <td>$n \cdot \frac{n}{2}$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
@@ -94,7 +94,7 @@ Questo algoritmo ha la stessa complessità degli altri algoritmi per il worse ca
   </tr>
   <tr>
     <th>Average Case</th>
-    <td>$O(n*Log2n)$</td>
+    <td>$O(n \cdot \log_2 n)$</td>
   </tr>
 </table>
 
@@ -113,7 +113,7 @@ Dipende molto quando è grande il valore più alto "k" rispetto ad "n".
 <table>
   <tr>
     <th>Operations</th>
-    <td>$n*k$</td>
+    <td>$n \cdot k$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
@@ -145,15 +145,15 @@ Si sfrutta il modulo 10 per avere l'unità; per avere la decina si fa valore/10 
 <table>
   <tr>
     <th>Operations</th>
-    <td>$2*n*k$</td>
+    <td>$2 \cdot n \cdot k$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
-    <td>$O(n*k)$</td>
+    <td>$O(n \cdot k)$</td>
   </tr>
   <tr>
     <th>Average Case</th>
-    <td>$O(n*Logn)$</td>
+    <td>$O(n \cdot \log n)$</td>
   </tr>
 </table>
 
@@ -169,7 +169,7 @@ Questo algoritmo, è diviso in due parti:
 <table>
   <tr>
     <th>All Cases</th>
-    <td>$O(n*Logn)$</td>
+    <td>$O(n \cdot \log n)$</td>
   </tr>
 </table>
 
@@ -193,6 +193,6 @@ Confronti l'elemento a metà dell'array con l'elemento cercato: se quello che ce
 <table>
   <tr>
     <th>Worst Cases</th>
-    <td>$O(n*Log2n)$</td>
+    <td>$O(n \cdot \log_2 n)$</td>
   </tr>
 </table>
