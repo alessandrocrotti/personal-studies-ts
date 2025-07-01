@@ -10,16 +10,16 @@
     - [Complessità Computazionale](#complessità-computazionale-2)
   - [Insertion Sort](#insertion-sort)
     - [Complessità Computazionale](#complessità-computazionale-3)
-- [Quick Sort](#quick-sort)
-  - [Complessità Computazionale](#complessità-computazionale-4)
-- [Counting Sort](#counting-sort)
-  - [Complessità Computazionale](#complessità-computazionale-5)
-- [Radix Sort](#radix-sort)
-  - [Complessità Computazionale](#complessità-computazionale-6)
-- [Merge Sort](#merge-sort)
-  - [Complessità Computazionale](#complessità-computazionale-7)
+  - [Quick Sort](#quick-sort)
+    - [Complessità Computazionale](#complessità-computazionale-4)
+  - [Counting Sort](#counting-sort)
+    - [Complessità Computazionale](#complessità-computazionale-5)
+  - [Radix Sort](#radix-sort)
+    - [Complessità Computazionale](#complessità-computazionale-6)
+  - [Merge Sort](#merge-sort)
+    - [Complessità Computazionale](#complessità-computazionale-7)
 - [Linear Search](#linear-search)
-- [Binary Search](#binary-search)
+  - [Binary Search](#binary-search)
 
 ## Descrizione
 
@@ -97,7 +97,7 @@ Consideri il tuo array come un insieme di 2 sub array: ordinati e da ordinare. S
   </tr>
 </table>
 
-# Quick Sort
+## Quick Sort
 
 Si basa su una funzione ricorsiva che prende un valore "pivot" (per esempio l'ultimo dell'array selezionato) con lo scopo si mettere tale valore nella posizione corretta all'interno dell'array. Questo significa che alla fine dell'iterazione, tutti i valori più piccoli del "pivot" saranno a sinistra e tutti i valori più grandi del "pivot" saranno alla sua destra.
 Poi si seleziona applica la stessa logica ai 2 sotto array che si vengono a formare a destra e a sinistra del pivot. Facendo questo in maniera ricorsiva, si ordina l'intero array.
@@ -121,7 +121,7 @@ Questo algoritmo ha la stessa complessità degli altri algoritmi per il worse ca
   </tr>
 </table>
 
-# Counting Sort
+## Counting Sort
 
 **IMPORTANTE**: applicabile solamente ad array di valori interi positivi e non troppo alti.
 
@@ -150,7 +150,7 @@ Dipende molto quando è grande il valore più alto "k" rispetto ad "n".
   </tr>
 </table>
 
-# Radix Sort
+## Radix Sort
 
 **IMPORTANTE**: applicabile solamente ad array di valori interi positivi
 
@@ -180,7 +180,7 @@ Si sfrutta il modulo 10 per avere l'unità; per avere la decina si fa valore/10 
   </tr>
 </table>
 
-# Merge Sort
+## Merge Sort
 
 Questo algoritmo, è diviso in due parti:
 
@@ -207,7 +207,7 @@ Classica ricerca scorrendo l'array fino a che non trovi un elemento col valore c
   </tr>
 </table>
 
-# Binary Search
+## Binary Search
 
 **IMPORTANTE**: si può applicare solamente con array ordinati
 
