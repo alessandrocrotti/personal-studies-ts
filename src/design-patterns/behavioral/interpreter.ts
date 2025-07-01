@@ -127,5 +127,63 @@ users.filter((user) => adminAndActive.interpret(user)).forEach((u) => console.lo
 console.log("\n🔍 Sales o Manager:");
 users.filter((user) => salesOrManager.interpret(user)).forEach((u) => console.log(u.name));
 
+// OPPURE
+
+// Costruzione di un interprete per espressioni matematiche con variabili e valori di variabili
+
+// Interfaccia base per tutte le espressioni
+interface Expression3 {
+  interpret(context: Record<string, number>): number;
+}
+
+// Terminale: numero costante
+class NumberLiteral implements Expression3 {
+  constructor(private value: number) {}
+
+  interpret(_: Record<string, number>): number {
+    return this.value;
+  }
+}
+
+// Terminale: variabile
+class Variable implements Expression3 {
+  constructor(private name: string) {}
+
+  interpret(context: Record<string, number>): number {
+    return context[this.name] ?? 0;
+  }
+}
+
+// Non-terminale: somma
+class Add implements Expression3 {
+  constructor(private left: Expression3, private right: Expression3) {}
+
+  interpret(context: Record<string, number>): number {
+    return this.left.interpret(context) + this.right.interpret(context);
+  }
+}
+
+// Non-terminale: sottrazione
+class Subtract implements Expression3 {
+  constructor(private left: Expression3, private right: Expression3) {}
+
+  interpret(context: Record<string, number>): number {
+    return this.left.interpret(context) - this.right.interpret(context);
+  }
+}
+
+// Costruzione dell’espressione: (x + 5) - (y - 2)
+const expression: Expression3 = new Subtract(new Add(new Variable("x"), new NumberLiteral(5)), new Subtract(new Variable("y"), new NumberLiteral(2)));
+
+// Contesto con i valori delle variabili
+const context = {
+  x: 10,
+  y: 4,
+};
+
+// Interpretazione
+const result = expression.interpret(context);
+console.log("Risultato:", result); // Output: 13
+
 // Rende il file un modulo ES6 invece che un file globale
 export {};
