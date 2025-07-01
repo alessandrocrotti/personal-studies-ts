@@ -32,7 +32,7 @@ Inoltre, se ad una iterazione non hai compiuto alcuno swap, significa che anche 
 <table>
   <tr>
     <th>Operations</th>
-    <td>$(n - 1) * n / 2$</td>
+    <td>$(n - 1) \cdot \frac{n}{2}$</td>
   </tr>
   <tr>
     <th>Worse Case</th>
