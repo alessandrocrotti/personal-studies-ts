@@ -6,9 +6,9 @@
   - [Factory](#factory)
     - [Factory Method](#factory-method)
     - [Abstract Factory](#abstract-factory)
-  - [Builder](#builder)
-  - [Build Orchestrator](#build-orchestrator)
-  - [Build fluent](#build-fluent)
+  - [Build](#build)
+    - [Build orchestrator](#build-orchestrator)
+    - [Build fluent](#build-fluent)
   - [Prototype](#prototype)
 
 ## Descrizione
@@ -66,32 +66,32 @@ Non si occupa quindi di creare le varie istanze di oggetti con una stessa interf
 - Analogamente a come si è fatto per il factory method, si crea una classe `FactoryGenerator` con il registry, dove si registrano tutti i possibili Factory che estendono l'Abstract Factory
 - Tramite `FactoryGenerator` posso poi creare il mio factory di contesto e dal factory i miei oggetti specifici del contesto scelto
 
-## Builder
+## Build
 
-**Creare una classe Builder che semplifica o raccoglie le istruzioni per costruire un oggetto e solo alla fine tramite la funzione build() si ottiene l'istanaza era e propria dell'oggetto voluto**
+**Creare una classe Builder che semplifica o raccoglie le istruzioni per costruire un oggetto e solo alla fine tramite la funzione build() si ottiene l'istanaza vera e propria dell'oggetto voluto.**
 
-## Build Orchestrator
+### Build orchestrator
 
 Questa è una versione più classica del builder che si appoggia ad un `director`.
 Quando si ha un oggetto complesso composto da tante proprietà complesse che solitamente hanno configurazioni precise, si può creare un Builder che crei automaticamente quelle configurazioni di proprietà e quindi restituisca l'oggetto.
 
-Probabilmente meno utilizzato nei contesti moderni
+Probabilmente meno utilizzato nei contesti moderni.
 
-## Build fluent
+### Build fluent
 
 Questa è una versione più moderna del builder che valorizza i parametri dell'oggetto da costruire passo a passo.
-Il builder è una classe che raccoglie tutti i parametri della classe che deve costruire e ogni volta che setti un parametro, fai `return this;` per poter concatenare i comandi. Alla fine il `build();` passerà i parametri per creare la classe originale restituendola.
+Il builder è una classe che raccoglie tutti i parametri della classe che deve costruire e ogni volta che setti un parametro, fai `return this;` per poter concatenare i comandi. Alla fine il `build();` passerà i parametri per creare la classe originale per istanziarla e restituirla.
 
-Questa versione può essere comoda per creare oggetti immutabili, cioè con proprietà `readonly` che si possono settare solo alla costruzione del builder.
+Questa versione può essere comoda per creare oggetti immutabili, cioè con proprietà `readonly` che si possono settare solo tramite il builder in fase di costruzione e senza altri set.
 
 ## Prototype
 
-**Invece di creare un oggetto nuovo da zero, si clona un oggetto esistente, il prototipo, e si applicano le modifiche sull'oggetto clonato**
+**Invece di creare un oggetto nuovo da zero, si clona un oggetto esistente, il prototipo, e si applicano le modifiche sull'oggetto clonato.**
 
 Utile quando:
 
 - la creazione di quell'oggetto è molto costosa
-- Vuoi duplicare gli oggetti mantenendo la configurazione interna
-- Hai molto parametri nel costruttore
+- vuoi duplicare gli oggetti mantenendo la configurazione interna
+- hai molti parametri nel costruttore
 
-Per fare questo devi avere una interfaccia `Clonable` che definisce un metodo `clone()` che viene implementato nella classe dell'oggetto.
+Per fare questo devi avere una interfaccia `Clonable` che definisce un metodo `clone()` che viene implementato nella classe dell'oggetto. Una volta clonato, puoi settare le differenze sul nuovo oggetto.
