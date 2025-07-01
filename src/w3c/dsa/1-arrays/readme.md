@@ -18,7 +18,7 @@
     - [Complessità Computazionale](#complessità-computazionale-6)
   - [Merge Sort](#merge-sort)
     - [Complessità Computazionale](#complessità-computazionale-7)
-- [Linear Search](#linear-search)
+  - [Linear Search](#linear-search)
   - [Binary Search](#binary-search)
 
 ## Descrizione
@@ -196,7 +196,7 @@ Questo algoritmo, è diviso in due parti:
   </tr>
 </table>
 
-# Linear Search
+## Linear Search
 
 Classica ricerca scorrendo l'array fino a che non trovi un elemento col valore che cercavi e ne ritorni l'indice, se non lo trovi ritorni -1
 
