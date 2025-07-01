@@ -4,22 +4,24 @@
   - [Descrizione](#descrizione)
     - [Complessità Computazionale](#complessità-computazionale)
   - [Documentazione ufficiale](#documentazione-ufficiale)
-  - [Bubble Sort](#bubble-sort)
-    - [Complessità Computazionale](#complessità-computazionale-1)
-  - [Selection Sort](#selection-sort)
-    - [Complessità Computazionale](#complessità-computazionale-2)
-  - [Insertion Sort](#insertion-sort)
-    - [Complessità Computazionale](#complessità-computazionale-3)
-  - [Quick Sort](#quick-sort)
-    - [Complessità Computazionale](#complessità-computazionale-4)
-  - [Counting Sort](#counting-sort)
-    - [Complessità Computazionale](#complessità-computazionale-5)
-  - [Radix Sort](#radix-sort)
-    - [Complessità Computazionale](#complessità-computazionale-6)
-  - [Merge Sort](#merge-sort)
-    - [Complessità Computazionale](#complessità-computazionale-7)
-  - [Linear Search](#linear-search)
-  - [Binary Search](#binary-search)
+  - [Algoritmi di Sort](#algoritmi-di-sort)
+    - [Bubble Sort](#bubble-sort)
+      - [Complessità Computazionale](#complessità-computazionale-1)
+    - [Selection Sort](#selection-sort)
+      - [Complessità Computazionale](#complessità-computazionale-2)
+    - [Insertion Sort](#insertion-sort)
+      - [Complessità Computazionale](#complessità-computazionale-3)
+    - [Quick Sort](#quick-sort)
+      - [Complessità Computazionale](#complessità-computazionale-4)
+    - [Counting Sort](#counting-sort)
+      - [Complessità Computazionale](#complessità-computazionale-5)
+    - [Radix Sort](#radix-sort)
+      - [Complessità Computazionale](#complessità-computazionale-6)
+    - [Merge Sort](#merge-sort)
+      - [Complessità Computazionale](#complessità-computazionale-7)
+  - [Algoritmi di Search](#algoritmi-di-search)
+    - [Linear Search](#linear-search)
+    - [Binary Search](#binary-search)
 
 ## Descrizione
 
@@ -45,12 +47,14 @@ Per questa ragione, i seguenti algoritmi che operano sugli array evitano lo shif
 
 Per una documentazione più dettagliata, fare riferimento a [W3CSchool](https://www.w3schools.com/dsa/dsa_data_arrays.php)
 
-## Bubble Sort
+## Algoritmi di Sort
+
+### Bubble Sort
 
 Si controllano gli elementi a coppie, prendendo l'indice corrente e il suo successivo. Se il corrente è maggiore, fai lo swap e inverti gli elementi. Si compie con un ciclo innestato "i" e "j" dove "j < n-i-1", perchè tutti gli elementi che ad ogni iterazioni di "i" porti in fondo, sono già ordinati e non devono essere controllati nuovamente.
 Inoltre, se ad una iterazione non hai compiuto alcuno swap, significa che anche i rimanenti elementi dell'array sono già ordinati e non serve proseguire.
 
-### Complessità Computazionale
+#### Complessità Computazionale
 
 <table>
   <tr>
@@ -63,11 +67,11 @@ Inoltre, se ad una iterazione non hai compiuto alcuno swap, significa che anche 
   </tr>
 </table>
 
-## Selection Sort
+### Selection Sort
 
 Scorri l'iteratore alla ricerca del valore minimo e quando lo trovi, fai lo swap con l'indice del primo elemento non controllato e incrementi il contatore dei valori controllati. In questo modo porti all'inizio quelli controllati e riduci ad ogni iterazione gli elementi da controllare.
 
-### Complessità Computazionale
+#### Complessità Computazionale
 
 <table>
   <tr>
@@ -80,11 +84,11 @@ Scorri l'iteratore alla ricerca del valore minimo e quando lo trovi, fai lo swap
   </tr>
 </table>
 
-## Insertion Sort
+### Insertion Sort
 
 Consideri il tuo array come un insieme di 2 sub array: ordinati e da ordinare. Salvi il valore del primo dagli "da ordinare" e valuti se quell'elemento è minore del suo precedente. Considerato che tutti i suoi precedenti sono già ordinati, se è minore assegna il valore del minore al valore corrente e continui finche il suo valore non è maggiore o uguale del precedente. A quel punto assegni in quella posizione il valore che ti eri salvato, posizionandolo nel punto corretto della parte ordinata.
 
-### Complessità Computazionale
+#### Complessità Computazionale
 
 <table>
   <tr>
@@ -97,12 +101,12 @@ Consideri il tuo array come un insieme di 2 sub array: ordinati e da ordinare. S
   </tr>
 </table>
 
-## Quick Sort
+### Quick Sort
 
 Si basa su una funzione ricorsiva che prende un valore "pivot" (per esempio l'ultimo dell'array selezionato) con lo scopo si mettere tale valore nella posizione corretta all'interno dell'array. Questo significa che alla fine dell'iterazione, tutti i valori più piccoli del "pivot" saranno a sinistra e tutti i valori più grandi del "pivot" saranno alla sua destra.
 Poi si seleziona applica la stessa logica ai 2 sotto array che si vengono a formare a destra e a sinistra del pivot. Facendo questo in maniera ricorsiva, si ordina l'intero array.
 
-### Complessità Computazionale
+#### Complessità Computazionale
 
 Questo algoritmo ha la stessa complessità degli altri algoritmi per il worse case, in cui tutti gli elementi sono ordinati nel verso opposto, ma per un average case in cui sono ordinati casualmente, è più veloce e quindi migliore.
 
@@ -121,7 +125,7 @@ Questo algoritmo ha la stessa complessità degli altri algoritmi per il worse ca
   </tr>
 </table>
 
-## Counting Sort
+### Counting Sort
 
 **IMPORTANTE**: applicabile solamente ad array di valori interi positivi e non troppo alti.
 
@@ -129,7 +133,7 @@ Lo scopo è quello scorrere l'array originale e incrementare di 1 l'elemento del
 
 Si prende il valore massimo dell'array e crea il countingArray con dimensione (max+1) e valori 0 in ogni elemento. Si fa pop() dall'array originale fino a che non è vuoto, per incrementare il countingArray. Si scorre il countingArray e si fa push() nell'array originale del valore dell'indice per un numero di volte pari al valore dell'elemento nel countingArray,
 
-### Complessità Computazionale
+#### Complessità Computazionale
 
 Dipende molto quando è grande il valore più alto "k" rispetto ad "n".
 
@@ -150,7 +154,7 @@ Dipende molto quando è grande il valore più alto "k" rispetto ad "n".
   </tr>
 </table>
 
-## Radix Sort
+### Radix Sort
 
 **IMPORTANTE**: applicabile solamente ad array di valori interi positivi
 
@@ -161,7 +165,7 @@ Si sfrutta il modulo 10 per avere l'unità; per avere la decina si fa valore/10 
 
 **FONDAMENTALE**: si deve utilizzare di uno Stable Algorithm quando si mettono i valori nel radixArray e poi si riportano nel array originale. Questo significa che viene mantenuto l'ordinamento fatto negli step precedenti anche in quelli successivi (quando ordino per decine, devo mantenere l'ordinamento fatto precedentemente tramite unità). Per questo motivo si usa pop() e push()
 
-### Complessità Computazionale
+#### Complessità Computazionale
 
 "k" è il numero di cifre del valore max. L'average case è una approssimazione considerando "k" relativamente più piccolo di "n". Per valori di "k" molto più piccoli di "n", l'algoritmo è particolarmente performante, potenzialmente il più veloce.
 
@@ -180,14 +184,14 @@ Si sfrutta il modulo 10 per avere l'unità; per avere la decina si fa valore/10 
   </tr>
 </table>
 
-## Merge Sort
+### Merge Sort
 
 Questo algoritmo, è diviso in due parti:
 
 - Splitting: si divide in maniera ricorsiva l'array in 2 array più piccoli, prendendo l'indice a metà. Poi si ripete per il sotto array di destra e sinistra, fino ad ottenere array di dimesione 1
 - Merge: prende 2 array precedentemente splittati (left e right) e confronta i valori. Scorrendo entrambi da sinistra a destra, confronta i valori dei due, rimuove il valore più basso dal relativo sotto array e lo usa per popolare un array risultante che in questo modo sarà ordinato.
 
-### Complessità Computazionale
+#### Complessità Computazionale
 
 <table>
   <tr>
@@ -196,7 +200,9 @@ Questo algoritmo, è diviso in due parti:
   </tr>
 </table>
 
-## Linear Search
+## Algoritmi di Search
+
+### Linear Search
 
 Classica ricerca scorrendo l'array fino a che non trovi un elemento col valore che cercavi e ne ritorni l'indice, se non lo trovi ritorni -1
 
@@ -207,7 +213,7 @@ Classica ricerca scorrendo l'array fino a che non trovi un elemento col valore c
   </tr>
 </table>
 
-## Binary Search
+### Binary Search
 
 **IMPORTANTE**: si può applicare solamente con array ordinati
 
