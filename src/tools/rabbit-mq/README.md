@@ -2,14 +2,15 @@
 
 - [RabbitMQ](#rabbitmq)
 - [Descrizione](#descrizione)
-- [Installazione](#installazione)
-- [Utilizzo](#utilizzo)
+  - [Installazione](#installazione)
+  - [Interfaccia web](#interfaccia-web)
+  - [Utilizzo](#utilizzo)
 
 # Descrizione
 
 Si tratta di un Broker di messaggi su protocollo AMQP. Gestiste la connessione con _producer_ e _consumer_ per gestire integrazioni asyncrone tra sistemi diversi.
 
-# Installazione
+## Installazione
 
 Tramite il file `docker-compose.yml` si può configurare l'installazione di RabbitMQ come container docker, con un relativo volume per poter conservare i messaggi.
 
@@ -27,4 +28,8 @@ cd src/tools/rabbit-mq
 docker-compose down -v
 ```
 
-# Utilizzo
+## Interfaccia web
+
+http://localhost:15672/
+
+## Utilizzo
