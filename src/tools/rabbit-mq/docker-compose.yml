@@ -1,0 +1,19 @@
+name: personal-studies-rabbitmq
+
+services:
+  rabbitmq:
+    image: rabbitmq:4.1.1-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # Porta AMQP per le applicazioni
+      - "15672:15672" # Interfaccia web di gestione
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin # Utente predefinito
+      RABBITMQ_DEFAULT_PASS: password # Credenziali di accesso predefinite
+    restart: unless-stopped # Riavvia il container se si arresta inaspettatamente
+
+volumes:
+  rabbitmq_data:
+    name: personal-studies-rabbitmq-data # Volume per i dati persistenti di RabbitMQ con nome specifico
