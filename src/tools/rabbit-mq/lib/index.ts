@@ -6,7 +6,7 @@ async function main() {
   // await fanoutExample();
   // await topicExample();
   // await headersExample();
-  await rpcExample();
+  // await rpcExample();
 }
 
 async function simpleSendReceiveOnQueue() {
