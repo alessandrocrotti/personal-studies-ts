@@ -1,4 +1,4 @@
-import { getMessage } from "./index";
+import { getMessage } from "./message";
 
 describe("getMessage()", () => {
   it("should return the correct message when called", () => {
