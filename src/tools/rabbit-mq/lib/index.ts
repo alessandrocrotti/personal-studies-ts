@@ -2,11 +2,11 @@ import { consumeQueue, consumeFanoutExchange, consumeTopicExchange, consumeHeade
 import { sendToQueue, sendToFanoutExchange, sendToTopicExchange, sendToHeadersExchange, sendRpcRequest } from "./producer";
 
 async function main() {
-  // await simpleSendReceiveOnQueue();
-  // await fanoutExample();
-  // await topicExample();
-  // await headersExample();
-  // await rpcExample();
+  await simpleSendReceiveOnQueue();
+  await fanoutExample();
+  await topicExample();
+  await headersExample();
+  await rpcExample();
 }
 
 async function simpleSendReceiveOnQueue() {
