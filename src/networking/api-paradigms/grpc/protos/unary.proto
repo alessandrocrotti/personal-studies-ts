@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+// Questo è il namespace del pacchetto per evitare conflitti di nomi
+package helloworld;
+
+// Definizione del servizio Greeter
+// Il servizio ha un metodo SayHello che accetta una richiesta HelloRequest e restituisce una risposta HelloReply
+// Questo servizio è unary (una richiesta, una risposta) perchè non usa stream ma oggetti singoli
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply);
+}
+
+// Definisce una struttura dati per la richiesta
+// La richiesta contiene un campo stringa chiamato "name"
+// Tutti i campi sono sempre opzionali e non possono essere forzati required, ma gestiti nel lato server
+message HelloRequest {
+  // Il numero 1 indica che questo è il primo campo del messaggio
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}

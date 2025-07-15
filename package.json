@@ -7,13 +7,15 @@
     "test:watch": "jest --watch",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
-    "lint": "eslint ./src/**/.ts"
+    "lint": "eslint ./src/**/.ts",
+    "generate:protos": "npx buf generate --template ./src/networking/api-paradigms/grpc/buf.gen.yaml"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@bufbuild/buf": "^1.55.1",
     "@types/amqplib": "^0.10.7",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.13",
@@ -29,10 +31,13 @@
   "dependencies": {
     "@apollo/client": "^3.13.8",
     "@apollo/server": "^4.12.2",
+    "@bufbuild/protobuf": "^2.6.0",
+    "@grpc/grpc-js": "^1.13.4",
     "amqplib": "^0.10.8",
     "cross-fetch": "^4.1.0",
     "graphql": "^16.11.0",
     "kafkajs": "^2.2.4",
+    "ts-proto": "^2.7.5",
     "uuid": "^11.1.0"
   }
 }

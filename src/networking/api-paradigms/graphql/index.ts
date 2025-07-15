@@ -1,9 +1,9 @@
-import { runClient } from "./client";
-import { startServer } from "./server";
+import { runGraphQLClient } from "./client";
+import { startGraphQLServer } from "./server";
 
 async function startGraphQLDemo() {
-  await startServer();
-  await runClient();
+  await startGraphQLServer();
+  await runGraphQLClient();
 }
 
 startGraphQLDemo();

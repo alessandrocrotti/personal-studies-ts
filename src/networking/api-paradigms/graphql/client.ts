@@ -3,7 +3,7 @@ import { ApolloClient, InMemoryCache, gql, HttpLink, ApolloQueryResult, FetchRes
 import fetch from "cross-fetch";
 import { CreateUserInput, Role, User } from "./types";
 
-export async function runClient() {
+export async function runGraphQLClient() {
   const client = new ApolloClient({
     link: new HttpLink({ uri: "http://localhost:4000/graphql", fetch }),
     cache: new InMemoryCache(),

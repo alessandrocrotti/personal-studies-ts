@@ -1,0 +1,14 @@
+syntax = "proto3";
+package chat;
+
+service ChatService {
+  rpc Chat(stream ChatMessage) returns (stream ChatMessage);
+}
+
+message ChatMessage {
+  string user = 1;
+  string message = 2;
+  // Il timestamp è int64 per precauzione in caso di valori molto grandi, ma non può essere mappato in un Number in JavaScript perchè non può contenere valore superiore a 2^53-1 mentre int64 puo contenere valori fino a 2^63-1
+  // Si può forzare ad usare number nel buf.gen.yaml, ma potrebbe essere rischioso se si usano valori molto grandi
+  int64 timestamp = 3;
+}
