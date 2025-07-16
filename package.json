@@ -17,8 +17,10 @@
   "devDependencies": {
     "@bufbuild/buf": "^1.55.1",
     "@types/amqplib": "^0.10.7",
+    "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.13",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^9.30.1",
@@ -35,9 +37,12 @@
     "@grpc/grpc-js": "^1.13.4",
     "amqplib": "^0.10.8",
     "cross-fetch": "^4.1.0",
+    "express": "^5.1.0",
     "graphql": "^16.11.0",
     "kafkajs": "^2.2.4",
     "ts-proto": "^2.7.5",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "ws": "^8.18.3",
+    "zod": "^4.0.5"
   }
 }

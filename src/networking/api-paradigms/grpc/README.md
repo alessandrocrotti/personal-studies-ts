@@ -23,6 +23,7 @@ Il principio delle **RPC** in generale è quello di permettere ad un client di c
 
 - **proto**: protocol buffers che è un linguaggio binario, compatto e tipizzato per definire i messaggi e le API
 - **HTTP/2**: utilizzando questo protocollo di comunicazione, si può sfruttare il multiplexing, streaming e compressione. Rende tutto più veloce rispetto alle REST in HTTP/1.1 ed ottimo per le app real-time
+  - **Multiplexing**: tenendo una sola connessione TCP aperta, può aprire più stream indipendenti e paralleli per comunicare
 - **Stub**: generazione automatica del codice client per comunicare col server
 - **Service**: definizione delle funzioni sul server
 

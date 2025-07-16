@@ -28,27 +28,35 @@ const clientClientStreaming = new LogServiceClient("localhost:50051", grpc.crede
 const clientBidirectionalStreaming = new ChatServiceClient("localhost:50051", grpc.credentials.createInsecure());
 
 export async function runGRPCClient() {
-  // unaryClientHandling();
+  await unaryClientHandling();
 
   // serverStreamingClientHandling();
 
   // clientStreamingClientHandling();
 
-  bidirectionalStreamingClientHandling();
+  // bidirectionalStreamingClientHandling();
 }
 
 async function unaryClientHandling() {
   // Chiamata unary
-  clientUnary.sayHello(request, (err, response) => {
-    if (err) {
-      console.error("Unary - Client: Errore nella chiamata:", err);
-    } else {
-      console.log("Unary - Client: Risposta del server:", response.message);
-    }
-  });
+  return new Promise((resolve, reject) =>
+    clientUnary.sayHello(request, (err, response) => {
+      if (err) {
+        console.error("Unary - Client: Errore nella chiamata:", err);
+        reject(err);
+      } else {
+        console.log("Unary - Client: Risposta del server:", response.message);
+        resolve(response);
+      }
+    })
+  );
 }
 
-async function serverStreamingClientHandling() {
+/**
+ * Gestisce la chiamata server streaming.
+ * Questa funziona non richiede Promise perchè la connessione è aperta dal server quando invia lo stream. Il client si configura immediatamente tramite la creazione del client e la definizione degli eventi.
+ */
+function serverStreamingClientHandling() {
   // Chiamata server streaming
   const requestServerStreaming: UpdateRequest = { topic: "notizie" };
   const streamSeverStreaming = clientServerStreaming.streamUpdates(requestServerStreaming);
@@ -66,7 +74,7 @@ async function serverStreamingClientHandling() {
   });
 }
 
-async function clientStreamingClientHandling() {
+function clientStreamingClientHandling() {
   // Chiamata client streaming
   const streamClientStreaming = clientClientStreaming.uploadLogs((err, summary) => {
     if (err) {
@@ -87,7 +95,7 @@ async function clientStreamingClientHandling() {
   streamClientStreaming.end();
 }
 
-async function bidirectionalStreamingClientHandling() {
+function bidirectionalStreamingClientHandling() {
   // Chiamata bidirectional streaming
   const streamBidirectionalStreaming = clientBidirectionalStreaming.chat();
 

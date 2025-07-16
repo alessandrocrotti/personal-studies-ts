@@ -116,8 +116,11 @@ export async function startGRPCServer() {
   // Aggiungi il servizio bidirectional streaming
   server.addService(ChatServiceService, chatServiceImpl);
   // Avvia il server sulla porta 50051 per tutte le interfacce di rete in quanto è stato indicato "0.0.0.0". Corretto visto che si usa in locale. La porta 50051 è la porta standard per gRPC
-  server.bindAsync("0.0.0.0:50051", grpc.ServerCredentials.createInsecure(), (err, port) => {
-    if (err) throw err;
-    console.log(`gRPC Server: in ascolto su ${port}`);
+  await new Promise<void>((resolve, reject) => {
+    server.bindAsync("0.0.0.0:50051", grpc.ServerCredentials.createInsecure(), (err, port) => {
+      if (err) return reject(err);
+      console.log(`gRPC Server: in ascolto su ${port}`);
+      resolve();
+    });
   });
 }
