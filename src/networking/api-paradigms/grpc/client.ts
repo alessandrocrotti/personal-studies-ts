@@ -75,7 +75,7 @@ function serverStreamingClientHandling() {
 }
 
 function clientStreamingClientHandling() {
-  // Chiamata client streaming
+  // Chiamata client streaming (non è una Promise perchè il server risponde quando lo stream termina)
   const streamClientStreaming = clientClientStreaming.uploadLogs((err, summary) => {
     if (err) {
       console.error("ClientStreaming - Client: Errore nella risposta:", err);
