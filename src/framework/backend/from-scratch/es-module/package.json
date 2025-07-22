@@ -1,0 +1,31 @@
+{
+  "name": "todo-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "lint": "echo 'No linting configured yet'",
+    "build": "rimraf dist && tsc",
+    "esbuild:watch": "node esbuild.config.js --watch",
+    "esbuild": "node esbuild.config.js",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^4.18.2",
+    "mongoose": "^8.16.4",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/mongoose": "^5.11.96",
+    "esbuild": "^0.25.8",
+    "esbuild-node-externals": "^1.18.0",
+    "eslint": "^9.31.0",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.2.2"
+  }
+}
