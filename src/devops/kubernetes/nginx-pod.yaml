@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx-pod
+  name: nginx-pod
+  namespace: my-namaspace
+spec:
+  containers:
+    - image: nginx
+      name: nginx-container
+      # Aggiunte manualmente. Sono opzionali ma è una best practise metterle esplicite
+      resources:
+        # Risorse massime che il processo può richiedere al nodo. Se supera la CPU, il processo rallenta; se supera la Memory, il processo crasha per OutOfMemory (processo eseguito dal kubelet del nodo)
+        limits:
+          cpu: "1"
+          memory: "512Mi"
+        # Risorse minime che devono essere disponibili sul nodo al momento dell'assegnazione del pod al nodo. Non garantisce un accesso esclusivo a questo minimo di risorse, ma solamente che al momento siano disponibili
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+  restartPolicy: Never

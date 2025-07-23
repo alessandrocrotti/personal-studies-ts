@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deployment
+  name: nginx-deployment
+  namespace: my-namaspace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  # Strategia di aggiornamento del Deployment
+  strategy:
+    # RollingUpdate è la strategia di default. Permette di aggiornare i pod uno alla volta, riducendo il downtime
+    type: RollingUpdate
+    rollingUpdate:
+      # Numero di pod che possono essere creati in più durante l'aggiornamento
+      maxSurge: 1
+      # Numero di pod che possono essere non disponibili durante l'aggiornamento
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment
+        name: nginx-pod
+    spec:
+      containers:
+        - image: nginx
+          name: nginx-container
+          # Aggiunte manualmente. Sono opzionali ma è una best practise metterle esplicite
+          resources:
+            # Risorse massime che il processo può richiedere al nodo. Se supera la CPU, il processo rallenta; se supera la Memory, il processo crasha per OutOfMemory (processo eseguito dal kubelet del nodo)
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            # Risorse minime che devono essere disponibili sul nodo al momento dell'assegnazione del pod al nodo. Non garantisce un accesso esclusivo a questo minimo di risorse, ma solamente che al momento siano disponibili
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          ports:
+            - containerPort: 80
+            - containerPort: 443

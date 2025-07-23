@@ -1,0 +1,94 @@
+# IMPORTANTE: Questa è una implementazione custom di MongoDB in un StatefulSet a scopo di studio. Normalmente si userebbe un operator dedicato.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-sfs
+  namespace: my-namaspace
+spec:
+  # Usa questo servizio headless per generare i nomi DNS dei pod. Questo permette di accedere ai pod tra di loro tramite il loro nome DNS unico.
+  # Poi si dovrò anche configurare l'applicazione in modo che sia in grado di utilizzare questi nomi DNS per comunicare tra i pod
+  serviceName: mongo-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongo-statefulset
+  template:
+    metadata:
+      labels:
+        app: mongo-statefulset
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        # Il container principale che esegue MongoDB come server (gestisce lettura/scrittura dei dati, replica, storage, ecc.)
+        # tramite il --replSet rs0 si abilita la replica set, che permette di avere più istanze di MongoDB che si replicano tra loro
+        - name: mongo
+          image: mongo:6.0
+          command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          # lifecycle.postStart per avviare un processo dopo l'avvio del container, visto che serve che il server MongoDB sia attivo prima di inizializzare il replica set
+          # Tramite il comando mongo "rs.initiate()" si inizializza il replicaSet "rs0" definito in ogni container di ogni pod.
+          # I pod vengono avviati in ordine nello StatefulSet e questo comando viene eseguito solo una volta alla conclusione dell'ultimo pod del StatefulSet vista la condizione if [ "$(hostname)" = "mongo-sfs-2" ]; then in modo che tutti i pod siano attivi prima di inizializzare il replica set.
+          # Utilizzando come "_id" lo stesso replicaSet del --replSet "rs0" si permette ai pod di essere membri dello stesso replica set e nel members si definiscono gli altri membri del replicaSet, che sono i pod del StatefulSet con il loro nome DNS unico.
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    if [ "$(hostname)" = "mongo-sfs-2" ]; then
+                      echo "[MongoDB Init] Aspetto che mongod sia attivo..."
+                      until mongosh --host localhost --eval "db.adminCommand({ ping: 1 })"; do
+                        sleep 2
+                      done
+                      echo "[MongoDB Init] Replica set in avvio..."
+                      mongosh --host localhost --eval '
+                        rs.initiate({
+                          _id: "rs0",
+                          members: [
+                            { _id: 0, host: "mongo-sfs-0.mongo-headless.my-namaspace.svc.cluster.local:27017" },
+                            { _id: 1, host: "mongo-sfs-1.mongo-headless.my-namaspace.svc.cluster.local:27017" },
+                            { _id: 2, host: "mongo-sfs-2.mongo-headless.my-namaspace.svc.cluster.local:27017" }
+                          ]
+                        })
+                      '
+                    else
+                      echo "[MongoDB Init] Nodo secondario: nessuna inizializzazione"
+                    fi
+  # StatefulSet richiede un volume per ogni pod, quindi non si può usare un PersistentVolumeClaim condiviso come nel Deployment
+  # volumeClaimTemplates è una configurazione specifica dello StatefulSet che crea automaticamente un PersistentVolumeClaim e un PersistentVolume
+  # per ogni pod del StatefulSet con il nome del template + il nome del pod come suffisso: mongo-data-mongo-sfs-0, mongo-data-mongo-sfs-1, mongo-data-mongo-sfs-2
+  # Ognuno sarà automaticamente montato nel pod relativo
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 128Mi
+---
+# Questo è un servizio headless per il StatefulSet, che permette di accedere ai pod tramite DNS
+# In un StatefulSet, ogni pod ha un nome DNS unico basato sul nome del StatefulSet e il suo indice
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-headless
+  namespace: my-namaspace
+spec:
+  # Il tipo di servizio è ClusterIP anche se type non è specificato perchè è il default
+
+  # Non ha un clusterIP, quindi è headless
+  # Questo permette di accedere ai pod tramite il loro nome DNS unico
+  # Se si avesse avuto un clusterIP, questo poi sarebbe stato condiviso tra tutti i pod e le richieste sarebbero state bilanciate tra i pod,
+  # ma in uno StatefulSet non si vuole questo comportamento che renderebbe l'accesso ai pod casuale
+  clusterIP: None
+  selector:
+    app: mongo-statefulset
+  ports:
+    - port: 27017
+      targetPort: 27017
