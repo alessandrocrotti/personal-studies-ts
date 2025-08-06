@@ -468,13 +468,66 @@ In questo modo si può usare `provisioner: hostpath.csi.k8s.io` altrimenti si de
 
 ### Persistent Volume Claim
 
+Questo componente ha lo scopo di richiedere dello storage con certe caratteristiche per poterlo montare su un Pod. Infatti un PVC da solo non fa nulla, potrebbe generare il relativo PV se la configurazione della StorageClass è `volumeBindingMode: Immediate`, ma il PV creato non sarebbe utilizzato da nessuno se quel PVC non fosse utilizzato da un Pod.
+
+Le configurazioni più importanti sono:
+
+- **accessMode**: come si accede allo storage
+  - **ReadWriteOnce**: montabile su un solo NODO in lettura e scrittura
+  - **ReadOnlyMany**: montabile da più NODI in sola lettura
+  - **ReadWriteMany**: montabile di più NODI in lettura e scrittura
+- **resources.requests.storage**: quantità di spazio richiesto
+- **storageClassName**: la storage class usata per creare il volume
+
+All'interno di un pod si può mettere l'accesso al PVC utilizzando
+
+- **volumes**: per indicare quali PVC sono utilizzati dal Pod e dichiarandone un nome nel contesto del POD
+- **volumeMounts**: associa un PVC, utilizzando il nome precedentemente dichiarato, ad un path del file system dentro al pod
+  Pael
+
 ### Persistent Volume
+
+Si tratta di un reale storage all'interno del cluster di kubernetes. Può essere fatto in vari modi:
+
+- Disco fisico o virtuale
+- Un file system NFS
+- Un volume cloud
+- Un path locale (come nel caso di minikube)
+
+Importante è che un PV può persistere rispetto ai pod: anche se i pod vengono riavviati o cancellati, il PV rimane persistente con i dati al suo interno, in modo che i pod li possano recuperare.
+
+Solitamente i PV vengono creati dinamicamente, ma possono anche esere creati manualmente tramite manifest YAML. I PV creati manualmente, cioè statici, sono raramente utilizzati e solo per ambienti e situazioni particolari, va sempre preferita una configurazione dinamica.
 
 ## Configuration
 
 ### ConfigMap
 
+Permette di salvare dati di configurazione che siano considerati NON SENSIBILI. Può anche contenere file, variabili d'ambiente o comandi ed è utile per separare la configurazione dell'applicazione dal suo codice. Il type di default è `generic` e va bene nella maggior parte dei casi, ma ci sono anche altri type, come `docker-registry` per le credenziali di docker privati o `tls` per i certificati SSL/TLS.
+
+Possono essere create da riga di comando oppure da manifest YAML: se si vogliono creare classiche coppie chiave/valore allora è meglio lo YAML, ma se si vuole caricare un file/directory in una ConfigMap è meglio da riga di comando (anche se si potrebbe copiare il contenuto del file dentro il manifest YAML, ma risulterebbe scomodo da mantenere).
+
+```shell
+# Il file script.js sara dentro la CM "js-config" con chiave "script.js" e valore il contenuto del file
+kubectl create configmap js-config --from-file=script.js
+# Tutti i file dentro la cartella verranno messi come chiave/valore della CM "js-config" con lo stesso pattern <nome-file>/<contenuto-file>
+kubectl create configmap js-config --from-file=./scripts/
+```
+
+Hanno il limite di massimo **1 Mib** per ConfigMap, se si necessita di montare file più grandi si deve usare i PersistentVolume. Volendo le si possono creare con il valore `immutable: true` per evitare che possano essere modificate.
+
+Le ConfigMap possono essere montate sui pod per essere utilizzate o montate su delle CRD di specifici Operator.
+
 ### Secret
+
+Serve per salvare i dati SENSIBILI, come password, token, certificati. I dati nelle secret sono codificati in **base64** e possono essere criptati a livello di storage. Questo significa che se crei una secret via YAML, devi mettere il valore già codificato tramite base64, invece se vuoi creare una secret via riga di comando puoi farlo così:
+
+```shell
+kubectl create secret generic example-secret --from-literal=username=admin --from-literal=password=s3cr3t
+```
+
+Essendo valori segreti, metterli in un file YAML non è consigliabile, quindi è solitamente preferibile usare la riga di comando.
+
+Si possono usare come variabili d'ambiente usando il `env.#.valueFrom.secretKeyRef` o come volume dentro `volumes.#.secret.secretName`
 
 ## Meccanismi di scheduling
 

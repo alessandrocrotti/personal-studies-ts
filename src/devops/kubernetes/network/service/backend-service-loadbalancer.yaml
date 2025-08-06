@@ -10,5 +10,5 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 80 # Porta del Service
+    - port: 8080 # Porta del Service
       targetPort: 8080 # Porta del container
