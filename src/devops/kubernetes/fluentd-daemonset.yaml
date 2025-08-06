@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  # Essendo un DaemonSet è comune usare il kube-system namespace perchè si considerano componenti di sistema visto che girano su ogni nodo del cluster.
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: fluentd
+  template:
+    metadata:
+      labels:
+        name: fluentd
+    spec:
+      # La configurazione di Fluentd attualmente si occupa solo di raccogliere i log, non li usa in alcun modo per inviarli a servizi esterni. Serve solamente per testare la creazione di un DaemonSet.
+      containers:
+        - name: fluentd
+          image: fluent/fluentd:latest
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        # Volume di tipo hostPath per accedere ai log del nodo. Non è persistente e si riferisce ad una directory già esistente del nodo host
+        # In questo modo Fluentd può leggere i log del sistema e dei container in esecuzione montandola nel suo container. Gli altri container scrivono i log in questa directory.
+        # Solitamente una applicazione scrive i log in stdout/stderr e K8S li mette in /var/log/containers/<mio-pod_mio-namespace_mio-container-xyz>.log
+        - name: varlog
+          hostPath:
+            path: /var/log

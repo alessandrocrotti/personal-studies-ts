@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: esempio-cronjob
+  namespace: my-namespace
+spec:
+  # Esegui ogni 5 minuti
+  schedule: "*/5 * * * *"
+  # Interpreta l'orario secondo il fuso orario italiano
+  timeZone: "Europe/Rome"
+  # Se il Job ritarda oltre 200s, viene saltato
+  startingDeadlineSeconds: 200
+  # Non avvia un nuovo Job se quello precedente è ancora in esecuzione
+  concurrencyPolicy: Forbid
+  # Se true, sospende l'esecuzione (default: false)
+  suspend: false
+  # Mantieni gli ultimi 3 Job completati
+  successfulJobsHistoryLimit: 3
+  # Mantieni l’ultimo Job fallito
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: esempio
+              image: busybox
+              command: ["/bin/sh", "-c", "date; echo 'Ciao dal CronJob!'"]
+          # Riavvia il Pod solo se fallisce
+          restartPolicy: OnFailure

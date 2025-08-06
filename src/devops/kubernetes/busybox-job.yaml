@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: esempio-job
+  namespace: my-namespace
+spec:
+  # Voglio che il Job abbia 5 esecuzioni completate con successo
+  completions: 5
+  # Al massimo 2 Pod possono essere eseguiti in parallelo
+  parallelism: 2
+  # Se un Pod fallisce, Kubernetes lo ritenta max 3 volte
+  backoffLimit: 3
+  # Dopo 100 secondi dalla fine, il Job viene automaticamente eliminato
+  ttlSecondsAfterFinished: 100
+  # Il Job deve completarsi entro 60 secondi, altrimenti viene considerato fallito
+  activeDeadlineSeconds: 60
+  template:
+    spec:
+      containers:
+        - name: esempio
+          image: busybox
+          command: ["echo", "Ciao dal Job!"]
+      # Il Pod non viene riavviato all’interno del container (i retry li gestisce il Job)
+      restartPolicy: Never
