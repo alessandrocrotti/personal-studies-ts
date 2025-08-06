@@ -28,6 +28,7 @@
       - [Cert-Manager](#cert-manager)
   - [Storage](#storage)
     - [Storage Class](#storage-class)
+      - [Configurazione nel minikube](#configurazione-nel-minikube)
     - [Persistent Volume Claim](#persistent-volume-claim)
     - [Persistent Volume](#persistent-volume)
   - [Configuration](#configuration)
@@ -453,6 +454,17 @@ Le configurazioni più importanti sono:
   - **Immedate**: il volume viene creato suvito
   - **WaitForFirstConsumer**: viene creato quanto il pod lo usa (utile in contesti in cui potrebbe non essere mai utilizzato anche se montato)
 - **allowVolumeExpansion**: se `true`, il volume può aumentare di dimensione oltre la configurazione iniziale. Attenzione che il PV si può sempre espandere ma non si può ridurre facilmente, servono procedure complesse
+
+#### Configurazione nel minikube
+
+Esiste uno storage di default, ma su minikube puoi attivare anche l'hostpath CSI usando questi comandi:
+
+```shell
+minikube addons enable volumesnapshots
+minikube addons enable csi-hostpath-driver
+```
+
+In questo modo si può usare `provisioner: hostpath.csi.k8s.io` altrimenti si deve usare `provisioner: k8s.io/minikube-hostpath`
 
 ### Persistent Volume Claim
 
