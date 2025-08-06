@@ -21,9 +21,21 @@
     - [Job](#job)
     - [CronJob](#cronjob)
   - [Operator](#operator)
-  - [Service](#service)
+  - [Network](#network)
+    - [Service](#service)
+    - [Endpoint](#endpoint)
+    - [Ingress](#ingress)
+      - [Cert-Manager](#cert-manager)
+  - [Storage](#storage)
+    - [Storage Class](#storage-class)
+    - [Persistent Volume Claim](#persistent-volume-claim)
+    - [Persistent Volume](#persistent-volume)
+  - [Configuration](#configuration)
+    - [ConfigMap](#configmap)
+    - [Secret](#secret)
   - [Meccanismi di scheduling](#meccanismi-di-scheduling)
   - [Configurazioni di sicurezza](#configurazioni-di-sicurezza)
+  - [Helm](#helm)
 
 ## Descrizione
 
@@ -36,6 +48,8 @@ K8S è un orchestratore di container, composto un cluster di nodi che contengono
 Per poter sperimentare localmente con K8S, si può installare tramite `choco`, Minikube che rappresenta una istanza di kubernate eseguita in locale con un solo nodo. Installando `kubectl` si può interagire col cluster ed eseguire i comandi come un vero cluster kubernetes.
 
 Dopo aver avviato Docker Desktop, puoi avviare il minikube utilizzando il comando: `minikube start`
+
+Se usi dei service di tipo Load Balancer, devi lanciare il seguente comando e lasciarlo in esecuzione sulla shell: `minikube tunnel`. Questo permette di generare l'external ip che sarà comunque per il minikube 127.0.0.1 (localhost)
 
 ### Docker Desktop - Opzione Kubernetes
 
@@ -102,7 +116,7 @@ kubectl create namespace my-namespase
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: my-namaspace
+  name: my-namespace
 ```
 
 Utilizzando `kubens` si può definire il namaspace in uso quando utilizzi i comandi `kubectl` per accedere alle risorse. Se non si usa `kubens`, il comando sarebbe
@@ -253,7 +267,7 @@ Nel caso di esempio di `mongo-statefulset.yaml` è stato fatto un `StatefulSet` 
 Una volta avviato applicato il file si può verificare che tutto funziona tramite il comando:
 
 ```shell
-kubectl exec -it mongo-sfs-2 -n my-namaspace -- mongosh
+kubectl exec -it mongo-sfs-2 -n my-namespace -- mongosh
 ```
 
 ### DaemonSet
@@ -326,11 +340,129 @@ Tramite le **Custom Resource (CR)** si definisce lo stato voluto di una specific
 
 Solitamente gli operator vengono creati tramite tool che autogenerano il codice YAML, come `kubebuilder`.
 
-## Service
+## Network
 
-I service sono dei componenti che permettono di configurare delle regole di networking e di esporre una applicazione all'esterno del cluster, analogamente al port-forward ma in maniera più strutturata, o all'interno del cluster verso altri pod.
+### Service
 
-- Load Balancer
+I service sono dei componenti che permettono di configurare delle regole di networking e di esporre una applicazione all'esterno del cluster, analogamente al port-forward ma in maniera più strutturata, o all'interno del cluster verso altri pod. Un service più valere per un insieme di pod ed utilizzando il `selector` ti permette di definire su quali pod agisce il service. Kubernetes agisce internamente come un bilanciatore che, di default, assegna la chiamata al pod più scarico, ma ci sono anche configurazioni in cui si possono forzare che le chiamate che arrivano dallo stesso IP raggiungano lo stesso pod. Solitamente per le applicazione stateless questo non serve e va bene la logica Round Robin di assegnamento di default al pod più scarico.
+
+Il pattern del DNS di un service è:
+
+- `<service-name>.<namespace>.svc.cluster.local` quindi si può accedere internamente tramite `http://backend-service.my-app.svc.cluster.local`
+- se il pod che chiama il service è nello stesso namespace si può usare solo il `<service-name>` quindi `http://backend-service`
+- se il pod che chiama il service è in un namespase diverso, si deve usare almeno `<service-name>.<namespace>` quindi `http://backend-service.my-app`
+
+Questi sono i vari service che si usano:
+
+- **ClusterIP**: service di default se non viene definito un `type` nella definizione del service. Si usa per l'accesso tra pod interni dello stesso cluster, come un backend che deve essere raggiungibile dal frontend
+  - **Headless Service**: è un ClusterIP che non assegna alcun IP al service ma direttamente ai singoli pod tramite la configurazione `clusterIP: None`. Questi IP sono poi gestiti anche tramite un DNS che permette di puntare direttamente ai pod. Utile per gli StatefulSet dove il bilanciamento è gestito dall'applicazione stessa (Vedi esempio `controller/mongo-statefulset.yaml`)
+- **Node Port**: serve per esporre all'esterno una porta statica su ogni nodo, senza utilizzare il Load Balancer. Solitamente usato per accedere dall'esterno ad ambienti di DEV e TEST
+  - Permette di accedere ai pod di uno specifico nodo tramite selector, esponendo una porta raggiungibile dall'esterno nella configurazione `nodePort` che deve essere tra 30000 e 32767.
+- **Load Balancer**: richiede di aver installato il cluster su un cloud provider che supporta i bilanciatori e permette di esporre tramite un IP esterno l'applicazione, gestendo il traffico sui vari pod dell'applicazione. Usato per le applicazioni di produzione che sono esposte su internet
+  - Nonostante funzioni solo sul cloud provider, Minikube riesce a simulare un load balancer per gestire questo tipo di service. Per poterlo fare si deve lanciare su una shell il comando `minikube tunnel` in modo da poter assegnare l'external ip al service
+- **External Name**: serve per mappare il nome di un servizio ad un DNS esterno, in modo da accedere a servizi esterni. In pratica puoi creare un alias del DNS esterno nel DNS interno del cluster col pattern del service, in modo che internamente puoi chiamare quel servizio esterno con il classico pattern di DNS interno. Non fa da proxy, è un semplice redirect. La `port` che si definisce in questo service è sia quella usata per contattare il service internamente al cluster dai pod, sia quella usata per contattare il DNS esterno tramite il redirect
+
+Puoi vedere la lista dei service tramite il comando:
+
+```shell
+# shortname
+kubectl get svc
+# nome completo
+kubectl get services
+```
+
+### Endpoint
+
+è un oggetto di kubernetes che viene creato automaticamente tramite i `service` e permette di creare una lista di IP e Port dei pod che sono associati tramite i selector. Se per un service ho 3 pod, vedrò 3 endpoints coi relativi IP interni e dettagli.
+
+Puoi vedere la lista dei endpoint tramite il comando:
+
+```shell
+# comando vecchio
+kubectl get endpoints
+# comando vecchio recuperando gli endpoint di uno specifico service
+kubectl get endpoints "<nome-service>" -o wide
+# comando più recente e più leggero, meglio usare questo
+kubectl get endpointslice
+# Gli endpointslice di uno specifico service
+kubectl get endpointslice -l kubernetes.io/service-name="<mio-service-name>"
+# Dettagli del endpointslice
+kubectl describe endpointslice "endpointslice-name"
+```
+
+Essendo dei componenti automaticamente creati, ha senso controllarli quando:
+
+- Un service è stato creato ma i pod non ricevono traffico. Potrebbe esserci un problema nel selector o un problema nell'esecuzione del service, per cui vale la pena eseguirlo nuovamente
+- Puoi vedere quanti pod sono registrati come endpoint e verificare se sono tutti in salute (stato `Ready: true`)
+- Se stai facendo un Rollig update o scaling, guardare gli endpoint ti permette di verificare la transizione
+- Se stai facendo delle regole di Network Policies o Firewall, puoi verificare gli effettivi IP dei vari pod
+
+### Ingress
+
+L'ingress è un risorsa di kubernetes che permette di gestire il traffico HTTP/HTTPS in entrata tramite delle regole di configurazione. Tramite questo routing del traffico, permette tramite un solo componente di gestire come esporre le proprie applicazioni nel cluster.
+
+Richiede un Ingress controller come NGINX o Traefik. Questo è un componente attivo che legge le risorse Ingress e le implementa, gestendo routing, TLS, redirect, load balancing. Questo tipo di componente deve essere installato sul cluster, non è presente di default.
+
+Quindi, l'ingress controller può essere unico per tutte le risorse Ingress. L'ingress controller è la porta di accesso al cluster e le Ingress sono le regole utilizzate per raggiungere ogni applicazione all'interno del cluster
+
+Avendo l'Ingress Controller che è un componente interno che gestisce il traffico dall'esterno verso l'interno del cluster, questo si può andare a sostituire al service di tipo `load balancer`. Il service che servirà quindi per comunicare tra l'Ingress Controller e le applicazioni sarà di tipo `ClusterIP`.
+Sostanzialmente:
+
+- Usare il load balancer se hai solo una applicazione ed è una configurazione semplice
+- Usare l'ingress controller se hai più applicazioni da gestire nel tuo cluster (più economico di un load balancer per applicazione) e vuoi automatizzare alcunce configurazioni come il TLS/HTTPS
+
+Se si vogliono utilizzare i certificato SSL per le chiamate HTTPS, il modo migliore è quello di appoggiarsi al componento `Cert-Manager`
+
+#### Cert-Manager
+
+Si tratta di un componente che permette di gestire i certificati, la scadenza, il rinnovo tutto in maniera automatica. Si crea un `Issuer` o `ClusterIssuer` che gestisce il certificato e lo salva nelle secret, poi in combinazione con l'ingress, questo certificato viene utilizzato per le chiamate HTTPS/TLS.
+
+L'issuer è sostanzalmente la configurazione di chi si occuperà di creare il certificato, ma non lo crea direttamente, anzi, l'issuer può essere utilizzato per diversi Ingress. Inoltre, utilizzando nell'ingress l'annotation `cert-manager.io/cluster-issuer: <nome-del-mio-issuer>` oppure `cert-manager.io/issuer: <nome-del-mio-issuer>`, Cert-Manager in automatico prenderà dalla configurazione di quell'ingress i valori di `tls.hosts` e `tls.secretName` e li userà per creare automaticamente il certificato, senza che tu debba scrivere il relativo yaml a mano.
+
+Invece di usare l'Helm Repo che è il metodo tradizionale, per Cert-Manager consigliano di usare OCI Registry che è un registro standard per i package, anche quelli di K9S. Questo non richiede di fare `add repo` e `update`, ma si può usare direttamente questo comando:
+
+```shell
+helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.18.2 --namespace cert-manager --create-namespace --set crds.enabled=true
+```
+
+Cert-Manager permette inoltre di usare **Let's Encrypt** che ti permette di creare certificate SSL gratuitamente per domini pubblici.
+
+## Storage
+
+Il principio che guida gli storage è:
+
+- Le storage class sono la definizione che kubernetes usa per poter generare un Persistent Volume. Quindi sono le regole per creare automaticamente un PV
+- I pod (anche attraverso il relativo controller) hanno un `volume` che è una astrazione di uno storage montato. Qui non c'è un effettivo storage, ma solo l'associazione al punto del file system in cui è necessario avere una persistenza dei dati se il pod dovesse riavviarsi. A questo volume non si associa direttamente un Persistent Volume, ma un Persistent Volume Claim
+- Il Persistent Volume Claim è un componente che gestisce la richiesta di un Persistent Volume. Qui ci sono le caratteristiche necessarie su cui K8S si baserà per creare il reale Persistent Volume, come il tipo di StorageClass, lo spazio necessario e l'access mode
+- Tramite il Persistent Volume Claim, K8S crea il relativo Persistent Volume e lo associa al Persistent Volume Claim che a sua volta lo monta sul pod a cui è associato
+
+Quello descritto è il processo automatico di creazione di PV, si possono anche creare PV e PVC manualmente, ma solitamente quello è l'approccio corretto.
+
+### Storage Class
+
+Definisce come creareun PersistentVolume per K8S in modo dinamico. Si possono creare delle storage class personalizzate oppure utilizzare quelle di default e solitamente ce n'è una marcata come "default".
+
+Le configurazioni più importanti sono:
+
+- **provisioner**: Specifica il CSI driver (plugin che collega Kubernetes ad uno storage estero di un Cloud). Dipende da dov'è installato il cluster
+- **parameters**: dipendono dal CSI driver scelto
+- **reclaimPolicy**: gestisce cosa accade quando il PVC viene cancellato
+  - **Delete**: il volume viene eliminato
+  - **Retain**: il volume viene conservato, utile per backup o analisi
+- **volumeBindingMode**: gestisce quando il volume viene effettivamente creato
+  - **Immedate**: il volume viene creato suvito
+  - **WaitForFirstConsumer**: viene creato quanto il pod lo usa (utile in contesti in cui potrebbe non essere mai utilizzato anche se montato)
+- **allowVolumeExpansion**: se `true`, il volume può aumentare di dimensione oltre la configurazione iniziale. Attenzione che il PV si può sempre espandere ma non si può ridurre facilmente, servono procedure complesse
+
+### Persistent Volume Claim
+
+### Persistent Volume
+
+## Configuration
+
+### ConfigMap
+
+### Secret
 
 ## Meccanismi di scheduling
 
@@ -348,4 +480,65 @@ I service sono dei componenti che permettono di configurare delle regole di netw
 - RBAC
 - Service Mesh
 
-https://www.youtube.com/watch?v=5B77Rm9kudI&list=PLU2FPKLp7ojIeEueIrjvL4d0zWw_NwWKH&index=2
+## Helm
+
+Helm è un gestore di pacchetti di Kubernetes che ti permette di installare, aggiornare e gestire applicazioni complesse nel tuo cluster.
+I pacchetti vengono chiamati **Helm Chart** e contengono tutti i file necessari per l'installazione e i valori configurabili dentro il `values.yaml`.
+
+I file principali di una chart:
+
+- `Chart.yaml` cointiene la versione della chart e i vari metadata che la rappresentano
+- `values.yaml` contiene i parametri configurabili con i valori di default, che possono anche essere personalizzati durante la tua installazione
+- `/templates/` contiene i file di installazione con le relative variabili che poi helm utilizzerà per generare i manifest YAML veri e propri da applicare al cluster
+
+I passaggi per installare una chart sono i seguenti:
+
+- Aggiungere il repo di helm al tuo client helm locale
+  - I repo possono essere cercati su [Artifact Hub](https://artifacthub.io/)
+- Aggiornare i repo all'ultima versione sul tuo client helm
+- Installare il componente tramite quella chart
+  - Darai un nome alla Release, cioè all'installazione
+  - Punterai alla chart tramite "<nome repo al momento di helm repo add>/<chartname dentro il repo, visibile su Chart.yaml>"
+
+Per esempio questa è l'installazione di Traefik:
+
+```shell
+# Aggiunge al client helm questo repository che contiene delle chart
+# qui traefik è un alias locale per riferirti a questo repo remoto
+# Il comando solitamente viene trovato https://artifacthub.io/ dove ci sono tutte le chart
+helm repo add traefik https://traefik.github.io/charts
+# Aggiorna i repo presenti sul tuo client helm all'ultima versione
+helm repo update
+# Installa la chart. Il primo traefik è il nome della release cioè dell'installazione che stai facendo
+# traefik/traefik è il
+helm install traefik traefik/traefik --namespace=traefik
+# Oppure se si vuole passare un proprio set di values per personalizzare le configurazioni di default si può creare il file traefik-values.yaml e passarlo all'installazione
+helm install traefik traefik/traefik --namespace=traefik -f traefik-values.yaml
+```
+
+Comandi aggiuntivi del client helm che possono essere utili:
+
+```shell
+# Mostra la lista dei repo presenti nel mio client
+helm repo list
+# Mostra le chart disponibili del repo aggiunto
+helm search repo traefik
+```
+
+Se vuoi aggiornare il tuo componente perchè hai cambiato qualcosa al tuo file di values, puoi fare:
+
+```shell
+helm upgrade traefik traefik/traefik --namespace=traefik -f traefik-values.yaml
+```
+
+Puoi disistallare un componente tramite helm, rimuovendolo completamente:
+
+```shell
+helm uninstall traefik --namespace=traefik
+```
+
+Se vuoi vedere i manifest prima di installare il componente, puoi lanciare questo comando che non fa alcuna installazione e mostra solo i file risultanti:
+
+```shell
+helm template traefik traefik/traefik -f traefik-values.yaml
+```

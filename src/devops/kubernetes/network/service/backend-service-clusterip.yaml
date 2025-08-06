@@ -1,0 +1,17 @@
+# Tutti i pod con la label "app: backend" saranno raggiungibili internamente tramite questo Service tramite il nome "backend-service.my-namespace.svc.cluster.local" sulla porta 80
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: my-namespace
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      # Porta esposta dal Service
+      port: 80
+      # Porta su cui ascoltano i Pod
+      targetPort: 8080
+  # Tipo di Service (default)
+  type: ClusterIP

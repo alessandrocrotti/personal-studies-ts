@@ -2,14 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: nginx-deployment
+    app: nginx-deployment-with-ingress
   name: nginx-deployment
-  namespace: my-namaspace
+  namespace: my-namespace
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx-deployment
+      app: "nginx-deployment-with-ingress"
   # Strategia di aggiornamento del Deployment
   strategy:
     # RollingUpdate è la strategia di default. Permette di aggiornare i pod uno alla volta, riducendo il downtime
@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       labels:
-        app: nginx-deployment
+        app: nginx-deployment-with-ingress
         name: nginx-pod
     spec:
       containers:
@@ -41,3 +41,19 @@ spec:
           ports:
             - containerPort: 80
             - containerPort: 443
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service-with-ingress
+  namespace: my-namespace
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx-deployment-with-ingress
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

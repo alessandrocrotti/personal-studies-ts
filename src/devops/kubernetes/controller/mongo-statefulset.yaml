@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mongo-sfs
-  namespace: my-namaspace
+  namespace: my-namespace
 spec:
   # Usa questo servizio headless per generare i nomi DNS dei pod. Questo permette di accedere ai pod tra di loro tramite il loro nome DNS unico.
   # Poi si dovrò anche configurare l'applicazione in modo che sia in grado di utilizzare questi nomi DNS per comunicare tra i pod
@@ -50,9 +50,9 @@ spec:
                         rs.initiate({
                           _id: "rs0",
                           members: [
-                            { _id: 0, host: "mongo-sfs-0.mongo-headless.my-namaspace.svc.cluster.local:27017" },
-                            { _id: 1, host: "mongo-sfs-1.mongo-headless.my-namaspace.svc.cluster.local:27017" },
-                            { _id: 2, host: "mongo-sfs-2.mongo-headless.my-namaspace.svc.cluster.local:27017" }
+                            { _id: 0, host: "mongo-sfs-0.mongo-headless.my-namespace.svc.cluster.local:27017" },
+                            { _id: 1, host: "mongo-sfs-1.mongo-headless.my-namespace.svc.cluster.local:27017" },
+                            { _id: 2, host: "mongo-sfs-2.mongo-headless.my-namespace.svc.cluster.local:27017" }
                           ]
                         })
                       '
@@ -78,7 +78,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongo-headless
-  namespace: my-namaspace
+  namespace: my-namespace
 spec:
   # Il tipo di servizio è ClusterIP anche se type non è specificato perchè è il default
 

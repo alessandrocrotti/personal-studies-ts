@@ -1,0 +1,13 @@
+# Questo ExternalName service permette di accedere a un database esterno utilizzando all'interno del cluster il nome "external-db.my-namespace.svc.cluster.local"
+# In questo modo, i pod all'interno del cluster possono connettersi al database esterno utilizzando questo nome DNS invece del suo external DNS
+# Se il pod chiama "external-db:3306", verrà risolto in "db.example.com:3306". La porta del service è anche la porta del database esterno.
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-db
+  namespace: my-namespace
+spec:
+  type: ExternalName
+  externalName: db.example.com
+  ports:
+    - port: 3306

@@ -4,7 +4,7 @@ metadata:
   labels:
     run: nginx-pod
   name: nginx-pod
-  namespace: my-namaspace
+  namespace: my-namespace
 spec:
   containers:
     - image: nginx

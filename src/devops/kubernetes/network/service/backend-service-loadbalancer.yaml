@@ -1,0 +1,14 @@
+# Load Balancer che espone all'esterno l'applicazione backend sulla porta 80 sull'ip esterno assegnato dal cloud provider per questo service
+# Dall'esterno si può accedere all'applicazione backend tramite http://<IP-esterno>:80
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: my-namespace
+spec:
+  type: LoadBalancer
+  selector:
+    app: backend
+  ports:
+    - port: 80 # Porta del Service
+      targetPort: 8080 # Porta del container
