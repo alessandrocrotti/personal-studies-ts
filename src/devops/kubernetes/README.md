@@ -35,7 +35,22 @@
     - [ConfigMap](#configmap)
     - [Secret](#secret)
   - [Meccanismi di scheduling](#meccanismi-di-scheduling)
+    - [NodeName](#nodename)
+    - [Label a NodeSelector](#label-a-nodeselector)
+    - [Node Affinity](#node-affinity)
+    - [Pod Affinity/Anti-Affinity](#pod-affinityanti-affinity)
+    - [Taints \& Tolerantions](#taints--tolerantions)
+    - [Resource Requests \& Limits](#resource-requests--limits)
+      - [Autoscaling](#autoscaling)
+    - [Priority \& Preemption](#priority--preemption)
+    - [Topology Spread Constraints](#topology-spread-constraints)
+    - [PodDisruptionBudget (PDB)](#poddisruptionbudget-pdb)
   - [Configurazioni di sicurezza](#configurazioni-di-sicurezza)
+    - [NetworkPolicy](#networkpolicy)
+    - [Autenticazione e Autorizzazione](#autenticazione-e-autorizzazione)
+      - [Creare un nuovo utente su minikube](#creare-un-nuovo-utente-su-minikube)
+      - [Service Account](#service-account)
+    - [Service Mesh](#service-mesh)
   - [Helm](#helm)
 
 ## Descrizione
@@ -531,19 +546,365 @@ Si possono usare come variabili d'ambiente usando il `env.#.valueFrom.secretKeyR
 
 ## Meccanismi di scheduling
 
-- Labels e NodeScheduler
-- Taints & Tolerantions
-- Affinity/Anti-affinity
-- Resource Requests & Limits
-- Priority & Preemption
-- Topology Spread Constraints
-- PodDisruptionBudget (PDB)
+Lo scheduling è il meccanismo per cui kubernetes associa un pod ad un nodo tramite il `kube-scheduler`. Ovviamente cerca i pod non assegnati, i nodi disponibili e poi esegue il binding per assegnarli.
+
+Il processo ha 2 fasi principali:
+
+- **Filtering**: esclude i nodi che non soddisfano i requisiti del pod
+- **Scoring**: assegna un punteggio ai nodi rimanenti per poi scegliere il nodo col punteggio più alto
+
+### NodeName
+
+Puoi assegnare direttamente in un pod il nome del nodo sul quale vuoi che quel pod giri, bypassando il kube-scheduler. Si usa per test o situazioni particolari.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  # Assegnazione diretta al nodo con name "node-1"
+  nodeName: node-1
+  containers:
+    - name: nginx
+      image: nginx
+```
+
+### Label a NodeSelector
+
+I nodi posso avere delle label che servono per raggrupparli o distinguerli da altri. Sul pod si può indicare un `nodeSelector` con una label ed il suo valore che indica che questo pod deve essere assegnato ad un nodo che abbia quella label. Consente solamente match esatti e non regole complesse
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  nodeSelector:
+    # Assegnazione ai soli nodi con label "disktype=ssd"
+    disktype: ssd
+  containers:
+    - name: nginx
+      image: nginx
+```
+
+### Node Affinity
+
+Questa condizione è più avanzata del `nodeSelector`. Si basa sempre sulle label dei nodi, ma permette espressioni logiche e condizioni "required" o "preferred". Si definisce sul pod.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  affinity:
+    # Definisce l'affinity a livello di nodo
+    nodeAffinity:
+      # Questo valore indica che la condizione è richiesta, mentre se fosse preferibile si deve usare "preferredDuringSchedulingIgnoredDuringExecution"
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: disktype
+                # Gli operatori validi sono In, NotIn, Exists, DoesNotExist, Gt, Lt
+                operator: In
+                # Questo array di valori dipende dall'operatore, per In/NotIn deve essere definito, per Exists/DoesNotExist non deve essere definito, per Gt/Lt deve contenere un singolo elemento
+                values:
+                  - ssd
+  containers:
+    - name: nginx
+      image: nginx
+```
+
+### Pod Affinity/Anti-Affinity
+
+Analogo al Node Affinity, ma questa condizione permette di influenzare lo scheduling sulla base della presenza o assenza di altri pod su un nodo. Pod Affinity colloca un pod dove ce n'è già un altro affine, mentre Pod Anti-Affinity lo evita. Importante sottolineare che se ho un nodo senza alcun pod e ho una condizione di podAffinity con "requiredDuringSchedulingIgnoredDuringExecution", quel pod NON potrà essere schedulato su quel nodo perchè non è presente il pod affine.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  affinity:
+    # Definisce l'affinity a livello di pod. Con "podAffinity" il pod viene creato dove esistono altri pod con label "app=frontend". Se fosse "podAntiAffinity" verrebbe evitato di creare il podo dove ne esistono altri con label "app=frontend"
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - frontend
+          # Proprietà specifica del podAffinity che indica che la regola di affinità tra pod è valida all'interno dello stesso nodo, se il valore fosse "topology.kubernetes.io/zone" la regola varrebbe per la stessa zona
+          topologyKey: "kubernetes.io/hostname"
+  containers:
+    - name: nginx
+      image: nginx
+```
+
+### Taints & Tolerantions
+
+Questa è una condizione che serve ad impedire che certi pod vengano schedulati su certi nodi, con delle condizioni di esclusione. Lo scopo è quello di marcare dei nodi come se fossero esclusivi per certi pod: "non puoi usare questo nodo a meno che non hai una certa proprietà". Al contrario dell'affinity che ha il concetto inclusivo, questo ha un concetto esclusivo.
+Ci sono due proprietà che hanno due obiettivi diversi e collaborano per ottenere il risultato:
+
+- **Taint**: è una proprietà da mettere sul nodo ed è come una spacie di label con <chiave>=<valore>:<effetto>. Per esempio dedicated=support:NoSchedule, dove l'effetto si applica sempre al nodo, a meno che su un pod ci sia la Toleration per quella <chiave>=<valore>. Per la stessa chiave/valore si potrebbero avere sia l'effetto NoSchedule che NoExecute, ma sarebbe ridondante quindi è meglio evitarlo.
+- L'effetto può essere:
+  - **NoSchedule**: non viene schedulato alcun pod che non ha il giusto valore di Toleration
+  - **PreferNoSchedule**: lo schedule cercherà di non usare il nodo per i pod che non hanno il giusto valore di Toleration, ma non è un vincolo stretto che deve essere garantito
+  - **NoExecute**: se esistono pod già in esecuzione che non rispettano il giusto valore di Toleration, vengono chiusi e non verranno schedulati nuovi pod sul nodo senza la corretta Toleration. Quindi è come NoSchedule ed inoltre chiude i pod che attualmente stanno girando
+- **Toleration**: è una proprietà del pod che permette di evitare l'effetto del Taint presente su un certo nodo. Tramite delle regole di toleration si definiscono i tre valori <chiave>=<valore>:<effetto> che il pod può aggirare
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  # Questo pod può essere schedulato su un nodo marcato con Taint "dedicated=support:NoSchedule" al contrario degli altri pod che verrebbero esclusi dallo scheduling su nodi con quel Taint
+  tolerations:
+    - key: "dedicated"
+      # Gli operator sono "Equal" a cui si deve mettere un valore oppure "Exists" dove il value non è necessario
+      operator: "Equal"
+      value: "support"
+      # Effetto che si vuole aggirare tramite questa toleration, deve essere lo stesso presente nel Taint del nodo
+      effect: "NoSchedule"
+  containers:
+    - name: nginx
+      image: nginx
+```
+
+### Resource Requests & Limits
+
+Ogni pod dovrebbe essere calibrato per avere un limite e una richiesta di risorse. Questa è una best practise per ogni pod, ma è anche una maniera implicita per indicare allo scheduler come può schedulare i pod rispetto ai nodi disponibili. Le risorse che vengono gestite sono sempre "memory" intesa come RAM del nodo e "cpu" inteso come core del nodo. Se non sono presenti le proprerties di resources, i pod potrebbero comportarsi in maniera incontrollata e consumare più risorse del dovuto, compromettendo il funzionamento di tutti gli altri pod su quel nodo.
+
+- **Requests**: sono le risorse minime che servono per far girare il pod. Lo scheduler usa questa configurazione per capire se può combinare il pod che deve schedulare su un nodo con i pod che già girano su quel nodo. Importante sapere che non usa mai il consumo reale per fare questa valutazione, ma solo questa configurazione dichiarativa in Request: se la somma di request degli attuali pod più il nuovo pod è minore o uguale alle risorse del nodo, allora il pod può essere assegnato. Importante anche sapere che le risorse richieste non sono assegnate ad uso esclusivo del pod, il consumo effettivo potrebbe essere anche minore, lasciando risore effettive per altri
+- **Limits**: queste sono le risorse massime che il pod può consumare. Non viene considerato per lo scheduling, ma serve solo per bilanciare il nodo e i suoi pod. Quando la CPU del pod supera il limit, Kubernetes rallenta il pod (throttling), mentre quando la memory del pod supera il limit, il pod viene ucciso (OOMKilled)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "250m"
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+```
+
+#### Autoscaling
+
+Quando le risorse scarseggiano e non si trovano nodi disponibili che soddisfano le condizioni di risorse necessarie, se il cluster è configurato su un Cloud Service, si può attivare l'autoscaling orizzontale, cioè automaticamente viene creato un nuovo nodo per poter assegnare il pod che è stato richiesto in quel momento. Questo è molto utile per automatizzare e minimizzare l'utilizzo di nodi, avendo solamente i nodi attivi che effettivamente servono quando servono.
+
+### Priority & Preemption
+
+Queste configurazioni permettono di dare una priorità ai pod che devono essere terminati quando le risorse disponibili non sono sufficienti durante lo scheduling: la richiesta di esecuzione di un pod con più alta priorità può forzare la chiusura di quelli con più bassa priorità. Al contrario, se in fase di esecuzione le risorse scarseggiano, i pod con bassa priorità non verranno terminati automaticamente.
+Questo comportamento viene gestito tramite le `PriorityClass` che hanno un valore: più il valore è alto più la classe è "importante". Queste PriorityClass vengono assegnate ai Pod per creare questa scala di priorità. Ogni PriorityClass ha una "Preemption Policy" che è la logica con cui una classe con alta priorità forza la chiusura di pod con classi di bassa priorità per liberare risorse quando necessario.
+
+I pod che non definiscono una priorityClass sono considerati a priorità 0, quindi la più bassa e possono sempre essere preemptied da pod con una priorità definita più alta. Si può creare una PriorityClass di default (`globalDefault: true`) per quelli che non l'hanno definita. Sulla PriorityClass si può anche mettere la configurazion `preemptionPolicy: Never` per evitare che di terminare i pod con minore priorità quando un pod con questa classe viene schedulato (invece di `preemptionPolicy: PreemptLowerPriority` che è quella di default).
+
+```shell
+# Lista delle priorityClass esistenti
+kubectl get priorityClass
+```
+
+```yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000000
+globalDefault: false
+description: "Pod critici per il business"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  priorityClassName: high-priority
+  containers:
+    - name: nginx
+      image: nginx
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "250m"
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+```
+
+### Topology Spread Constraints
+
+Si di una configurazione che permette di regolare la distribuzione dei pod nei nodi in maniera più distribuita ed equilibrata. Puoi definire che un deployment distribuisca i suoi pod in vari nodi o in varie zone invece che tutti nello stesso nodo. Senza questa configurazione, kubernetes non ha una regola e potrebbe eseguire tutti i pod sullo stesso nodo.
+
+Le zone sono solitamente definite dal Cloud provider che marca i nodi con l'etichetta "topology.kubernetes.io/zone" le zone geografiche in cui i nodi risiedono effettivamente.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+      topologySpreadConstraints:
+        # Che differenza di numero di pod viene eseguito tra ciascuna zona
+        - maxSkew: 1
+          # Distribuire nelle zone, si potrebbe anche mettere la distribuzione tra nodi con kubernetes.io/hostname
+          topologyKey: topology.kubernetes.io/zone
+          # Cosa fare quando non ci sono le caratteristiche per eseguire il pod seguendo le condizioni del topologySpreadConstraints, in questo caso non lo esegue, ma si potrebbe forzare l'esecuzione con la configurazione "ScheduleAnyway"
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: web
+```
+
+### PodDisruptionBudget (PDB)
+
+Questa è una risorsa specifica di kubernetes che permette di definire delle regole su quanti pod possono essere interrotti contemporaneamente durante un "Disruption" volontario, come un aggiornamento del nodo, autoscaling o manutenzione. Permette di definer una soglia minima di disponibilità per un gruppo, in questo modo se tutti i pod di un nodo devono essere terminati, non vengono terminati insieme ma si aspetta sempre di averne un certo numero in esecuzione prima di terminarne altri: quindi ne termino alcuni che si riavviano su un altro nodo e una volta avviati posso terminarne altri fino a completare il processo.
+
+Tramite un selettore a livello di label si definisce su quale gruppo il PDB lavora, poi si definisce se si vogliono avere un `minAvailable` numero di pod oppure un `maxUnavailable`, ma non puoi configurare entrambi.
+
+```yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web-pdb
+spec:
+  # Tra tutti i pod con label web=app, almeno 2 devono essere sempre disponibili. Se si ha un Deploy con 3 repliche, verranno interrotti e riavviati uno alla volta.
+  # Alternativamente si potrebbe avere "maxUnavailable: 1"
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: web
+```
 
 ## Configurazioni di sicurezza
 
-- NetworkPolicy
-- RBAC
-- Service Mesh
+### NetworkPolicy
+
+Le NetworkPolicy sono risorse di kuberentes che limitano il traffico di rete all'interno del cluster, indicando delle regole di Ingress o Egress tra applicazioni usando i pod selector tramite label.
+Una volta messa una NetworkPolicy, tutto quello che non la rispetta viene considerato denied.
+
+Importante: per utilizzare le network policy si deve installare un CNI plugin (Container Network Interface) compatibile con le Network Policies. Sostanzialmente un componente che gestisce la rete tra i pod. Un esempio è il software **Calico**.
+
+```yaml
+# Questa risorsa forza la applicazione di backend (con label app=backend) a ricevere in ingresso il traffico solo dall'applicazione di frontend (app=frontend)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend
+  namespace: my-app
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+```
+
+### Autenticazione e Autorizzazione
+
+Kubernetes non gestisce l'autenticazione diretta degli utenti, ma la delega a meccanismi esterni. Kubernetes verifica l'identità, ma non ha un database di utenti interno. Una volta autenticato, verifica l'autorizzazione per capire cosa puoi fare, usando RBAC (Role-Based Access Control).
+
+L'autenticazione può essere tramite:
+
+- Certificati client: vengono scritti sul file `kubeconfig` e ti permettono di essere autenticato
+- Service Account: è una sorta di user interno al cluster usato dai pod
+- OIDC: tramite un servizio esterno di autenticazione. Si può usare il plugin `kubelogin` per loggarsi usanzo Azure AD. Il risultato viene comunque salvato sul `kubeconfig`
+
+L'autorizzazione viene invece gestita tramite:
+
+- **Role**: componenti che definiscono le risorse a cui puoi accedere e che operazioni puoi fare su quelle risorse (`verbs`)
+  - Il `Role` è ristretto al relativo namespace, mentre se si vuole che quella regola valga per tutto il cluster si deve creare un `ClusterRole`. Le risorse Cluster-wide come "nodes", "persistentvolumes", "namespaces" possono essere gestite solamente da un `ClusterRole`
+- **RoleBinding**: associa un ruolo ad uno User o ServiceAccount assegnandogli effettivamente dei permessi specifici
+  - Il `RoleBinding` può essere usato per associare sia un `Role` che un `ClusterRole`. Se si associa un `ClusterRole` tramite `RoleBinding` allora se ne limiteranno i permessi al namespace del `RoleBinding`. Se altrimenti si vuole dare i permessi Cluster-wide si deve usare `ClusterRoleBinding`
+
+Ogni role ha tre campi fondamentali: apiGroups, resources, verbs
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+```
+
+- **apiGroups**: il/i gruppo/i a cui tutte le risorse nel campo "resources" appartengono. Alcune resource non hanno alcun apiGroup (""), altre hanno altri valori (come "apps"). Non vengono fatti controlli incrociati tra la lista in apiGroup e resources, per cui è buona norma fare regole specifiche per ogni apiGroup. In alternativa si può usare "\*" che indica un qualsiasi apiGroup va bene e rende la regola indipendente dall'apiGroup
+- **resources**: sono le resource di kubernetes, comprese le `CustomResourceDefinition`. Le CRD hanno anche un loro apiGroup. Anche in questo caso si può usare "\*" per indicare che questa Rule vale per qualsiasi resource
+- **verbs**: le azioni consentite su quelle risorse. I verbs sono fissi e non si possono creare nuovi verbs. Si può usare anche qui il "\*" ma spesso è sconsigliato perchè darebbe accesso totale, a meno che non sia quello che si vuole fare. Una lista dei verbs che si usano solitamente:
+  - Lettura: "get", "list", "watch",
+  - Scrittura: "create", "update", "patch", "delete"
+
+#### Creare un nuovo utente su minikube
+
+Per simulare un utente che non sia l'utente basi di minikube, che si chiama "minikube", è necessario aggiungere un nuovo utente al `kubeconfig` e un relativo nuovo context. In questo modo passando da un contesto all'altro si può simulare utenti diversi connessi al minikube.
+
+Step:
+
+- Creazione del certificato nella cartella `certificates/alessandro`
+
+```shell
+openssl genrsa -out alessandro.key 2048
+openssl req -new -key alessandro.key -out alessandro.csr -subj "/CN=alessandro"
+openssl x509 -req -in alessandro.csr -CA C:\Users\allec\.minikube\ca.crt -CAkey C:\Users\allec\.minikube\ca.key -CAcreateserial -out alessandro.crt -days 365
+```
+
+- Aggiungere l'utente al kubeconfig
+
+```shell
+# Creazione dell'utente
+kubectl config set-credentials alessandro --client-certificate=alessandro.crt --client-key=alessandro.key
+# Creazione del context
+kubectl config set-context alessandro-context --cluster=minikube --user=alessandro
+# Accesso al namespace di default
+kubectl create rolebinding alessandro-read-pods --clusterrole=view --user=alessandro --namespace=default
+```
+
+#### Service Account
+
+Il service account è una identità che si da ad un pod per permettergli di interagire con l'API server. Ogni pod può avere associato un ServiceAccount che a sua volta può avere un Role associato con RoleBinding.
+Quando noi usiamo kubectl, interagiamo direttamente con API server. Se un pod ha bisogno di listare i nodi, pod, creare configmap o fare altre operazioni sul cluster stesso, ha bisogno di un Role che glielo permetta. In questi casi si usa il ServiceAccount che permette di chiamare l'API server con successo.
+Normalmente le chiamate all'API server sono (ma non solo) chiamate HTTP con un Authorization header utilizzando il JWT montato automaticamente da Kubernetes sul pod. Poi l'API Server verifica il Role e risponde di conseguenza.
+
+### Service Mesh
+
+Il Service Mesh è una infrastruttura software dentro Kubernetes per gestire i microservizi che permette di astrarre a livello di Kubernetes le complessità di comunicazione come:
+
+- Retry, timeout, circuit breaker
+- Logging e tracing
+- Load balancing interno
+- Sicurezza tra servizi
+
+Ha senso vedere il dettaglio in contesti con molti microservizi che comunicano tra loro, altrimenti sarebbe esagerato.
 
 ## Helm
 

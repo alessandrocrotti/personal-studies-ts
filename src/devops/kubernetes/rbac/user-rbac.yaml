@@ -1,0 +1,27 @@
+# Gli esempi seguenti usano l'utente "alessandro" creato appositamente per questi test. L'utente di default del minikube è "minikube".
+
+# Crea un Role e un RoleBinding per l'utente "alessandro" che gli consente di leggere i pod nel namespace "my-namespace".
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: my-namespace
+  name: pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: my-namespace
+subjects:
+  - kind: User
+    # Questo dovrebbe essere lo stesso nome utente usato per accedere al cluster Kubernetes e che si trova nel file kubeconfig
+    name: alessandro
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
