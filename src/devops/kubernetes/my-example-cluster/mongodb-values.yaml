@@ -1,0 +1,27 @@
+# Necessario quando usi Bitnami Helm Chart perchè solo le latest sono gratuite
+image:
+  tag: latest
+
+# Le password devono essere messe da riga di comando durante l'installazione
+auth:
+  enabled: true
+  database: todos
+
+persistence:
+  enabled: true
+  storageClass: "standard"
+  size: 1Gi
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    # Attiva se usi Prometheus
+    enabled: false

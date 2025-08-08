@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-example-fe-deployment
+  name: my-example-fe-deployment
+  namespace: my-example
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-example-fe-deployment
+  # Strategia di aggiornamento del Deployment
+  strategy:
+    # RollingUpdate è la strategia di default. Permette di aggiornare i pod uno alla volta, riducendo il downtime
+    type: RollingUpdate
+    rollingUpdate:
+      # Numero di pod che possono essere creati in più durante l'aggiornamento
+      maxSurge: 1
+      # Numero di pod che possono essere non disponibili durante l'aggiornamento
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: my-example-fe-deployment
+        name: my-example-fe-pod
+    spec:
+      containers:
+        - image: allecrotti/my-example-image-fe
+          name: my-example-image-fe-container
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+          ports:
+            - containerPort: 80
+          env:
+            - name: API_URL
+              # Backend Ingress URL
+              value: "http://localhost.my-example.be"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-example-fe-service
+  namespace: my-example
+spec:
+  type: ClusterIP
+  selector:
+    app: my-example-fe-deployment
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 80
+---
+# Ingress per il frontend
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-example-fe-ingress
+  namespace: my-example
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: localhost.my-example.fe
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-example-fe-service
+                port:
+                  number: 8080

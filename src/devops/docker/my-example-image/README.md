@@ -39,6 +39,8 @@ Il frontend ha bisogno di sapere l'url a cui chiamare il backend. Per evitare di
 
 In questo modo, tramite la variabile d'ambiente `API_URL`, si può ridefinire l'endpoint di backoffice, cosa indispensabile al passaggio in produzione sul cluster kubernetes.
 
+Questa tecnica è chiamata **Runtime Configuration Injection** ed è usata solitamente nelle applicazioni di frontend.
+
 ### Publish
 
 L'immagine è stata pubblicata sul mio account di DockerHub per poterla usare comodamente su kubernete. Questi sono i comandi:
