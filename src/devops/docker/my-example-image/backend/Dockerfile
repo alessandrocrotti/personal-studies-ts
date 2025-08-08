@@ -23,7 +23,7 @@ RUN npm install
 COPY --chown=node:node ./src ./src
 
 # Compila il codice TypeScript in JavaScript
-RUN npm run build
+RUN npm run esbuild
 
 # Espone la porta dell'app (8000)
 # Non pubblica la porta, ma la rende disponibile per il container e "documenta" quale porta l'app è in ascolto

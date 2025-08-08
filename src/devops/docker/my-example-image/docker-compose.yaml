@@ -24,7 +24,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - 80:80
+      - 81:80
+    environment:
+      API_URL: "http://localhost:8000"
 
   mongodb:
     image: mongo:8.0.10

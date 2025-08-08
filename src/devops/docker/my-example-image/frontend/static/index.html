@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minimal Todo List</title>
+    <script src="config.js"></script>
   </head>
   <body>
     <h1>Todo List</h1>
@@ -12,7 +13,7 @@
     <ul id="todoList"></ul>
 
     <script>
-      const API_URL = "http://localhost:8000";
+      const API_URL = window.API_URL;
 
       async function fetchTodos() {
         const response = await fetch(`${API_URL}/todos`);

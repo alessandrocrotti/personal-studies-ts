@@ -1,5 +1,22 @@
 # Docker
 
+- [Docker](#docker)
+  - [Descrizione](#descrizione)
+  - [Docker Desktop](#docker-desktop)
+  - [Containers VS Images](#containers-vs-images)
+    - [Tipi di Images](#tipi-di-images)
+    - [Port Mapping](#port-mapping)
+  - [Esecuzione container in background](#esecuzione-container-in-background)
+  - [Tags/Versions e Digests](#tagsversions-e-digests)
+  - [Debug sui Container](#debug-sui-container)
+  - [Persistence](#persistence)
+  - [Custom Images](#custom-images)
+    - [Sintassi Dockerfile](#sintassi-dockerfile)
+    - [Layers](#layers)
+  - [Docker Compose](#docker-compose)
+  - [Registry](#registry)
+    - [Docker Hub](#docker-hub)
+
 ## Descrizione
 
 Docker è un sistema per eseguire dei programmi in the _container_. I _container_ sono degli ambienti esecutivi isolati con il loro file system, dipendenze e applicazioni necessarie per eseguire il tuo codice.
@@ -45,7 +62,7 @@ Una stessa applicazione può essere installata su una immagine che implementa di
 - Ci sono alcune immagini che hanno il tag con la desinenza `-slim` che si basano su distro più contenute
 - Solitamente le immagini più leggere utilizzano la distro Alpine che è basata sull'essere minimale, utilizzando al desinenza `-alpine`
 
-SUggerimenti su quale usare:
+Suggerimenti su quale usare:
 
 - Se presente la versione `-slim` questa solitamente è un buon compromesso, contiene Debian ma alleggerito
 - `-alpine` anch'essa valida. Al contrario di Debian, alcuni command non sono li stessi
@@ -53,7 +70,7 @@ SUggerimenti su quale usare:
   - utilizza `apk` invece di `apt` per installare i package
   - potrebbe essere necessario conoscere i dettagli di alpine a differenza di debian per evitare errori
 
-# Port Mapping
+### Port Mapping
 
 Quando esegui un container, questo è isolato verso l'esterno, per cui anche se esegui un container sulla base di una immagine di un web server come NGINX, non potrai accede alla sua pagina di default tramite "localhost"
 
