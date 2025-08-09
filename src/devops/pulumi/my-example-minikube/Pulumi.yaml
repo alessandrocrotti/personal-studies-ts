@@ -1,0 +1,10 @@
+name: my-example-minikube
+description: my-example-cluster converted as IaC with Pulumi on minikube
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: kubernetes-typescript

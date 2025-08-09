@@ -38,13 +38,13 @@ spec:
           ports:
             - containerPort: 8000
           env:
-            - name: MONGO_PASSWORD
+            - name: MONGODB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: my-example-mongodb
                   key: root-password
             - name: MONGODB_URI
-              value: "mongodb://root:$(MONGO_PASSWORD)@my-example-mongo-mongodb.mongodb.svc.cluster.local:27017/todos?authSource=admin"
+              value: "mongodb://root:$(MONGODB_PASSWORD)@my-example-mongo-mongodb.mongodb.svc.cluster.local:27017/todos?authSource=admin"
 ---
 apiVersion: v1
 kind: Service
