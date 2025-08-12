@@ -9,9 +9,7 @@ import FrontendComponent from "./frontend/components";
 
 const traefik = new Traefik("my-traefik");
 
-const certManager = new CertManager("my-cert-manager", {
-  dependsOn: [traefik],
-});
+const certManager = new CertManager("my-cert-manager");
 
 const config = new pulumi.Config();
 const mongoRootPassword = config.requireSecret(Constants.SECRET_KEY_MONGODB_ROOT_PASSWORD);
@@ -38,7 +36,7 @@ const backend = new BackendComponent(
     // Utilizza il nome della release di Traefik come ingressClassName
     ingressClassName: traefik.releaseName,
   },
-  { dependsOn: [myExampleNamespace, mongodb, certManager] }
+  { dependsOn: [myExampleNamespace, mongodb, traefik, certManager] }
 );
 
 const frontend = new FrontendComponent(
@@ -51,5 +49,5 @@ const frontend = new FrontendComponent(
     // Utilizza il nome della release di Traefik come ingressClassName
     ingressClassName: traefik.releaseName,
   },
-  { dependsOn: [myExampleNamespace, certManager] }
+  { dependsOn: [myExampleNamespace, traefik, certManager] }
 );
