@@ -28,13 +28,10 @@ const backend = new BackendComponent(
     image: "allecrotti/my-example-image-be",
     replicas: 3,
     selfSignedIssuerName: certManager.selfSignedClusterIssuerName,
-    mongoDBDatabase: "todos",
-    // Utilizza il nome della release di MongoDB come mongoDBServiceName
-    mongoDBServiceName: mongodb.releaseName,
-    mongoDBNamespaceName: mongodb.namespaceName,
-    mongoDBConnectionString: mongodb.connectionString,
     // Utilizza il nome della release di Traefik come ingressClassName
     ingressClassName: traefik.releaseName,
+    mongoDBDatabase: "todos",
+    mongoDBConnectionString: mongodb.connectionString,
   },
   { dependsOn: [myExampleNamespace, mongodb, traefik, certManager] }
 );
