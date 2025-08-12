@@ -25,6 +25,7 @@ export default class Traefik extends pulumi.ComponentResource {
 
     // Esporta il nome della release come output.
     // Avendo messo `name: "traefik",` questa sarà fissa "traefik", ma è corretto recuperarla dinamicamente nel caso si scegla di cambiare release name
+    // Si usa apply proprio perchè status è un output asincrono e deve essere risolto dopo che la risorsa è stata creata
     this.releaseName = traefik.status.apply((status) => status.name);
     this.namespaceName = traefikNamespace.namespaceName;
 

@@ -72,6 +72,9 @@ export default class MongoDB extends pulumi.ComponentResource {
       }
     );
 
+    // Esporta il nome della release come output.
+    // Avendo messo `name: "mongodb",` questa sarà fissa "mongodb", ma è corretto recuperarla dinamicamente nel caso si scegla di cambiare release name
+    // Si usa apply proprio perchè status è un output asincrono e deve essere risolto dopo che la risorsa è stata creata
     this.releaseName = mongodbRelease.status.apply((status) => status.name);
     this.namespaceName = mongoDBNamespace.namespaceName;
     // Utilizzo interpolate per risolvere le variabili che sono Output visto che sono valori asincroni
