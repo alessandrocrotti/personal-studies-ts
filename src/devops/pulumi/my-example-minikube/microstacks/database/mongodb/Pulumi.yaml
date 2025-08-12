@@ -1,0 +1,10 @@
+name: my-example-minikube.database.mongodb
+description: Microstack for mongodb
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: kubernetes-typescript

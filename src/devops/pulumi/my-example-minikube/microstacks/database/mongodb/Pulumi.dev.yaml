@@ -1,0 +1,5 @@
+config:
+  my-example-minikube.database.mongodb:mongoRootPassword:
+    secure: AAABAFKH1rt9FRz61qLbSglV8CNMowE1Uht3rVVRIj644NxJ+D7o3QXb5hafp/9kKQ==
+  my-example-minikube.database.mongodb:mongoTodosUserPassword:
+    secure: AAABAINN4qdiTQxZE1H5RMzXHw7HEf3r7tg6MlNlbf+4Nf8z4QE/ZjvNtgm9BQqVzO2+HH+4aA==

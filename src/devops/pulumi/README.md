@@ -90,8 +90,8 @@ Per esempio il "my-cluster" potrebbe essere suddiviso in questi componenti per g
 Per utilizzare il minikube relativo a pulumi monorepo avviare:
 
 ```shell
-minikube start -p pulumi-microstack
-minikube tunnel -p pulumi-microstack
+minikube start -p pulumi-microstacks
+minikube tunnel -p pulumi-microstacks
 ```
 
 ### Pulumi Minikube
