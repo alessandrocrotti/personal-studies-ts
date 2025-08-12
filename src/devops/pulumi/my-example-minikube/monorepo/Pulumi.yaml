@@ -1,4 +1,4 @@
-name: my-example-minikube
+name: my-example-minikube-monorepo
 description: my-example-cluster converted as IaC with Pulumi on minikube
 runtime:
   name: nodejs

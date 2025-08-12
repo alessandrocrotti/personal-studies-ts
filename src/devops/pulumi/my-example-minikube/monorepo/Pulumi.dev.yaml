@@ -1,0 +1,7 @@
+{
+  config:
+    {
+      "my-example-minikube-monorepo:mongoRootPassword": { secure: AAABANf9bHEoA+hBRr6cz6mYXte4FwiPiqJEU0O+jZzqkvb5Cvb9yAjWyT4= },
+      "my-example-minikube-monorepo:mongoTodosUserPassword": { secure: AAABAP6QKmha/bAvFhhlTF8ujk+BAQ5mYPBrvmO3uRHuDhGdr2WfZJufld61 },
+    },
+}
