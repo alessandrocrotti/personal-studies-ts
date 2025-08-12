@@ -1,17 +1,18 @@
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import Constants from "./constants";
 import NamespaceComponent from "./namespace";
+
+interface MongoDBArgs {
+  mongoRootPassword: pulumi.Input<string>;
+  mongoTodosUserPassword: pulumi.Input<string>;
+}
 
 export default class MongoDB extends pulumi.ComponentResource {
   public readonly releaseName: pulumi.Output<string>;
   public readonly namespaceName: pulumi.Output<string>;
-  constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
+  public readonly connectionString: pulumi.Output<string>;
+  constructor(name: string, args: MongoDBArgs, opts?: pulumi.ComponentResourceOptions) {
     super(`my-example:mongodb:component`, `${name}-component`, {}, opts);
-
-    const config = new pulumi.Config();
-    const mongoRootPassword = config.requireSecret(Constants.SECRET_KEY_MONGODB_ROOT_PASSWORD);
-    const mongoTodosUserPassword = config.requireSecret(Constants.SECRET_KEY_MONGODB_TODOS_USER_PASSWORD);
 
     // Crea il namespace tramite il componente NamespaceComponent
     const mongoDBNamespace = new NamespaceComponent("mongodb", { parent: this });
@@ -31,9 +32,9 @@ export default class MongoDB extends pulumi.ComponentResource {
         values: {
           auth: {
             enabled: true,
-            rootPassword: mongoRootPassword,
+            rootPassword: args.mongoRootPassword,
             username: "todos-user",
-            password: mongoTodosUserPassword,
+            password: args.mongoTodosUserPassword,
             database: "todos",
           },
           service: {
@@ -71,15 +72,14 @@ export default class MongoDB extends pulumi.ComponentResource {
       }
     );
 
-    this.releaseName = mongodbRelease.status.apply((status) => {
-      pulumi.log.info(`MongoDB release name: ${status.name}`, this);
-      return status.name;
-    });
+    this.releaseName = mongodbRelease.status.apply((status) => status.name);
     this.namespaceName = mongoDBNamespace.namespaceName;
-
+    // Utilizzo interpolate per risolvere le variabili che sono Output visto che sono valori asincroni
+    this.connectionString = pulumi.interpolate`mongodb://root:${args.mongoRootPassword}@${this.releaseName}.${this.namespaceName}.svc.cluster.local:27017`;
     this.registerOutputs({
-      mongodbReleaseName: this.releaseName,
-      mongodbNamespaceName: this.namespaceName,
+      releaseName: this.releaseName,
+      namespaceName: this.namespaceName,
+      connectionString: this.connectionString,
     });
   }
 }

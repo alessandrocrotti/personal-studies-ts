@@ -8,7 +8,7 @@ import NamespaceComponent from "./namespace";
  * (for example: Grafana needs it for SSO)
  */
 export default class CertManager extends pulumi.ComponentResource {
-  private readonly selfSignedClusterIssuer: k8s.apiextensions.CustomResource;
+  public readonly selfSignedClusterIssuerName: pulumi.Output<string>;
   constructor(name: string, opts?: pulumi.ComponentResourceOptions) {
     super(`my-example:cert-manager:component`, `${name}-component`, {}, opts);
 
@@ -33,7 +33,7 @@ export default class CertManager extends pulumi.ComponentResource {
       }
     );
 
-    this.selfSignedClusterIssuer = new k8s.apiextensions.CustomResource(
+    const selfSignedClusterIssuer = new k8s.apiextensions.CustomResource(
       `${name}-selfsigned-clusterissuer`,
       {
         apiVersion: "cert-manager.io/v1",
@@ -52,9 +52,10 @@ export default class CertManager extends pulumi.ComponentResource {
         parent: this,
       }
     );
-  }
 
-  public get selfSignedClusterIssuerName(): pulumi.Output<string> {
-    return this.selfSignedClusterIssuer.metadata.name;
+    this.selfSignedClusterIssuerName = selfSignedClusterIssuer.metadata.name;
+    this.registerOutputs({
+      selfSignedClusterIssuerName: this.selfSignedClusterIssuerName,
+    });
   }
 }

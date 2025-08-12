@@ -10,6 +10,7 @@ interface BackendArgs {
   mongoDBServiceName: pulumi.Input<string>;
   mongoDBNamespaceName: pulumi.Input<string>;
   mongoDBDatabase: pulumi.Input<string>;
+  mongoDBConnectionString?: pulumi.Input<string>;
   ingressClassName: pulumi.Input<string>;
 }
 
@@ -75,19 +76,26 @@ export default class BackendComponent extends pulumi.ComponentResource {
                   image: args.image,
                   ports: [{ containerPort: 8000 }],
                   env: [
-                    {
-                      name: envKeyMongoDBPassword,
-                      valueFrom: {
-                        secretKeyRef: {
-                          name: Constants.SECRET_KEY_MY_EXAMPLE_MONGODB,
-                          key: Constants.SECRET_KEY_MONGODB_ROOT_PASSWORD,
-                        },
-                      },
-                    },
+                    // {
+                    //   name: envKeyMongoDBPassword,
+                    //   valueFrom: {
+                    //     secretKeyRef: {
+                    //       name: Constants.SECRET_KEY_MY_EXAMPLE_MONGODB,
+                    //       key: Constants.SECRET_KEY_MONGODB_ROOT_PASSWORD,
+                    //     },
+                    //   },
+                    // },
+                    // {
+                    //   name: "MONGODB_URI",
+                    //   // Componiamo l'URI di connessione a MongoDB utilizzando la variabile d'ambiente envKeyMongoDBPassword e gli args MongoDBReleaseName e MongoDBNamespaceName ricavati dal componente MongoDB
+                    //   // Utilizzo interpolate per risolvere le variabili che sono Output visto che sono valori asincroni
+                    //   value: pulumi.interpolate`mongodb://root:$(${envKeyMongoDBPassword})@${args.mongoDBServiceName}.${args.mongoDBNamespaceName}.svc.cluster.local:27017/${args.mongoDBDatabase}?authSource=admin`,
+                    // },
                     {
                       name: "MONGODB_URI",
                       // Componiamo l'URI di connessione a MongoDB utilizzando la variabile d'ambiente envKeyMongoDBPassword e gli args MongoDBReleaseName e MongoDBNamespaceName ricavati dal componente MongoDB
-                      value: pulumi.interpolate`mongodb://root:$(${envKeyMongoDBPassword})@${args.mongoDBServiceName}.${args.mongoDBNamespaceName}.svc.cluster.local:27017/${args.mongoDBDatabase}?authSource=admin`,
+                      // Utilizzo interpolate per risolvere le variabili che sono Output visto che sono valori asincroni
+                      value: pulumi.interpolate`${args.mongoDBConnectionString}/${args.mongoDBDatabase}?authSource=admin`,
                     },
                   ],
                 },

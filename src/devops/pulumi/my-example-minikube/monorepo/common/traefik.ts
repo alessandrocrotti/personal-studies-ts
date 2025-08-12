@@ -27,5 +27,10 @@ export default class Traefik extends pulumi.ComponentResource {
     // Avendo messo `name: "traefik",` questa sarà fissa "traefik", ma è corretto recuperarla dinamicamente nel caso si scegla di cambiare release name
     this.releaseName = traefik.status.apply((status) => status.name);
     this.namespaceName = traefikNamespace.namespaceName;
+
+    this.registerOutputs({
+      releaseName: this.releaseName,
+      namespaceName: this.namespaceName,
+    });
   }
 }

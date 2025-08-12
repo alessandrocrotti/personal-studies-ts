@@ -2,22 +2,22 @@ import * as pulumi from "@pulumi/pulumi";
 import * as k8s from "@pulumi/kubernetes";
 
 export default class NamespaceComponent extends pulumi.ComponentResource {
-  private readonly namespace: k8s.core.v1.Namespace;
-  constructor(namespace: string, opts?: pulumi.ComponentResourceOptions) {
-    super(`my-example:namespace:component`, `${namespace}-namespace-component`, {}, opts);
+  public readonly namespaceName: pulumi.Output<string>;
+  constructor(namespaceString: string, opts?: pulumi.ComponentResourceOptions) {
+    super(`my-example:namespace:component`, `${namespaceString}-namespace-component`, {}, opts);
 
-    this.namespace = new k8s.core.v1.Namespace(
-      `${namespace}-namespace`,
+    const namespace = new k8s.core.v1.Namespace(
+      `${namespaceString}-namespace`,
       {
         metadata: {
-          name: namespace,
+          name: namespaceString,
         },
       },
       { parent: this }
     );
-  }
-
-  public get namespaceName(): pulumi.Output<string> {
-    return this.namespace.metadata.name;
+    this.namespaceName = namespace.metadata.name;
+    this.registerOutputs({
+      namespaceName: this.namespaceName,
+    });
   }
 }
