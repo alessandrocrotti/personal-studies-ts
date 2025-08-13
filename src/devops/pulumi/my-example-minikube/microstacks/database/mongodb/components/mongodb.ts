@@ -13,9 +13,7 @@ export default class MongoDB extends pulumi.ComponentResource {
   constructor(name: string, args: MongoDBArgs, opts?: pulumi.ComponentResourceOptions) {
     super(`my-example:mongodb:component`, `${name}-component`, {}, opts);
 
-    const config = new pulumi.Config();
-
-    // Crea il namespace tramite il componente NamespaceComponent
+    // Crea il namespace
     const mongoDBNamespace = new k8s.core.v1.Namespace(
       `${name}-namespace`,
       {
@@ -68,7 +66,7 @@ export default class MongoDB extends pulumi.ComponentResource {
           metrics: {
             enabled: true,
             serviceMonitor: {
-              enabled: false, // Set to true if you are using Prometheus
+              enabled: true, // Set to true if you are using Prometheus
             },
           },
         },

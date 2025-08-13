@@ -16,9 +16,11 @@ const config = new pulumi.Config();
 const mongoRootPassword = config.requireSecret(SECRET_KEY_MONGODB_ROOT_PASSWORD);
 const mongoTodosUserPassword = config.requireSecret(SECRET_KEY_MONGODB_TODOS_USER_PASSWORD);
 
+// IMPORTANTE: questa logica di esportare il kubeconfig è logicamente corretta, ma quando fai ripartire il minikube questo rigenera il file kubeconfig e quindi cambia ogni volta.
+// Nei vari componenti lascio commentata la logica come esempio, ma è meglio lasciare la gestione implicita
 const k8sProvider = new k8s.Provider("k8s-provider", { kubeconfig });
 
-const mongodb = new MongoDB("my-mongodb", { mongoRootPassword, mongoTodosUserPassword }, { provider: k8sProvider });
+const mongodb = new MongoDB("my-mongodb", { mongoRootPassword, mongoTodosUserPassword } /*, { provider: k8sProvider } */);
 
 // Contenendo la root password, la esportiamo come secret
 export const mongodbConnectionString = pulumi.secret(mongodb.connectionString);

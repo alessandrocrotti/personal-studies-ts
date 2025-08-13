@@ -12,6 +12,8 @@ const myExampleNamespace = infraStack.getOutput("myExampleNamespaceName");
 const certManagerSelfSignedIssuerName = infraStack.getOutput("certManagerSelfSignedIssuerName");
 const ingressClassName = infraStack.getOutput("ingressClassName");
 
+// IMPORTANTE: questa logica di esportare il kubeconfig è logicamente corretta, ma quando fai ripartire il minikube questo rigenera il file kubeconfig e quindi cambia ogni volta.
+// Nei vari componenti lascio commentata la logica come esempio, ma è meglio lasciare la gestione implicita
 const k8sProvider = new k8s.Provider("k8s-provider", { kubeconfig });
 
 const mongoDBStack = new pulumi.StackReference(`${currentOrg}/my-example-minikube.database.mongodb/${currentStack}`);
@@ -29,6 +31,6 @@ const backend = new BackendComponent(
     ingressClassName: ingressClassName,
     mongoDBDatabase: "todos",
     mongoDBConnectionString: mongodbConnectionString,
-  },
-  { provider: k8sProvider }
+  }
+  /*{ provider: k8sProvider } */
 );
