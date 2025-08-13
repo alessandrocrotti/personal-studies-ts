@@ -15,6 +15,7 @@
     "dev:graphql": "nodemon --exec ts-node src/networking/api-paradigms/graphql/index.ts",
     "dev:apache-kafka": "nodemon --exec ts-node src/tools/apache-kafka/lib/index.ts",
     "dev:rabbitmq": "nodemon --exec ts-node src/tools/rabbitmq/lib/index.ts",
+    "dev:redis": "nodemon --exec ts-node src/tools/redis/lib/index.ts",
     "start": "node dist/index.js",
     "lint": "eslint ./src/**/.ts",
     "generate:protos": "npx buf generate --template ./src/networking/api-paradigms/grpc/buf.gen.yaml"
@@ -51,6 +52,7 @@
     "fastify-cli": "^7.4.0",
     "graphql": "^16.11.0",
     "kafkajs": "^2.2.4",
+    "redis": "^5.8.1",
     "ts-proto": "^2.7.5",
     "uuid": "^11.1.0",
     "ws": "^8.18.3",

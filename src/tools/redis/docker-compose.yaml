@@ -1,0 +1,23 @@
+name: personal-studies-redis
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+
+volumes:
+  redis_data:
+    name: personal-studies-redis-data # Volume per i dati persistenti di redis con nome specifico
+  redisinsight_data:
+    name: personal-studies-redisinsight-data # Volume per i dati persistenti di redisinsight con nome specifico
