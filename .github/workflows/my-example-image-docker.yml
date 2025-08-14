@@ -25,11 +25,12 @@ jobs:
           # Recupera non solo il primo livello del repo dove ci sono i file correnti ma anche il secondo livello, cioè "HEAD^" che sarebbe l'history del file precedente
           fetch-depth: 2
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Check backend version change
         id: check_be
         run: |
-          git log --oneline -n 3
-          git show HEAD^:src/devops/docker/my-example-image/backend/package.json || echo "file non trovato"
           CURRENT=$(jq -r .version package.json)
           # Recupera da git il file package.json, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
           # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
@@ -110,8 +111,6 @@ jobs:
       - name: Check frontend version change
         id: check_fe
         run: |
-          git log --oneline -n 3
-          git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION || echo "file non trovato"
           # Recupera il contenuto del file VERSION in cui è segnata la versione del progetto
           CURRENT=$(cat VERSION)
           # Recupera da git il file VERSION, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 

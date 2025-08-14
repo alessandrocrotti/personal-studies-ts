@@ -28,6 +28,10 @@ docker tag my-example-image-be allecrotti/my-example-image-be:latest
 docker push allecrotti/my-example-image-be:latest
 ```
 
+#### Automation
+
+Per automatizzare il publishing dell'immagine, è stata fatta una GitHub Action che verifica il file `package.json` e se cambia la versione, automaticamente pubblica nuove immagini per quella versione e per la latest
+
 ## Frontend
 
 Il frontend è un semplice nginx con un file `index.html` minimale che gestisce la form di todo-list. Questa form interagisce col backend tramite le chiamate REST che esso espone.
@@ -50,6 +54,10 @@ docker build -t my-example-image-fe frontend
 docker tag my-example-image-fe allecrotti/my-example-image-fe:latest
 docker push allecrotti/my-example-image-fe:latest
 ```
+
+#### Automation
+
+Per automatizzare il publishing dell'immagine, è stata fatta una GitHub Action che verifica il file `VERSION` e se cambia la versione, automaticamente pubblica nuove immagini per quella versione e per la latest
 
 ## Frontend2
 
