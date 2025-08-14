@@ -22,6 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Recupera non solo il primo livello del repo dove ci sono i file correnti ma anche il secondo livello, cioè "HEAD^" che sarebbe l'history del file precedente
           fetch-depth: 2
 
       - name: Check backend version change
@@ -32,8 +33,9 @@ jobs:
           CURRENT=$(jq -r .version package.json)
           # Recupera da git il file package.json, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
           # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
-          # jq -r .version || echo "0.0.0" : jq converte in json il package.json (-r rimove le virgolette dai valori di stringa del json) e se non è definito fai fallback su 0.0.0
-          PREV=$(git show HEAD^:src/devops/docker/my-example-image/backend/package.json 2>/dev/null | jq -r .version || echo "0.0.0")
+          # jq -r .version: jq converte in json il package.json (-r rimove le virgolette dai valori di stringa del json)
+          #PREV=$(git show HEAD^:src/devops/docker/my-example-image/backend/package.json 2>/dev/null | jq -r .version)
+          PREV=temp
           echo "Current backend version: $CURRENT"
           echo "Previous backend version: $PREV"
 
@@ -85,6 +87,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: Dockerfile.multistage
+          # Segnare la cartella corrente (working-directory) come context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
+          context: .
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
@@ -99,6 +103,9 @@ jobs:
         working-directory: ./src/devops/docker/my-example-image/frontend
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Recupera non solo il primo livello del repo dove ci sono i file correnti ma anche il secondo livello, cioè "HEAD^" che sarebbe l'history del file precedente
+          fetch-depth: 2
 
       - name: Check frontend version change
         id: check_fe
@@ -109,7 +116,8 @@ jobs:
           CURRENT=$(cat VERSION)
           # Recupera da git il file VERSION, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
           # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
-          PREV=$(git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION 2>/dev/null || echo "0.0.0")
+          #PREV=$(git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION 2>/dev/null)
+          PREV=temp
           echo "Current frontend version: $CURRENT"
           echo "Previous frontend version: $PREV"
 
@@ -163,6 +171,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: Dockerfile
+          # Segnare la cartella corrente (working-directory) come context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
+          context: .
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
