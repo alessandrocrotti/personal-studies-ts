@@ -28,6 +28,9 @@ jobs:
           PREV=$(git show HEAD^:src/devops/docker/my-example-image/backend/package.json 2>/dev/null | jq -r .version || echo "0.0.0")
           echo "Current backend version: $CURRENT"
           echo "Previous backend version: $PREV"
+
+          ls -l ./src/devops/docker/my-example-image/backend
+
           # Verifica se la condizione CURRENT != PREF e tramite echo valorizza CHANGED che oi mette in OUTPUT
           CHANGED=$([[ "$CURRENT" != "$PREV" ]] && echo true || echo false)
           # Aggiungo un output a questo step con chiave "changed" e valore il valore di CHANGED
@@ -75,7 +78,7 @@ jobs:
         if: steps.check_be.outputs.changed == 'true'
         uses: docker/build-push-action@v6
         with:
-          context: ./src/devops/docker/my-example-image/backend
+          context: src/devops/docker/my-example-image/backend
           file: Dockerfile.multistage
           push: true
           tags: ${{ steps.tags.outputs.tags }}
@@ -98,6 +101,9 @@ jobs:
           PREV=$(git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION 2>/dev/null || echo "0.0.0")
           echo "Current frontend version: $CURRENT"
           echo "Previous frontend version: $PREV"
+
+          ls -l src/devops/docker/my-example-image/frontend
+
           if [ "$CURRENT" = "$PREV" ]; then
             # Messaggio con pattern "::notice title=Titolo::Testo" che viene scritto nell'interfaccia dell'action
             echo "::notice title=Skip job::No frontend version change detected"
@@ -147,7 +153,7 @@ jobs:
         if: steps.check_fe.outcome == 'success' && steps.tags.outcome == 'success'
         uses: docker/build-push-action@v6
         with:
-          context: ./src/devops/docker/my-example-image/frontend
+          context: src/devops/docker/my-example-image/frontend
           file: Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
