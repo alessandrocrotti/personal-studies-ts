@@ -21,6 +21,8 @@ jobs:
         working-directory: ./src/devops/docker/my-example-image/backend
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Check backend version change
         id: check_be
@@ -101,6 +103,8 @@ jobs:
       - name: Check frontend version change
         id: check_fe
         run: |
+          git log --oneline -n 3
+          git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION || echo "file non trovato"
           # Recupera il contenuto del file VERSION in cui è segnata la versione del progetto
           CURRENT=$(cat VERSION)
           # Recupera da git il file VERSION, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
