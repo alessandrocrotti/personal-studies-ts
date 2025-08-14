@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        # Definiamo come cartella di partenza quella di backend per tutti gli step di questo job
+        # Definiamo come cartella di partenza quella di backend per tutti gli step di questo job di tipo "run" (cioè i comandi da shell)
         working-directory: ./src/devops/docker/my-example-image/backend
     steps:
       - uses: actions/checkout@v4
@@ -86,9 +86,10 @@ jobs:
         if: steps.check_be.outputs.changed == 'true'
         uses: docker/build-push-action@v6
         with:
-          file: Dockerfile.multistage
-          # Segnare la cartella corrente (working-directory) come context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
-          context: .
+          # Serve il path esteso, perchè la "working-directory" definita vale solo per i comandi eseguiti da shell e non nei parametri delle action
+          file: ./src/devops/docker/my-example-image/backend/Dockerfile.multistage
+          # Segnare la cartellacome context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
+          context: ./src/devops/docker/my-example-image/backend
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
@@ -99,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        # Definiamo come cartella di partenza quella di frontend per tutti gli step di questo job
+        # Definiamo come cartella di partenza quella di frontend per tutti gli step di questo job di tipo "run" (cioè i comandi da shell)
         working-directory: ./src/devops/docker/my-example-image/frontend
     steps:
       - uses: actions/checkout@v4
@@ -170,9 +171,10 @@ jobs:
         if: steps.check_fe.outcome == 'success' && steps.tags.outcome == 'success'
         uses: docker/build-push-action@v6
         with:
-          file: Dockerfile
-          # Segnare la cartella corrente (working-directory) come context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
-          context: .
+          # Serve il path esteso, perchè la "working-directory" definita vale solo per i comandi eseguiti da shell e non nei parametri delle action
+          file: ./src/devops/docker/my-example-image/frontend/Dockerfile
+          # Segnare la cartellacome context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
+          context: ./src/devops/docker/my-example-image/frontend
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
