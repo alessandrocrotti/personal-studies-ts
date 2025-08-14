@@ -15,21 +15,23 @@ env:
 jobs:
   build-backend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Definiamo come cartella di partenza quella di backend per tutti gli step di questo job
+        working-directory: ./src/devops/docker/my-example-image/backend
     steps:
       - uses: actions/checkout@v4
 
       - name: Check backend version change
         id: check_be
         run: |
-          CURRENT=$(jq -r .version src/devops/docker/my-example-image/backend/package.json)
+          CURRENT=$(jq -r .version package.json)
           # Recupera da git il file package.json, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
           # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
           # jq -r .version || echo "0.0.0" : jq converte in json il package.json (-r rimove le virgolette dai valori di stringa del json) e se non è definito fai fallback su 0.0.0
           PREV=$(git show HEAD^:src/devops/docker/my-example-image/backend/package.json 2>/dev/null | jq -r .version || echo "0.0.0")
           echo "Current backend version: $CURRENT"
           echo "Previous backend version: $PREV"
-
-          ls -l ./src/devops/docker/my-example-image/backend
 
           # Verifica se la condizione CURRENT != PREF e tramite echo valorizza CHANGED che oi mette in OUTPUT
           CHANGED=$([[ "$CURRENT" != "$PREV" ]] && echo true || echo false)
@@ -78,7 +80,6 @@ jobs:
         if: steps.check_be.outputs.changed == 'true'
         uses: docker/build-push-action@v6
         with:
-          context: src/devops/docker/my-example-image/backend
           file: Dockerfile.multistage
           push: true
           tags: ${{ steps.tags.outputs.tags }}
@@ -88,6 +89,10 @@ jobs:
 
   build-frontend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Definiamo come cartella di partenza quella di frontend per tutti gli step di questo job
+        working-directory: ./src/devops/docker/my-example-image/frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -95,14 +100,12 @@ jobs:
         id: check_fe
         run: |
           # Recupera il contenuto del file VERSION in cui è segnata la versione del progetto
-          CURRENT=$(cat src/devops/docker/my-example-image/frontend/VERSION)
+          CURRENT=$(cat VERSION)
           # Recupera da git il file VERSION, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
           # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
           PREV=$(git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION 2>/dev/null || echo "0.0.0")
           echo "Current frontend version: $CURRENT"
           echo "Previous frontend version: $PREV"
-
-          ls -l src/devops/docker/my-example-image/frontend
 
           if [ "$CURRENT" = "$PREV" ]; then
             # Messaggio con pattern "::notice title=Titolo::Testo" che viene scritto nell'interfaccia dell'action
@@ -153,7 +156,6 @@ jobs:
         if: steps.check_fe.outcome == 'success' && steps.tags.outcome == 'success'
         uses: docker/build-push-action@v6
         with:
-          context: src/devops/docker/my-example-image/frontend
           file: Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
