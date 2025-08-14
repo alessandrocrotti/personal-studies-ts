@@ -1,0 +1,156 @@
+name: Build & Push my-example docker images
+
+on:
+  push:
+    # Esegui solamente se variano i seguenti file
+    paths:
+      - "src/devops/docker/my-example-image/backend/package.json"
+      - "src/devops/docker/my-example-image/frontend/VERSION"
+      - ".github/workflows/my-example-image-docker.yml"
+  workflow_dispatch:
+
+env:
+  IMAGE_NAMESPACE: ${{ secrets.DOCKERHUB_USERNAME  }}
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check backend version change
+        id: check_be
+        run: |
+          CURRENT=$(jq -r .version src/devops/docker/my-example-image/backend/package.json)
+          # Recupera da git il file package.json, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
+          # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
+          # jq -r .version || echo "0.0.0" : jq converte in json il package.json (-r rimove le virgolette dai valori di stringa del json) e se non è definito fai fallback su 0.0.0
+          PREV=$(git show HEAD^:src/devops/docker/my-example-image/backend/package.json 2>/dev/null | jq -r .version || echo "0.0.0")
+          echo "Current backend version: $CURRENT"
+          echo "Previous backend version: $PREV"
+          # Verifica se la condizione CURRENT != PREF e tramite echo valorizza CHANGED che oi mette in OUTPUT
+          CHANGED=$([[ "$CURRENT" != "$PREV" ]] && echo true || echo false)
+          # Aggiungo un output a questo step con chiave "changed" e valore il valore di CHANGED
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+          # Aggiungo un output a questo step con chiave "version" e valore il valore di CURRENT
+          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        # Esegui questo step solo se check_be changed è true
+        if: steps.check_be.outputs.changed == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        # Esegui questo step solo se check_be changed è true
+        if: steps.check_be.outputs.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Calculate Docker Tag list
+        # Esegui questo step solo se check_be changed è true
+        if: steps.check_be.outputs.changed == 'true'
+        id: tags
+        run: |
+          # Estraggo la version, la divido per il valore punto (-d.) e prendo il primo valore per MAJOR e il secondo per MINOR
+          VERSION=${{ steps.check_be.outputs.version }}
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          # Creo il valore dell'immagine
+          IMAGE="$IMAGE_NAMESPACE/my-example-image-be"
+          # Creo un tag per ogni livello di versione "image:1.2.3,image:1.2,image:1"
+          TAGS="${IMAGE}:${VERSION},${IMAGE}:${MAJOR}.${MINOR},${IMAGE}:${MAJOR}"
+
+          # Condizione per latest (ad es. solo su main)
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            TAGS="$TAGS,${IMAGE}:latest"
+          fi
+
+          # Aggiungo tags all'output
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push backend
+        # Esegui questo step solo se check_be changed è true
+        if: steps.check_be.outputs.changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/devops/docker/my-example-image/backend
+          file: Dockerfile.multistage
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check frontend version change
+        id: check_fe
+        run: |
+          # Recupera il contenuto del file VERSION in cui è segnata la versione del progetto
+          CURRENT=$(cat src/devops/docker/my-example-image/frontend/VERSION)
+          # Recupera da git il file VERSION, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
+          # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
+          PREV=$(git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION 2>/dev/null || echo "0.0.0")
+          echo "Current frontend version: $CURRENT"
+          echo "Previous frontend version: $PREV"
+          if [ "$CURRENT" = "$PREV" ]; then
+            # Messaggio con pattern "::notice title=Titolo::Testo" che viene scritto nell'interfaccia dell'action
+            echo "::notice title=Skip job::No frontend version change detected"
+            # Codice di uscita interpretato dall'actions/runner come "job skipped" in modo da evitare gli step successivi 
+            # Scelto di fare in questo modo per mostrare un modo possibile per faro
+            exit 78
+          fi
+          # Aggiungo un output a questo step con chiave "version" e valore il valore di CURRENT
+          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        # Salta questo se step check_fe non è "success", per esempio è fallito oppure è skippato tramite l'exit 78
+        if: steps.check_fe.outcome == 'success'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        # Salta questo se step check_fe non è "success", per esempio è fallito oppure è skippato tramite l'exit 78
+        if: steps.check_fe.outcome == 'success'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Calculate Docker Tag list
+        # Salta questo se step check_fe non è "success", per esempio è fallito oppure è skippato tramite l'exit 78
+        if: steps.check_fe.outcome == 'success'
+        id: tags
+        run: |
+          # Estraggo la version, la divido per il valore punto (-d.) e prendo il primo valore per MAJOR e il secondo per MINOR
+          VERSION=${{ steps.check_fe.outputs.version }}
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          # Creo il valore dell'immagine
+          IMAGE="$IMAGE_NAMESPACE/my-example-image-fe"
+          # Creo un tag per ogni livello di versione "image:1.2.3,image:1.2,image:1"
+          TAGS="${IMAGE}:${VERSION},${IMAGE}:${MAJOR}.${MINOR},${IMAGE}:${MAJOR}"
+
+          # Condizione per latest (ad es. solo su main)
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            TAGS="$TAGS,${IMAGE}:latest"
+          fi
+
+          # Aggiungo tags all'output
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push frontend
+        if: steps.check_fe.outcome == 'success' && steps.tags.outcome == 'success'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/devops/docker/my-example-image/frontend
+          file: Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
