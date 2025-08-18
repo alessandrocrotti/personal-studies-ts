@@ -9,7 +9,7 @@ L'esecuzione viene fatta su una macchina virtuale, chiamata runnner, solitamente
 
 Lo scopo è quello di automatizzare processi legati al ciclo di vita del software (come versionamento, testing, deploy...), ma anche eseguire azioni su sistemi esterni con cui ci si può integrare.
 
-ALcuni casi d'uso:
+Alcuni casi d'uso:
 
 - CI/CD classico: Build, test e deploy automatico di un’app ogni volta che si fa push su main
 - Release automation: Alla creazione di un tag vX.Y.Z, build e pubblicazione di pacchetti o immagini Docker
@@ -24,14 +24,21 @@ ALcuni casi d'uso:
   - condizioni che scatenano l'esecuzione del flusso, possono anche essere limitate (come on push, ma solamente se si modificano certe risorse
 - Job:
   - è l'insieme di processi che si innescano, in maniera parallela se non ci sono particolari dipendenze.
-  - ogni job viene eseguito su un runner, che viene definito e solitamente è una macchina virtuale linux
+  - ogni job viene eseguito su un runner che è una virtual machine separata, che viene definito e solitamente è una macchina virtuale linux
+  - i file creati in un job non sono accessibili da altri job, ma job può rendere accessibili gli outputs, la cache e gli artifacts
 - Step:
   - sono le singole unità che vengono compiute, una dopo l'altra, nel job.
-  - gli step possono produrre output ed utilizzare gli output degli step precedenti
+  - gli step possono produrre output ed utilizzare gli output degli step precedenti. Per accedere agli output di uno step, quello step deve definire un "id"
   - si possono fare condizioni di esecuzione sulla base dei risultati degli step precedenti (solo se uno step specifico è completato con un successo eseguo il seguente step)
   - gli step si possono basare su delle action o delle istruzioni "run" come se fossi nella shell del runner
 - Action:
   - Le action possono essere sviluppate e pubblicate da terze parti oppure internamente
+  - la action di checkout `actions/checkout` del codice di default ha un "fetch-depth" di 1 per renderlo più leggero, se vuoi l'history devi definire il relativo parametro
+  - la action di cache `actions/cache` permette di cachare dipendenze ed altri file per rendere più veloce il processo
+
+Esistono inoltre delle condizioni di esecuzione che permettono di saltare o controllare il flusso del workflow, saltando o eseguendo solo certe parti tramite `if`. Può essere valorizzato sulla base di risultati di step o job precedenti.
+
+Si possono definire delle variabili d'ambiente che puoi riutilizzare in diversi job/step del workflow tramite `${{ env.MY_VAR }}`. Inoltre GitHub fornisce delle variabili di default di contesto che possono essere utili in casi specifici tramite `${{ github.<var>}}`.
 
 ### Esecuzione in locale
 
@@ -96,3 +103,71 @@ runs:
       shell: bash
       run: ${{ github.action_path }}/k6-test-result.sh "${{ inputs.K8S_YAML_METADATA_NAME }}"
 ```
+
+### Workflow Calls
+
+In certi contesti è necessario riutulizzare interi workflow, per evitare di copiare e incollare la stessa lista di steps. Magari parametrizzando questi workflow si possono adattare a vari contesti, riducendo il codice duplicato, in questo caso si possono usare i `Workcall Flow`.
+
+La struttura è paragonabile ad un `workflow` dove definisco input, output e secret necessarie. Questi devono essere esplicitamente passati, anche se hanno lo stesso nome.
+
+Esempio di workflow call:
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+    secrets:
+      DEPLOY_TOKEN:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying to ${{ inputs.environment }}"
+      - run: echo "Using token ${{ secrets.DEPLOY_TOKEN }}"
+```
+
+Chiamante:
+
+```yaml
+name: Main Workflow
+
+on: push
+
+jobs:
+  call-deploy:
+    uses: your-org/your-repo/.github/workflows/deploy.yml@main
+    with:
+      environment: production
+    secrets:
+      DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+```
+
+## GITHUB_TOKEN
+
+Tra le variabili messe a disposizione automaticamente all'esecuzione del workflow, c'è anche il `GITHUB_TOKEN` che è un token automaticamente generato per la singola esecuzione ed è messo come secret. Capita spesso che delle action lo utilizzino, magari di default, per interagire con il repository stesso all'interno di GitHub.
+
+Tramite questo token si possono fare diverse azioni, come interagire con le API REST e GraphQL di GitHub, accedere al repository sia in scrittura che lettura (ma non ad altri repository) ed altre operazioni molto utili.
+
+I permessi del token possono essere personalizzati tramite una configurazione del workflow chiamata `permission`:
+
+```yaml
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+```
+
+Questo token è spesso sufficiente per le operazioni all'interno del proprio contesto di repository, ma se non fosso abbastanza allora si deve creare un PAT (Personal Access Token) con dei permessi ulteriori e metterlo come secret utilizzabile dal workflow.
+
+Si usa un PAT quando:
+
+- si deve accedere ad altri repository
+- si interagisce con GitHub Packages o Container Registry
