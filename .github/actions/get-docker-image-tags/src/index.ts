@@ -1,6 +1,7 @@
-// src/main.ts
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import * as semver from "semver";
+
 import { readFileSync } from "fs";
 
 async function run(): Promise<void> {
@@ -38,7 +39,7 @@ async function run(): Promise<void> {
     core.info(`Current version: ${currentVersion}`);
     core.info(`Previous version: ${previousVersion || "(nothing)"}`);
 
-    if (currentVersion !== previousVersion && currentVersion !== "") {
+    if (semver.gt(currentVersion, previousVersion)) {
       core.info("The version is changed");
 
       // Full
@@ -61,8 +62,10 @@ async function run(): Promise<void> {
 
       // Imposta l'output
       core.setOutput("tags", tags.join(","));
-    } else {
+    } else if (semver.eq(currentVersion, previousVersion)) {
       core.info("Same version");
+    } else {
+      core.error(`Version comparison error: ${currentVersion} is neither greater nor equal to ${previousVersion}`);
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
