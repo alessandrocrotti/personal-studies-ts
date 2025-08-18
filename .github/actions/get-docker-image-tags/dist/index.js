@@ -27493,7 +27493,7 @@ async function run() {
         // Log utile
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Current version: ${currentVersion}`);
         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Previous version: ${previousVersion || "(nothing)"}`);
-        if (currentVersion === previousVersion && currentVersion !== "") {
+        if (currentVersion !== previousVersion && currentVersion !== "") {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("The version is changed");
             // Full
             tags.push(`${dockerImage}:${currentVersion}`);

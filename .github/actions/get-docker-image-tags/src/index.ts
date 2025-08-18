@@ -38,7 +38,7 @@ async function run(): Promise<void> {
     core.info(`Current version: ${currentVersion}`);
     core.info(`Previous version: ${previousVersion || "(nothing)"}`);
 
-    if (currentVersion === previousVersion && currentVersion !== "") {
+    if (currentVersion !== previousVersion && currentVersion !== "") {
       core.info("The version is changed");
 
       // Full
