@@ -7,6 +7,7 @@ on:
       - "src/devops/docker/my-example-image/backend/package.json"
       - "src/devops/docker/my-example-image/frontend/VERSION"
       - ".github/workflows/my-example-image-docker.yml"
+      - ".github/actions/get-docker-image-tags/dist/**"
   workflow_dispatch:
 
 env:
