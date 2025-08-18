@@ -11,14 +11,18 @@ on:
 
 env:
   IMAGE_NAMESPACE: ${{ secrets.DOCKERHUB_USERNAME  }}
+  BACKEND_FOLDER: src/devops/docker/my-example-image/backend
+  FRONTEND_FOLDER: src/devops/docker/my-example-image/frontend
 
 jobs:
-  build-backend:
+  build-backend-with-run:
+    # VERSIONE CON "RUN" VIA SHELL. DISABILITATA PER UTILIZZARE INVECE LA CUSTOM ACTION JS, MA MANTENUTA COME ESEMPIO
+    if: false
     runs-on: ubuntu-latest
     defaults:
       run:
         # Definiamo come cartella di partenza quella di backend per tutti gli step di questo job di tipo "run" (cioè i comandi da shell)
-        working-directory: ./src/devops/docker/my-example-image/backend
+        working-directory: ${{ env.BACKEND_FOLDER }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,11 +35,11 @@ jobs:
       - name: Check backend version change
         id: check_be
         run: |
-          CURRENT=$(jq -r .version package.json)
+          CURRENT=$(jq -r .version "${{ env.BACKEND_FOLDER }}/package.json")
           # Recupera da git il file package.json, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
           # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
           # jq -r .version: jq converte in json il package.json (-r rimove le virgolette dai valori di stringa del json)
-          PREV=$(git show HEAD^:src/devops/docker/my-example-image/backend/package.json 2>/dev/null | jq -r .version)
+          PREV=$(git show HEAD^:"${{ env.BACKEND_FOLDER }}/package.json" 2>/dev/null | jq -r .version)
           echo "Current backend version: $CURRENT"
           echo "Previous backend version: $PREV"
 
@@ -87,21 +91,23 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           # Serve il path esteso, perchè la "working-directory" definita vale solo per i comandi eseguiti da shell e non nei parametri delle action
-          file: ./src/devops/docker/my-example-image/backend/Dockerfile.multistage
+          file: ${{ env.BACKEND_FOLDER }}/Dockerfile.multistage
           # Segnare la cartellacome context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
-          context: ./src/devops/docker/my-example-image/backend
+          context: ${{ env.BACKEND_FOLDER }}
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-frontend:
+  build-frontend-with-run:
+    # VERSIONE CON "RUN" VIA SHELL. DISABILITATA PER UTILIZZARE INVECE LA CUSTOM ACTION JS, MA MANTENUTA COME ESEMPIO
+    if: false
     runs-on: ubuntu-latest
     defaults:
       run:
         # Definiamo come cartella di partenza quella di frontend per tutti gli step di questo job di tipo "run" (cioè i comandi da shell)
-        working-directory: ./src/devops/docker/my-example-image/frontend
+        working-directory: ${{ env.FRONTEND_FOLDER }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -112,10 +118,10 @@ jobs:
         id: check_fe
         run: |
           # Recupera il contenuto del file VERSION in cui è segnata la versione del progetto
-          CURRENT=$(cat VERSION)
+          CURRENT=$(cat "${{ env.FRONTEND_FOLDER }}/VERSION")
           # Recupera da git il file VERSION, utilizzando HEAD^ si prende il commit precedente all'ultimo eseguito, 
           # 2>/dev/null reindirizza gli eventuali errori (2 indica l'output di error) nel "null device" per non mostrarli (/dev/null è un file speciale che se ci scrivi sopra il contenuto sparisce)
-          PREV=$(git show HEAD^:src/devops/docker/my-example-image/frontend/VERSION 2>/dev/null)
+          PREV=$(git show HEAD^:"${{ env.FRONTEND_FOLDER }}/VERSION" 2>/dev/null)
           echo "Current frontend version: $CURRENT"
           echo "Previous frontend version: $PREV"
 
@@ -169,11 +175,107 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           # Serve il path esteso, perchè la "working-directory" definita vale solo per i comandi eseguiti da shell e non nei parametri delle action
-          file: ./src/devops/docker/my-example-image/frontend/Dockerfile
+          file: ${{ env.FRONTEND_FOLDER }}/Dockerfile
           # Segnare la cartellacome context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
-          context: ./src/devops/docker/my-example-image/frontend
+          context: ${{ env.FRONTEND_FOLDER }}
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-backend-with-custom-action:
+    if: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Definiamo come cartella di partenza quella di backend per tutti gli step di questo job di tipo "run" (cioè i comandi da shell)
+        working-directory: ${{ env.BACKEND_FOLDER }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Recupera non solo il primo livello del repo dove ci sono i file correnti ma anche il secondo livello, cioè "HEAD^" che sarebbe l'history del file precedente
+          fetch-depth: 2
+
+      - name: Check docker image tags
+        id: check-docker-image-tags
+        uses: ./.github/actions/get-docker-image-tags
+        with:
+          version-file: ${{ env.BACKEND_FOLDER }}/package.json
+          docker-image: ${{ secrets.DOCKERHUB_USERNAME  }}/my-example-image-be
+
+      - name: Set up Docker Buildx
+        # Esegui questo step solo se tag è definito
+        if: steps.check-docker-image-tags.outputs.tags
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        # Esegui questo step solo se tag è definito
+        if: steps.check-docker-image-tags.outputs.tags
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend
+        # Esegui questo step solo se tag è definito
+        if: steps.check-docker-image-tags.outputs.tags
+        uses: docker/build-push-action@v6
+        with:
+          # Serve il path esteso, perchè la "working-directory" definita vale solo per i comandi eseguiti da shell e non nei parametri delle action
+          file: ${{ env.BACKEND_FOLDER }}/Dockerfile.multistage
+          # Segnare la cartellacome context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
+          context: ${{ env.BACKEND_FOLDER }}
+          push: true
+          tags: ${{ steps.check-docker-image-tags.outputs.tags }}
+          # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-frontend-with-custom-action:
+    if: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Definiamo come cartella di partenza quella di frontend per tutti gli step di questo job di tipo "run" (cioè i comandi da shell)
+        working-directory: ${{ env.FRONTEND_FOLDER }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Recupera non solo il primo livello del repo dove ci sono i file correnti ma anche il secondo livello, cioè "HEAD^" che sarebbe l'history del file precedente
+          fetch-depth: 2
+
+      - name: Check docker image tags
+        id: check-docker-image-tags
+        uses: ./.github/actions/get-docker-image-tags
+        with:
+          version-file: ${{ env.FRONTEND_FOLDER }}/VERSION
+          docker-image: ${{ secrets.DOCKERHUB_USERNAME  }}/my-example-image-fe
+
+      - name: Set up Docker Buildx
+        # Esegui questo step solo se tag è definito
+        if: steps.check-docker-image-tags.outputs.tags
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        # Esegui questo step solo se tag è definito
+        if: steps.check-docker-image-tags.outputs.tags
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push frontend
+        # Esegui questo step solo se tag è definito
+        if: steps.check-docker-image-tags.outputs.tags
+        uses: docker/build-push-action@v6
+        with:
+          # Serve il path esteso, perchè la "working-directory" definita vale solo per i comandi eseguiti da shell e non nei parametri delle action
+          file: ${{ env.FRONTEND_FOLDER }}/Dockerfile
+          # Segnare la cartellacome context, perchè il default e puntare al repository stesso dall'action e non sarebbe corretto nel nostro contesto
+          context: ${{ env.FRONTEND_FOLDER }}
+          push: true
+          tags: ${{ steps.check-docker-image-tags.outputs.tags }}
           # Gestisce la cache dei vari layer dell'immagine su github action in modo che rende più veloce l'esecuzione successiva (mantenuta per 7 giorni)
           cache-from: type=gha
           cache-to: type=gha,mode=max

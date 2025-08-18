@@ -1,0 +1,19 @@
+{
+  "name": "get-docker-image-tags",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ncc build src/index.ts --license licenses.txt"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3"
+  }
+}

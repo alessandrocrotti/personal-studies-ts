@@ -1,0 +1,18 @@
+name: "Get docker image tag"
+description: "Confronta la versione del file di version con la precedente e se è cambiato ti restituisce la lista di tag da pubblicare"
+
+inputs:
+  version-file:
+    description: "Percorso al file contenente la versione"
+    required: true
+  docker-image:
+    description: "Nome dell'immagine Docker (es: myorg/myimage)"
+    required: true
+
+outputs:
+  tags:
+    description: "Lista dei tag Docker generati"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"

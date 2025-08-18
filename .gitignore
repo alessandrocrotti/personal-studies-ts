@@ -128,3 +128,6 @@ dist
 
 # Generated files
 generated/
+
+# Escludi le dist delle github action
+!.github/actions/**/dist
