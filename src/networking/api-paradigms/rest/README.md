@@ -64,6 +64,7 @@ Funzionamento dei metodi:
 - **PUT**:
   - Scopo: aggiornare o sostituire completamente una risorsa. Quindi questo update rimuove i campi vuoti del body, visto che influenza tutte le proprietà della risorsa
   - IDEMPOTENTE: eseguendo più volte la request, non cambia lo stato sul server e la risorsa viene riaggiornata sempre con lo stesso valore
+    - Dettaglio importante: al contrario di POST, PUT avrà un url tipo `/api/deliveries/39660/` dove definisce nell'url l'id della risorsa e se quella risorsa non esiste, verrà creata con l'id scelto dal client
 - **PATCH**:
   - Scopo: aggiornare parte delle proprietà di una risorsa. Quindi se faccio un update, i campi vuoti non vengono influenzati.
   - NON è RICHIESTO CHE SIA IDEMPOTENTE: le regole non impongono che questo metodo sia idempotente, ma per sua natura molto spesso lo è. Comunque il client non si può aspettare che lo sia, quindi lo deve considerare NON IDEMPOTENTE

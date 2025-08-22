@@ -4,6 +4,8 @@
   - [Descrizione](#descrizione)
   - [Struttura](#struttura)
   - [Region](#region)
+  - [Servizi](#servizi)
+    - [Microservizi](#microservizi)
 
 ## Descrizione
 
@@ -38,3 +40,18 @@ Essendo una piattaforma globale distribuita in tutto il mondo, viene raggrupata 
 - **Datacenters**: ' l'unità più piccola che rappresenta un edificio reale pieno di server. Non scegli direttamente quale data center di una regioni usare, ma l'utente utilizza solo il concetto di region
 
 Puoi visualizzare l'infrastruttura di Azure dentro a [Global Infrastructure](https://azure.microsoft.com/en-us/explore/global-infrastructure).
+
+## Servizi
+
+### Microservizi
+
+Per implementare dei microservizi si possono scegliere alcuni di questi servizi:
+
+- **Azure Function**: ti permette di eseguire del codice NON containerizzato come serverless function senza stato (nessuna persistenza dei dati), crei il tuo microservizio e lo esegui sul cloud in questo modo. Semplice per task reattivi e brevi, ti permette di scalare a zero quando non è in uso. Solitamente limitato a funzioni o eventi
+  - Costo basato solo sul consimo effettivo di risorse visto che è serverless
+  - Se si avessero diversi servizi serverless da coordinare, sarebbe complicato e si potrebbe utilizzare il servizio **Azure Logic Apps**
+- **Azure Container Apps**: piattaforma serverless basata su Kubernetes, dove esegui il container dell'applicazione dove lo stato può essere gestito se si assegna uno storage esterno, ma di default è senza stato. Non hai accesso alle configurazioni di K8S, ma puoi fare autoscaling ed eseguire qualsiasi applicazione containerizzata. Valido per un microservizio semplice e che non richiede troppe configurazioni e senza l'accesso diretto al cluster.
+  - Costo basato solo sul consimo effettivo di risorse visto che è serverless
+- **Azure Service Fabric**: piattaforma completa per la gestione dei microservizi, con gestione dello stato nativamente (con sistemi di storage interni per i servizi stateful). Più complessa e configurabile, contiene all'interno diversi strumenti per CI/CD, monitoring, altro.
+- **AKS**: è il servizio di Kubernetes offerto e integrato nel contesto di Azure, richiede delle configurazioni ma è gestibile anche dal Azure Portal. Utile per microservizi cointenerizzati dove vuoi controllare il cluster. Lo stato è gestibile tramite configurazioni manuali degli storage.
+  - Costo basato sia sulle macchine virtuali utilizzate nel cluster
