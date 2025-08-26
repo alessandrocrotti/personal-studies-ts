@@ -52,6 +52,10 @@ Per implementare dei microservizi si possono scegliere alcuni di questi servizi:
   - Se si avessero diversi servizi serverless da coordinare, sarebbe complicato e si potrebbe utilizzare il servizio **Azure Logic Apps**
 - **Azure Container Apps**: piattaforma serverless basata su Kubernetes, dove esegui il container dell'applicazione dove lo stato può essere gestito se si assegna uno storage esterno, ma di default è senza stato. Non hai accesso alle configurazioni di K8S, ma puoi fare autoscaling ed eseguire qualsiasi applicazione containerizzata. Valido per un microservizio semplice e che non richiede troppe configurazioni e senza l'accesso diretto al cluster.
   - Costo basato solo sul consimo effettivo di risorse visto che è serverless
+  - Puoi anche usare Docker-Compose per avere più container insieme
 - **Azure Service Fabric**: piattaforma completa per la gestione dei microservizi, con gestione dello stato nativamente (con sistemi di storage interni per i servizi stateful). Più complessa e configurabile, contiene all'interno diversi strumenti per CI/CD, monitoring, altro.
+- **Azure Spring Apps**: è un servizio che gestisce applicazioni in Spring Boot. Non devi preoccuparti dell'infrastruttura che viene gestita automaticamente
 - **AKS**: è il servizio di Kubernetes offerto e integrato nel contesto di Azure, richiede delle configurazioni ma è gestibile anche dal Azure Portal. Utile per microservizi cointenerizzati dove vuoi controllare il cluster. Lo stato è gestibile tramite configurazioni manuali degli storage.
   - Costo basato sia sulle macchine virtuali utilizzate nel cluster
+- **Azure Red Hat OpenShift**: Permette di utilizzare OpenShift, che è una versione "Platform as a Service" dove sotto c'è Kubernetes
+- **Azure Cosmos DB**: database non relazionale gestito e ottimizzato per Azure, ma con delle API per essere utilizzato al posto di MongoDB. Nel caso si usasse MongoDB per il proprio progetto, questo è il servizio specifico che offre Azure al suo posto senza dover modificare il proprio codice

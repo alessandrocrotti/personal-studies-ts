@@ -15,10 +15,12 @@
         - [API Design](#api-design)
         - [API Versioning](#api-versioning)
         - [Operazioni Idempotenti](#operazioni-idempotenti)
+        - [Gestione dei dati](#gestione-dei-dati)
+        - [Container orchestration](#container-orchestration)
   - [Metodologie](#metodologie)
     - [Domain Driven Design (DDD)](#domain-driven-design-ddd)
       - [Strategic DDD](#strategic-ddd)
-        - [Tactical DDD](#tactical-ddd)
+      - [Tactical DDD](#tactical-ddd)
 
 ## Descrizione
 
@@ -265,6 +267,24 @@ Utilizzare PUT al posto di POST non è scontato:
   - Se la risorsa non esiste, la crea, altrimenti la aggiorna. Il risultato finale ad ogni chiamata è sempre lo stesso: esiste quella risorsa con quello stato
   - Potrebbe cambiare il response code, la prima volta 201 Created, la seconda volta 204 No Content o 200 Success
 
+##### Gestione dei dati
+
+Ogni microservizio deve avere il suo database e non può accedere direttamente a quelli degli altri. Questo significa che ognuno è indipendente e può scegliere come salvare i dati (SQL, NoSQL, altro). Se più microservizi scelgono lo stesso tipo di DB, è accettabile utilizzare la stessa applicazione di DB, ma l'importante è che ogni microservizio abbia il suo DB Schema separato.
+
+Questa strategia introduce la complessità nella gestione della coerenza dei dati e la duplicazione di dati tra microservizi differenti. Alcune strategie che possono essere utili per gestire la complessità:
+
+- Definire quali parti necessitano di una **strong consistency** dove i dati devono essere sempre perfettamente sincronizzati e si applica il principio ACID (Atomicity Consistency Isolation Durability) o **eventual consistency** dove è legittimo che siano consistenti dopo un possibile ritardo. Cercare di preferire quanto più possibile le **eventual consitency** alle **strong consistency**.
+- Quando si duplicano i dati, si può considerare un singolo servizio come master di quel dato
+- Usare i pattern **Scheduler Agent Supervisor** e **Compensating Transaction** per mantenere la coerenza tra servizi ed eventuali principi di checkpoint quando si eseguono workflow che eseguono insieme più step transazionali
+- Salvare nel proprio microservizio solo i dati necessari
+- Usare il modello **event driven** per pubblicare eventi da un microservizio che altri microservizi posso consumare e utilizzare (pub/sub)
+- Se un microservizio invia degli eventi, dovrebbe pubblicare uno schema che formalizza gli eventi e come utilizzarli da parte dei subscriber, un contratto sostanzialmente. Tramite lo schema ogni servizio si crea la sua struttura, indipendentemente dal linguaggio e senza condividere classi che creerebber un accoppiamento. In questo modo il publisher può validare il messaggio prima di inviarlo e il subscriber deserializzarlo alla ricezione
+- Se i messaggi sono numerosi, possono essere un collo di bottiglia e devono essere gestiti con aggregation o batch per ridurre il carico
+
+##### Container orchestration
+
+Solitamente in microservizio viene eseguito tramite un container. In locale è semplice quando si ha una singola esecuzione per ogni service sulla stessa macchina, ma in un cluster è più complesso. Solitamente ci sono più istanze del microservice che girano su nodi diversi, con un load balance (reverse proxy) che gestisce il traffico. Il cluster stesso si occupa di mantenere lo stato coerente dei microservizi, se un container muore, viene eseguito un nuovo container per ripristinare lo stato. Solitamente si usa Kubernetes, ma ci sono altri software e configurazioni specifiche del proprio Cloud Provider.
+
 ## Metodologie
 
 Le metodologie sono approcci che danno delle linee guida al comportamento da tenere, non sono stringenti e strutturate come le architetture, ma permettono di avere uno stile e dei principi di approccio nei confronti del software. Si puà avere metodologie nello sviluppo, ma anche nella gestione del processo e progetto (come Scrum, Kanban).
@@ -345,7 +365,7 @@ Alla fine di tutto lo strategic layer si è prodotto i seguenti documenti docume
 - Note sulle integrazioni
 - Visione evolutiva / roadmap
 
-##### Tactical DDD
+#### Tactical DDD
 
 Una volta definiti i confini, si inizia la modellazione vera e propria degli elementi del **Bounded Context** per poi creare le classi, metodi, interfacce. Questi sono alcuni degli oggetti:
 
@@ -356,11 +376,61 @@ Una volta definiti i confini, si inizia la modellazione vera e propria degli ele
 - Aggregate: sono un insieme di entity e value object che sono tutte dipendenti da una singola Root Entity. Questo permette di gestirli insieme perchè sono strettamente legati a quell'entity.
   - L'aggregate può anche contenere la logica che definisce come le entity al suo interno interagiscono, quando tale logica non è dipendente dall'entity stessa ma dall'interazione con le altre all'interno dell'aggregate
   - Nel modello ci si riferisce direttamente alla Root Entity per riferirsi all'aggregato nel suo insieme
-- Service: un service è un oggetto che contine della logica che non ha stato e non è legata a entity e value object. Sostanzalmente sono i metodi che effettuano logiche generiche
+- Service: un service è un oggetto che contiene della logica che non ha stato e non è legata a entity e value object. Sostanzalmente sono i metodi che effettuano logiche generiche
   - Domain service: sono logiche generiche di dominio che solitamente coinvolgono più entity e sono di basso livello
-  - Application service: sono funzioni tecniche come user authentication, dove si orchestrano altri componenti e possono aver dipendenze con livelli più bassi del software
+  - Application service: sono funzioni tecniche come user authentication, dove si orchestrano altri componenti del dominio ma non contiene logica di dominio e possono aver dipendenze con livelli più bassi del software
 - Repository: si occupa di trovare le istanze delle entity e, solitamente, gestire la persistenza su db
 - Factory: classi o metodi con lo scopo di creare le entity nascondendone la complessità della creazione
 - Domain Event: servono a notificare ad altri sistemi eventi che sono successi, per esempio "un nuovo elemento è stato creato" NON è un evento, mentre "una spedizione è stata cancellata" è un evento.
   - Sono molto usati nel contesto dei microservizi per scambiare messaggi ed aggiornare gli stati tramite eventi asincroni
-- Application Service: è semplicemente un orchestratore dei vari elementi del dominio usandoli insieme per eseguire una azione richiesta, ma non contiene alcuna logica
+
+Questa potrebbe essere una mappatura dei concetti di DDD in una Clean Architecture:
+
+| Concetto DDD                   | Equivalente Clean Architecture  |
+| ------------------------------ | ------------------------------- |
+| Entity                         | domain/entities/                |
+| Value Object                   | domain/value-objects/           |
+| Events                         | domain/events/                  |
+| Domain Service                 | domain/services/                |
+| Factories                      | domain/factories/               |
+| Repository Interface           | application/interfaces/         |
+| Application Service / Use Case | application/use-cases/          |
+| Anti-Corruption Layer          | interface-adapters/mappers/     |
+| UI / API                       | interface-adapters/controllers/ |
+| Infrastructure                 | infrastructure/persistence/     |
+
+```
+src/
+├── domain/                      # Core del modello di dominio
+│   ├── entities/               # Entità con identità (es. Order, Customer)
+│   ├── aggregates/             # Root + regole di consistenza (es. OrderAggregate)
+│   ├── value-objects/          # Oggetti immutabili senza identità (es. Money, Address)
+│   ├── services/               # Domain Services (logica che non appartiene a una singola entità)
+│   ├── factories/              # Costruttori complessi (es. OrderFactory)
+│   └── events/                 # Eventi di dominio (es. OrderCreatedEvent)
+│
+├── application/                # Casi d’uso e orchestrazione
+│   ├── use-cases/              # Es. CreateOrderUseCase
+│   ├── interfaces/             # Porte inbound/outbound (es. IOrderRepository)
+│   ├── dtos/                   # Input/output dei use-case
+│   └── exceptions/             # Errori applicativi
+│
+├── interface-adapters/         # Traduttori tra mondo esterno e core
+│   ├── controllers/            # Adapter inbound (es. HTTP)
+│   ├── presenters/             # Format output → ViewModel
+│   ├── mappers/                # DTO ↔ Entità / Aggregati
+│   └── view-models/            # Modelli per la presentazione
+│
+├── infrastructure/             # Adapter outbound e tecnologie esterne
+│   ├── persistence/            # Implementazioni repository (es. DB, ORM)
+│   ├── external-services/      # API esterne, email, file system
+│   ├── configuration/          # DI, settings, env
+│   └── logging/                # Log adapter
+│
+├── shared/                     # Codice riutilizzabile
+│   ├── utils/
+│   ├── constants/
+│   └── errors/
+│
+└── main.ts                     # Entry point dell’applicazione
+```
