@@ -1,15 +1,15 @@
-import { binarySearch, binarySearchW3C } from "./dsa/1-arrays/binary-search";
-import { bubbleSort, bubbleSortW3C } from "./dsa/1-arrays/bubble-sort";
-import { countingSort } from "./dsa/1-arrays/counting-sort";
-import { insertionSort, insertionSortW3C } from "./dsa/1-arrays/insertion-sort";
-import { mergeSortW3C } from "./dsa/1-arrays/merge-sort";
-import { quickSortW3C } from "./dsa/1-arrays/quick-sort";
-import { radixSort } from "./dsa/1-arrays/radix-sort";
-import { SinglyLinkedList } from "./dsa/2-linked-lists/singly-linkedlist";
-import { ArrayTree } from "./dsa/5-tree/array-tree";
-import { BinaryTree, BinaryTreeNode } from "./dsa/5-tree/binary-tree";
-import { Graph } from "./dsa/6-graphs/graph";
-import { WeightedGraph } from "./dsa/6-graphs/weighted-graph";
+import { binarySearch, binarySearchW3C } from "./w3c/1-arrays/binary-search";
+import { bubbleSort, bubbleSortW3C } from "./w3c/1-arrays/bubble-sort";
+import { countingSort } from "./w3c/1-arrays/counting-sort";
+import { insertionSort, insertionSortW3C } from "./w3c/1-arrays/insertion-sort";
+import { mergeSortW3C } from "./w3c/1-arrays/merge-sort";
+import { quickSortW3C } from "./w3c/1-arrays/quick-sort";
+import { radixSort } from "./w3c/1-arrays/radix-sort";
+import { SinglyLinkedList } from "./w3c/2-linked-lists/singly-linkedlist";
+import { ArrayTree } from "./w3c/5-tree/array-tree";
+import { BinaryTree, BinaryTreeNode } from "./w3c/5-tree/binary-tree";
+import { Graph } from "./w3c/6-graphs/graph";
+import { WeightedGraph } from "./w3c/6-graphs/weighted-graph";
 
 // bubbleSort([29, 3, -12, 45, 1, -321, 22]);
 // bubbleSortW3C([29, 3, -12, 45, 1, -321, 22]);
