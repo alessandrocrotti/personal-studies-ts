@@ -47,7 +47,7 @@ I vari tipi:
   - Raccomandato: per la cache o real time access
   - Es: **Redis**, Amazon DynamoDB, Riak
   - Utilizzo: abbastanza usati ma sempre in supporto ad altri database
-- **Documentali**: gestiscono i dati come document con un contenuto JSON, BSON (in MongoDB), XML.
+- **Documentali**: gestiscono i dati come document con un contenuto JSON, BSON (in MongoDB, è un Binary JSON-like), XML.
   - Vantaggi: Il documento contiene dati gerarchici e dimensioni variabili e non ha nessuno schema. Si possono modificare pezzi del documento facilmente. I dati sono tutti dentro il documento stesso e non è necessario usare referenze esterne per ottenere altri dati relativi.
   - Limiti: I documenti non hanno referenze e questo può portare a inconsistenza se due documenti hanno campi diversi. Inoltre non garantisce l'atomicità della transazione quando uno stesso dato è da mettere su documenti diversi perchè si eseguono 2 query separate.
   - Raccomandato: quando il data schema non è fisso, ma cambia costantemente

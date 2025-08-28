@@ -20,6 +20,7 @@
     "dev:apache-kafka": "nodemon --exec ts-node src/messaging-events/apache-kafka/lib/index.ts",
     "dev:rabbitmq": "nodemon --exec ts-node src/messaging-events/rabbitmq/lib/index.ts",
     "dev:redis": "nodemon --exec ts-node src/database/redis/lib/index.ts",
+    "dev:mongodb-native": "nodemon --exec ts-node src/database/mongo/native-driver/index.ts",
     "dev:ddd-clean": "nodemon --exec ts-node src/architecture/code/ddd-clean-architecture/index.ts",
     "start": "node dist/index.js",
     "lint": "eslint ./src/**/.ts"
