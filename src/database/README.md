@@ -5,8 +5,10 @@
   - [Database Relazionale](#database-relazionale)
     - [Lock](#lock)
     - [JOIN](#join)
+    - [Schema ER](#schema-er)
     - [ORM](#orm)
   - [Database Non Relazionale](#database-non-relazionale)
+  - [CAP Theorem](#cap-theorem)
 
 ## Descrizione
 
@@ -27,8 +29,8 @@ Descrizione:
 
 - Usa il linguaggio SQL per eseguire le operazioni
 - Esiste un Data Schema predefinito e fisso. Non si può modificare runtime, ma solamente da operazioni di "alterazione" che sono delicate
-- La scalabilità è solo verticale, per gestire maggiore traffico si deve aumentare la singola macchina/nodo aumentando CPU, RAM, SSD
-- Difficile da usare con BigData visto che è scalabile solo verticalmente
+- La scalabilità è perlopiù verticale, per gestire maggiore traffico si deve aumentare la singola macchina/nodo aumentando CPU, RAM, SSD. Ci sono configurazioni orizzontali per i relazionali, ma sono complesse e non native.
+- Difficile da usare con BigData visto che è solitamente scalabile solo verticalmente
 - Le operazioni sul relazionale sono **ACID** (Atomicità, Consistenza, Isolamento Durata) quindi danno una garanzia della consistenza dei dati
 
 Concetti fondamentali:
@@ -119,6 +121,31 @@ Sono il sistema con cui si mettono in realzione 2 tabelle attraverso degli attri
 
 ![SQL DIAGRAM](https://i0.wp.com/www.puntogeek.com/wp-content/uploads/2013/05/BHVicYICMAAdHGv.jpg?w=966&ssl=1)
 
+### Schema ER
+
+Lo schema ER (Entity-Relationship Model) è uno schema grafico e concettuale del database. Dai dati progettuali, si crea lo schema ER che serve poi per creare l'effettivo DB.
+
+Grazie a questo schema si mostrano graficamente:
+
+- Entity: gli oggetti che vengono memorizzati a database (sono le tabelle)
+  - Strong Entity: ha una chiave primaria univoca e indipendente dalle altre entity
+  - Weak Entity: ha una relazione con una altra entity che la identifica e senza di essa non esisterebbe
+- Attribute: le proprietà di una entity (sono le colonne)
+  - Chiave: valorie univoco che identifica l'entity
+  - Composite: un attributo che è rappresentato da altri sotto attributi
+  - Multivalue: un attributo che può contenere una lista
+  - Derived: un attributo che può essere derivato da altri attributi
+- Relationship: sono le connessioni tra entity
+  - Relazione Unary: mette in relazione l'entity con se stessa, quindi due istanze della stessa entity
+  - Relazione Binary: mette in relazione due entity diverse
+  - Relazione N-ary: quando ci sono più entity coinvolte
+  - Relazione totale o parziale: totale ogni entità deve partecipare alla relazione, parziale alcune istanze possono non partecipare. La differenza è che la foreign key è NOT NULL per TOTALE. Si può applicare ai tutti i tipi di relazione
+  - One to One: una istanza dell'entity A ha una associazione con una istanza della entity B (A1 -> B1, A2 -> B3, A3 -> B2, A4 senza relazione). Es: una persona ne sposa una e una sola altra
+  - One to Many: una istanza dell'entity A ha una o più istanze associate all'entity B (A1 -> B1, A2 -> B2;B3, A3 -> B4, A4 senza relazione). Es: il dipartimento più avere associati vari medici, un dipartimento può non avere medici, ma tutti i medici possono essere assegnati ad un dipartimento
+  - Many to One: varie istanze dell'entity A possono essere assegnate ad una istanza nell'entity B (A1;A2;A3 -> B1, A4 -> B3, B2 e B4 senza relazione:). Es: vari studenti possono essere iscritti ad un corso di laurea, anche lo stesso per studenti diversi. Alcuni corsi possono essere vuoti
+  - Many to Many: varie istanze dell'entity A sono assegnati a varie istanze dell'entity B (A1 -> B1;B2;B3, A2 -> B1;B3, A3 -> B2;B3). Es. vari studenti possono iscriversi a vari Esami e vari esami hanno vari studenti.
+    - Questa associazione viene trasformata in una tabella aggiuntiva che gestisce l'associazione. Es: tabella associativa Iscrizioni che raccoglie i match tra le foreign key studenteId e corsoId ed eventuali attributi dell'associazione
+
 ### ORM
 
 Object Relational Mapping è una tecnica che permette di collegare le tuple di un database agli oggetti del codice di una applicazione. Puoi lavorare con le tabelle come se fossero oggetti, evitando le query dirette a basso livello.
@@ -175,3 +202,24 @@ I vari tipi:
   - Raccomandato: in contesti un cui la relazione tra i data è importante, come i collegamenti tra utenti in un social network o recommendation engine
   - Es: **Neo4J**, Amazon Neptune, OrientDB
   - Utilizzo: di nicchia e specifico per casistiche che sono chiaramente rappresentabili da un grafo
+
+## CAP Theorem
+
+Questo teorema dice che in un sistema distribuito su una rete di nodi in cui si memorizzano dei dati, non si possono avere sia Consistency che Availability che Partition tolerance.
+
+- **Consistency**: significa che tutti gli utenti vedono gli stessi dati contemporaneamente, indipendentemente dal nodo a cui si connettono.
+  - Si ottiene facendo in modo che ogni modifica sia replicata su ogni nodo prima di dichiararla riuscita
+- **Availability**: significa che un cliente riesce ad ottenere una risposta da un nodo anche se altri nodi sono inattivi
+  - Si ottiene facendo in modo che tutti i nodi possano dare una risposta valida per qualsiasi richiesta
+- **Partition Tolerance**: una partizione è una interruzione delle comunicazioni in un sistema distribuito: una connessione persa o temporaneamente ritardata tra 2 nodi. Significa che il cluster deve continuare a funzionare anche se si interrompe la comunicazione tra i nodi
+
+Potendone scegliere solo 2 su 3, si configurano questi 3 casi:
+
+- **Database CP**: offre Consistency e Partition Tolerance, ma non Availability. Quando si verifica una partition tra due nodi, il sistema arresta il nodo non coerente (rendendolo non Available) finchè la partizione non è risolta
+  - Obiettivo: si preferisce mostrare un errore piuttosto che dati non coerenti. Es. sistema di acquisto biglietti ferroviari.
+  - **MongoDB** offre questa soluzione utilizzando il principio **Single-Master**. Esiste un nodo Primario dove vengono fatte le scritture, e ci sono N repliche Secondarie che replicano le operazioni di scrittura del Primario rimanendo sempre allineate. Di default anche le letture vengono fatte dal nodo Primario, ma si può configurare di leggere da i Secondari. Quando il nodo Primario diventa non disponibile, il nodo secondario col log di operazioni più recente diventa il primario e tutti gli altri i suoi secondari. Una volta terminato questa riconfigurazione, il database torna disponibile. Nel frangente non si possono effettuare più operazioni di scrittura.
+- **Database AP**: offre Availability e Partition Tolerance, ma non Consistency. Quando si verifica una partizione, tutti i nodi sono Available, a quelli che non sono stati aggiornati a causa della partizione restituiranno un dato precedente. Quando la partizione viene risolta, si sincronizzano i dati e si riparano le incoerenze.
+  - Obiettivo: si preferisce mostrare dati non coerenti piuttosto che un errore. Es. bacheca dei social network.
+  - **Apache Cassandra** è un database a colonne senza un nodo master, tutti i nodi devono essere disponibili continuamente. Fornisce comunque una consistenza finale, permettendo scritture nei vari nodi ed effettuando una riconciliazione delle incongruenze il più rapidamente possibile. I dati diventano inconsistenti solo in caso si partizione di rete, che si risolve quando la partizione si risolve. Essendo sempre disponibile, ha alte prestazioni.
+- **Database CA**: offre Consistency e Availability, ma non Partition Tolerance. Questo database non permette di essere distribuito su più nodi, visto che essere distribuito implicitamente porta alla possibilità di partizione.
+  - Tipicamente i **database relazionali** offrono questa soluzione
