@@ -1,4 +1,4 @@
-name: mysql-database
+name: personal-studies-mysql
 
 services:
   mysql:
@@ -10,8 +10,7 @@ services:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
       - mysql_data:/var/lib/mysql
-    restart: unless-stopped
 
 volumes:
   mysql_data:
-    name: mysql-data-volume
+    name: personal-studies-mysql-data
