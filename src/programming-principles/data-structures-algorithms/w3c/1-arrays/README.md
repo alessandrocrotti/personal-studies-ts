@@ -229,6 +229,6 @@ Confronti l'elemento a metà dell'array con l'elemento cercato: se quello che ce
 <table>
   <tr>
     <th>Worst Cases</th>
-    <td>$O(n \cdot \log_2 n)$</td>
+    <td>$O(log_2 n)$</td>
   </tr>
 </table>
