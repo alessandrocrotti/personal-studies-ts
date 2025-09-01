@@ -26,7 +26,7 @@
     "prisma:deploy": "prisma migrate deploy --schema=src/database/mysql/prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=src/database/mysql/prisma/schema.prisma",
     "dev:prisma": "nodemon --exec ts-node src/database/mysql/prisma/index.ts",
-    "dev:ddd-clean": "nodemon --exec ts-node src/architecture/code/ddd-clean-architecture/index.ts",
+    "dev:ddd-clean": "nodemon --exec ts-node src/architecture/coding/ddd-clean-architecture/index.ts",
     "start": "node dist/index.js",
     "lint": "eslint ./src/**/.ts"
   },
