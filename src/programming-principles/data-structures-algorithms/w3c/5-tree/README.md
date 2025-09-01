@@ -42,7 +42,7 @@ Al contrario delle linked list o degli array, l'operazione traverse che scorre i
   - risulta un elenco di nodi che parte dalla root e scorre il lato sinistro per risalire e fare il destro
 - **in-order**: si estrae il valore dopo aver chiamato la ricorsione del lato sinistro, ma prima del lato destro
   - risulta un elenco partendo dal dalla foglia più a sinistra e risalendo da sinistra
-  - molto utile per ordinare in modo crescente il AVL-Tree (essendo una struttura già ordinata con un determinato criterio, questo algoritmo produce una lista ordinata)
+  - molto utile per ordinare in modo crescente il Binary Search Tree (essendo una struttura già ordinata con un determinato criterio, questo algoritmo produce una lista ordinata)
 - **post-order**: si estrae il valore dopo aver chiamato sia la ricorsione del lato sinistro e che destro
   - risulta un elenco che prende prima le foglie e poi risale verso la radice
   - per questa ragione si usa per cancellare un tree
