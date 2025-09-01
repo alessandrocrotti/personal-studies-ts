@@ -24,9 +24,9 @@ class LinkedListStack<T> {
   }
 
   // Remove head node and reassign head to the next node
-  pop(): T | string {
+  pop(): T | null {
     if (this.isEmpty()) {
-      return "Stack is empty";
+      return null;
     }
     const poppedNode = this.head!;
     this.head = this.head!.next;
@@ -35,9 +35,9 @@ class LinkedListStack<T> {
   }
 
   // Get head value
-  peek(): T | string {
+  peek(): T | null {
     if (this.isEmpty()) {
-      return "Stack is empty";
+      return null;
     }
     return this.head!.value;
   }

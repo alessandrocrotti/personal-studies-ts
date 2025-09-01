@@ -51,7 +51,7 @@ Per una documentazione più dettagliata, fare riferimento a [W3CSchool](https://
 
 ### Bubble Sort
 
-Si controllano gli elementi a coppie, prendendo l'indice corrente e il suo successivo. Se il corrente è maggiore, fai lo swap e inverti gli elementi. Si compie con un ciclo innestato "i" e "j" dove "j < n-i-1", perchè tutti gli elementi che ad ogni iterazioni di "i" porti in fondo, sono già ordinati e non devono essere controllati nuovamente.
+Si controllano gli elementi a coppie, prendendo l'indice corrente e il suo successivo. Se il corrente è maggiore, fai lo swap e inverti gli elementi. Si compie con un ciclo innestato "i" e "j" dove "j < n-i-1" perchè tutti gli elementi che ad ogni iterazioni di "i" porti in fondo, sono già ordinati e non devono essere controllati nuovamente. L'algoritmo internamente utilizza solo l'indice "j" e "j+1", mentre l'indice "i" serve solo per ripetere dall'inizio l'algoritmo fatto dall'indice "j".
 Inoltre, se ad una iterazione non hai compiuto alcuno swap, significa che anche i rimanenti elementi dell'array sono già ordinati e non serve proseguire.
 
 #### Complessità Computazionale
@@ -86,7 +86,10 @@ Scorri l'iteratore alla ricerca del valore minimo e quando lo trovi, fai lo swap
 
 ### Insertion Sort
 
-Consideri il tuo array come un insieme di 2 sub array: ordinati e da ordinare. Salvi il valore del primo dagli "da ordinare" e valuti se quell'elemento è minore del suo precedente. Considerato che tutti i suoi precedenti sono già ordinati, se è minore assegna il valore del minore al valore corrente e continui finche il suo valore non è maggiore o uguale del precedente. A quel punto assegni in quella posizione il valore che ti eri salvato, posizionandolo nel punto corretto della parte ordinata.
+Consideri il tuo array come un insieme teorico di 2 sub array: "ordinati" e "da ordinare" (questa divisione dipende solo dall'indice dell'iteratore che distingue la parte iniziale degli "ordinati" da quella finale degli "da ordinare", iniziando da "i=1", così che negli "ordinati" c'è già un elemento).
+Tieni da parte il valore di "i", che è sempre il primo degli "da ordinare". Ora fai un loop su "j" a ritroso degli "ordinati", parti dall'ultimo e confronti se è più grande del valore che stai controllando: se è più grande, sovrascrivi il valore di "j+1" col valore di "j" e tieni l'indice "j" come "insertIndex". Questo passaggio è importante: temporaneamente l'array non conterrà più il valore da controllare, mentre ci sarà un valore duplicato.
+Quando la condizione non è più vera, il ciclo si interrompe e, fuori dal ciclo, si assegnerà nella posizione "insertIndex" il valore tenuto da parte. Questo approccio è fondamentale per evitare degli shifting.
+Logicamente, si può spiegare più facilmente dicendo che, si fa un loop per prendere il primo elemento "da ordinare" e lo si sposta dentro a quelli "ordinati" facendo degli swap sequenziali a partire dall'ultimo degli ordinati fino a che non arriva in posizione.
 
 #### Complessità Computazionale
 
@@ -103,8 +106,12 @@ Consideri il tuo array come un insieme di 2 sub array: ordinati e da ordinare. S
 
 ### Quick Sort
 
-Si basa su una funzione ricorsiva che prende un valore "pivot" (per esempio l'ultimo dell'array selezionato) con lo scopo si mettere tale valore nella posizione corretta all'interno dell'array. Questo significa che alla fine dell'iterazione, tutti i valori più piccoli del "pivot" saranno a sinistra e tutti i valori più grandi del "pivot" saranno alla sua destra.
+Si basa su una funzione ricorsiva che prende un valore "pivot" (per esempio l'ultimo dell'array selezionato) con lo scopo di mettere tale valore nella posizione corretta all'interno dell'array. Questo significa che alla fine dell'iterazione, tutti i valori più piccoli del "pivot" saranno a sinistra e tutti i valori più grandi del "pivot" saranno alla sua destra.
 Poi si seleziona applica la stessa logica ai 2 sotto array che si vengono a formare a destra e a sinistra del pivot. Facendo questo in maniera ricorsiva, si ordina l'intero array.
+L'algoritmo si divide in 2 metodi:
+
+- **SORT**: il metodo di "sort" riceve l'array e i valori "low" e "high" che indicano gli indici da cui partire e a cui arrivare (il sottoarray) per applicare il metodo "partition". Una volta ordinato il "pivot" attraverso il "partition", si richiama ricorsivamente settando come "low" e "high" la parte di quel sottoarray prima (low, pivot-1) e dopo (pivot+1, high) del pivot. Se "low" non è minore di "high", si interrompe la ricorsione.
+- **PARTITION**: la funzione "partition" riceve l'array, "low" e "high", quindi seleziona un pivot (ad esempio l'ultimo elemento del sottoarray, cioè "high") e cerca di posizionarlo nell'indice corretto all'interno di quel sottoarray. Lo fa con l'indice "i" (partendo da "low-1") che rappresenta dove sono i numeri più piccoli del pivot e un loop su "j", che scorre il sottoarray, che ogni volta che trova un numero più piccolo del pivot, incrementa "i" e fa swap dell'elemento trovato "j" mettendolo in posizione "i". La logica è "ho trovato uno più piccolo, quindi avanzo l'indice dei più piccoli e ci metto j". Alla fine del loop faccio swap del "pivot" con "i+1", cioè la posizione appena dopo il suo l'elemento più piccolo
 
 #### Complessità Computazionale
 
@@ -188,8 +195,8 @@ Si sfrutta il modulo 10 per avere l'unità; per avere la decina si fa valore/10 
 
 Questo algoritmo, è diviso in due parti:
 
-- Splitting: si divide in maniera ricorsiva l'array in 2 array più piccoli, prendendo l'indice a metà. Poi si ripete per il sotto array di destra e sinistra, fino ad ottenere array di dimesione 1
-- Merge: prende 2 array precedentemente splittati (left e right) e confronta i valori. Scorrendo entrambi da sinistra a destra, confronta i valori dei due, rimuove il valore più basso dal relativo sotto array e lo usa per popolare un array risultante che in questo modo sarà ordinato.
+- **Splitting**: si divide in maniera ricorsiva l'array in 2 array più piccoli, prendendo l'indice a metà. Poi si ripete per il sotto array di destra e sinistra, fino ad ottenere array di dimesione 1
+- **Merge**: prende 2 array precedentemente splittati (left e right) e confronta i valori. Scorrendo entrambi da sinistra a destra, confronta i valori dei due, rimuove il valore più basso dal relativo sotto array e lo usa per popolare un array risultante che in questo modo sarà ordinato.
 
 #### Complessità Computazionale
 

@@ -11,11 +11,15 @@ import { BinaryTree, BinaryTreeNode } from "./w3c/5-tree/binary-tree";
 import { Graph } from "./w3c/6-graphs/graph";
 import { WeightedGraph } from "./w3c/6-graphs/weighted-graph";
 
+/**
+ * https://www.w3schools.com/dsa/index.php
+ */
+
 // bubbleSort([29, 3, -12, 45, 1, -321, 22]);
 // bubbleSortW3C([29, 3, -12, 45, 1, -321, 22]);
 
 // bubbleSortW3C([7, 3, 9, 12, 11]);
-// countingSort([2, 4, 3, 2, 1, 1, 4]);
+countingSort([2, 4, 3, 2, 1, 1, 4]);
 // mergeSortW3C([12, 29, 3, 12, 45, 1, 321, 22]);
 
 // console.log("result", binarySearchW3C([1, 2, 3, 3, 7, 9, 10], 9));

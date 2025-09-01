@@ -39,9 +39,9 @@ export function countingSortW3C(arr: number[]): number[] {
   const maxVal = Math.max(...arr);
   const count = new Array(maxVal + 1).fill(0);
 
-  // Simulate pop(0): remove from the front and count occurrences
+  // Remove the last element from the array and increase count at value index
   while (arr.length > 0) {
-    const num = arr.shift()!; // 'shift' removes the first element
+    const num = arr.pop()!;
     count[num]++;
   }
 

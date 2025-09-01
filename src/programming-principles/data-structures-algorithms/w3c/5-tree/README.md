@@ -32,7 +32,7 @@ L'albero può avere queste caratteristiche:
 ### Struttura dati
 
 Solitamente la struttura dati utilizzata è la linked list, ma si possono usare anche gli array nel caso si necessiti di risparmiare memoria e di fare ricerche senza operazioni insert/delete.
-Sapendo che ogni nodo ha fino a 2 childern, si può fare un array [R, L1, R1, L1L2, L1R2, R1L2, R1L2,...]. Permette di accedere tramite l'indice, ma non è la scelta più comoda.
+Sapendo che ogni nodo ha fino a 2 children, si può fare un array [R, L1, R1, L1L2, L1R2, R1L2, R1L2,...]. Permette di accedere tramite l'indice, ma non è la scelta più comoda.
 
 ### Traversal
 
@@ -42,7 +42,7 @@ Al contrario delle linked list o degli array, l'operazione traverse che scorre i
   - risulta un elenco di nodi che parte dalla root e scorre il lato sinistro per risalire e fare il destro
 - **in-order**: si estrae il valore dopo aver chiamato la ricorsione del lato sinistro, ma prima del lato destro
   - risulta un elenco partendo dal dalla foglia più a sinistra e risalendo da sinistra
-  - molto utilie per ordinare in modo crescente il Binary Search Tree
+  - molto utile per ordinare in modo crescente il AVL-Tree (essendo una struttura già ordinata con un determinato criterio, questo algoritmo produce una lista ordinata)
 - **post-order**: si estrae il valore dopo aver chiamato sia la ricorsione del lato sinistro e che destro
   - risulta un elenco che prende prima le foglie e poi risale verso la radice
   - per questa ragione si usa per cancellare un tree

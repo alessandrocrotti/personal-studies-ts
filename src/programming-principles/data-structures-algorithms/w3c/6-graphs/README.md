@@ -13,13 +13,13 @@
 
 ## Descrizione
 
-Sono una struttura dati composta da un insieme di vertici "v" che possono essere connessi a da 0..v vertici.
+Sono una struttura dati non lineare composta da un insieme di vertici\nodi "v" che possono essere connessi tramite archi\edges a\da 0..v vertici (compreso se stesso).
 
 La rappresentazione di un grafo è dato da una matrice quadrata VxV in cui sia in altezza che in lunghezza sono rappresentati i vertici e i numeri nella matrice rappresentano le connessioni tra i vertici col loro peso.
 
 ## Tipi di grafi
 
-- **Pesati/Wieghted**: sugli archi che connettono i vertici del grafo sono definiti dei numeri (potenzalmente sia positivi che negativi), che rappresentano il peso del percorso da un vertice all'altro
+- **Pesati/Weighted**: sugli archi che connettono i vertici del grafo sono definiti dei numeri (potenzalmente sia positivi che negativi), che rappresentano il peso del percorso da un vertice all'altro
 - **Connesso/Connected**: tutti i vertici sono connessi tra di loro tramite archi, senza creare insiemi disgiungi irraggiungibili
 - **Direzionati/directed**: se un arco porta solo in una direzioni da un vertice ad un altro, altrimenti non direzionati/undirected se il percorso è bidirezionale
 - **Ciclici/cyclic**:
@@ -35,7 +35,7 @@ I grafi sono matrici VxV chiamata **Matrice di Adiacenza** con le seguenti carat
 - per i grafi non pesati, gli archi hanno valore 1
 - per i grafi non direzionati, la matrice risulterà simmetrica rispetto la diagonale "V"-"V"
 
-Raramente si può rappresentare un grafo come una **Lista di adiacenza**. Questa è utile in casi con molti vertici e pochi archi
+Raramente si può rappresentare un grafo come una **Lista di adiacenza**. Questa è utile in casi con molti vertici e pochi archi, visto che risulterebbe una matrice grande, ma quasi vuota. La **lista di adiacenza** è sostanzialmente un array di dimensione "v" dove ogni elemento è una lista dei vertici a cui è connesso. In caso di grafo pesato, sarà una lista di coppie [vertice, peso]. Raramente utilizzata perchè è più complicata, ma da tenere in considerazione in casi specifici.
 
 ## Traversal
 
@@ -43,9 +43,15 @@ L'operazione traverse non è cosi intuitiva per i grafi, in quanto non hanno un 
 
 Ci sono due tipi di traverse:
 
-- **Depth First Search Traversal (DFS)**: si crea una funzione ricorsiva a cui si passa un vertice e partendo dall'arco con peso minore, si richiama se stessa finchè ci sono vertici non ancora visitati disponibili
-  - Questo tipo di ricerca entra in ogni vertice prima di analizzare gli altri vertici collegati al vertice corrente. La struttura dati che concettualmente si usa è una stack in cui le funzioni ricorsive sono come delle azioni che vengono messe dentro alla stack e quando si eseguono, si parte dall'ultimo a ritroso per poi aggiungere nuove azioni alla stack,
-- **Breadth First Search Traversal (BFS)**: si crea una coda in cui si mettono tutti i vertici connessi al vertice corrente non ancora inseriti, poi si fa dequeue() per prendere il vertice successivo e aggiungere nuovi vertici. Si continua fino a che ci sono vertici nella queue
+- **Depth First Search Traversal (DFS)**: si crea una funzione ricorsiva a cui si passa un vertice e partendo dall'arco con peso minore, si richiama se stessa finchè ci sono vertici non ancora visitati disponibili:
+  - Si basa su un array "visited" di dimensione "v" con tutti valori false. Ogni volta che si entra in un vertice si mette "true" il relativo valore
+  - Questo tipo di ricerca entra in ogni vertice prima di analizzare gli altri vertici collegati al vertice corrente. La struttura dati che concettualmente si usa è una stack in cui il modo in cui le funzioni ricorsive vengono chiamate si comportano come le azioni "push" e "pop". Si popola la "stack" teorica aggiungendo nodi non visitati finchè si ce ne sono di connessi, poi a ritroso si va negli archi che non erano stati visitati.
+- **Breadth First Search Traversal (BFS)**: si basa su una funzione ricorsiva dove ogni vertice viene messo in una coda e poi visitato:
+  - si basa su un array "visited" di dimensione "v" con tutti valori false. Ogni volta che si entra in un vertice si mette "true" tutti i vertici adiacenti
+  - il vertice di partenza viene messo nella coda e viene messo a "true" il relativo indice in "visited"
+  - si fa un loop sulla queue finchè non si esaurisce
+    - si fa dequeue/shift dalla queue e si si verificano tutti i vertici adiacenti non ancora visitati e li si mettono nella queue
+    - avendoli messi nella queue, il loop prosegue prosegue ad analizzare e marcare come visitati i vari nodi finchè la coda non sarà vuota
 
 ## Verifica di un ciclo nel grafo
 
@@ -66,8 +72,9 @@ Questo algoritmo permette di trovare il percorso più breve per i **grafi con ar
 Sostanzialmente l'algoritmo si svolge in questo modo:
 
 - Si crea un array di vertici a cui assegneremo di volta in volta la loro distanza dal vertice di partenza. Inizializzato a tutti infinito, tranne il vertice di partenza che sarà 0
-- Partendo da un vertice, si guardano i vertici adiacenti e su quei vertici si mettere il peso dell'arco che porta dal vertice corrente a loro, se e solo se questo valore è minore del valore corrente su quel vertice
-- Si prosegue prendendo il vertice non visitato con valore più piccolo e si prosegue fino a che è possibile, perchè potrebbero esserci vertici non raggiungibili
+- Partendo da un vertice, si guardano i vertici adiacenti e su quei vertici si mette la somma "del peso del nodo corrente" + "il peso dell'arco che porta al vertice", se e solo se questo valore è minore del valore corrente su quel vertice.
+  - Queesto perchè è possibile raggiungere lo stesso nodo da percorsi diversi e si vuole tener memoria del valore più basso
+- Si prosegue prendendo il vertice non visitato con valore più piccolo fino a che è possibile, perchè potrebbero esserci vertici non raggiungibili
 
 Tramite una variante di questo algoritmo, si può anche determinare il percorso più breve da un vertice di partenza ad uno di destinazione, memorizzandosi tutto il percorso.
 
