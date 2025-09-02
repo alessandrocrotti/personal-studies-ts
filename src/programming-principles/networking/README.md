@@ -65,7 +65,8 @@ A questo punto la connessione è stata stabilita con successo e si possono trasm
   - Il certificato (che contiene sia la chiave pubblica che il dominio e tutti i dati di validità)
   - Un numero casuale proprio
 - Il client verifica il certificato del server (controlla sia quello giusto per il dominio, che sia firmato e valido)
-- Entrambi si scambiano una chiave pubbliche (tramite il concetto di chiave pubblica/privata) e generano una chiave di sessione condivisa tramite le parti pubbliche ricevute e la loro parte privata
+- Nel caso di navigazione HTTPS/TLS il client invia una stringa secreta criptata attraverso la chiave pubblica che il serve decripta con la sua chiave privata. Tramite quella stringa segreta, sia client che server riescono a generare una chiave di sessione simmetrica condivisa.
+- Nel caso di mTLS (mutual TLS) entrambi si scambiano le relative chiave pubbliche (tramite il concetto di chiave pubblica/privata) e generano una chiave di sessione condivisa tramite le parti pubbliche ricevute e la loro parte privata
   - C'è una versione avanzata di questo concetto, si chiama Elliptic Curve, che genera chiavi più robuste, sono temporanee e valgono per sessione, il sever può firmare i suoi parametri tramite il certificaqto
 - Ora tutti i dati vengono cifrati utilizzando la chiave condivisa
 
@@ -73,7 +74,7 @@ A questo punto la connessione è stata stabilita con successo e si possono trasm
 
 La richieste viene quindi inviata sulla connessione stabilita. Il server elabora la richiesta e costruisce la risposta. La risposta ha una struttura analoga, con Headers, Body e anche uno Status Code che permette al client di capire l'esito della request.
 
-** Chiusura della connessione**:
+**Chiusura della connessione**:
 
 - **Keep-Alive**: la connessione TCP/TLS rimane aperta dopo la risposta e viene riutilizzata
   - Il client/server possono usare un header `Connection: keep-alive` per indicarle di mantenere la connessione aperta
@@ -82,7 +83,7 @@ La richieste viene quindi inviata sulla connessione stabilita. Il server elabora
     - Quindi rende più veloce la comunicazione
   - Solitamnete è di default in _HTTP/1.1_
   - Si può comunque mettere un timeout o un numero massimo di request prima di chiuderla
-- **Cloed**
+- **Closed**
   - Il server può usare un header `Connection: closed` per indicarle di aver chiuso la connessione dopo che ha risposto
 
 ## Caching

@@ -32,7 +32,9 @@ I principi sono i seguenti:
 
 ## **S**ingle Responsibility Principle
 
-**Una classe deve avere una singola responsabilità, cioè una sola ragione per cambiare.** Cioè, si deve occupare di una cosa precisa e se quella precisa logica cambia allora è giusto che la classe sia modificata, ma se la modifica è riguardante ad una logica nello stesso contesto, ma non precisamente quella, allora la classe non dovrebbe essere coinvolta.
+**Una classe deve avere una singola responsabilità, cioè una sola ragione per cambiare.**
+
+Cioè, si deve occupare di una cosa precisa e se quella precisa logica cambia allora è giusto che la classe sia modificata, ma se la modifica è riguardante ad una logica nello stesso contesto, ma non precisamente quella, allora la classe non dovrebbe essere coinvolta.
 
 Questo significa che le classi devono avere competenze specifiche, anche quando sono inserite nello stesso contesto.
 Esempio:
@@ -142,9 +144,9 @@ Questo principio si può applicare anche alle funzioni, cercando di spezzarle in
 
 ## **O**pen-Closed Principle
 
-Questo principio indica che **una classe dovrebbe essere aperta all'estesione e chiusa alle modifiche**.
+**Una classe dovrebbe essere aperta all'estesione e chiusa alle modifiche**.
 
-Lo scopo è che la richiesta di una modifica non impatti sulla modifica delle classi esistenti. Piuttosto che inserire la modifica richiesta in una classe esistente, si dovrebbe estendere la classe esistente ed utilizzarla nel codice al posto della classe originale. Questo principio si basa sul **POLIMORFISMO** delle classi.In questo modo i test e il funzionamento originale non viene cambiato e si deve verificare solo che funziona ad alto livello la nuova classe.
+Lo scopo è che la richiesta di una modifica non impatti sulla modifica delle classi esistenti. Piuttosto che inserire la modifica richiesta in una classe esistente, si dovrebbe estendere la classe esistente ed utilizzarla nel codice al posto della classe originale. Questo principio si basa sul **POLIMORFISMO** delle classi. In questo modo i test e il funzionamento originale non viene cambiato e si deve verificare solo che funziona ad alto livello la nuova classe.
 
 Questo approccio evita i bug e permette di creare librerie riutilizzabili da altri progetti senza che questi progetti richiedano di modificare il codice originale
 
@@ -215,7 +217,9 @@ printCommission(account, 1000); // Commissione: €10.00
 
 ## **L**iskov Substitution Principle
 
-Questo principio indica che **una sottoclasse deve essere sempre utilizzata al posto di una sua superclasse**. Sostanzialmente se io chiami i metodi della superclasse, non devo avere delle eccezioni come UnsupportedOperationException o throw che non avrei chiamando tali metodi nella superclasse.
+**Deve essere sempre possibile utilizzare una sottoclasse al posto di una sua superclasse come se fosse la superclasse stessa**.
+
+Sostanzialmente se io chiamo i metodi della sottoclasse, non devo avere delle eccezioni come UnsupportedOperationException o throw che non avrei chiamando tali metodi nella superclasse.
 
 Inoltre è anche importante che una sottoclasse non aumenti le precondizioni e non diminiusca le postcondizioni:
 
@@ -269,7 +273,9 @@ class RettangoloConLog extends Rettangolo {
 
 ## **I**nterface Segregation Principle
 
-Lo scopo di questo principio è che **è meglio avere tante interfacce specifiche piuttosto che una interfaccia con tanti possibili metodi dichiarati**. L'obiettivo è quello di evitare di implementare una interfaccia per poi essere forzati a definire dei metodi che non verranno usati da quella classe, quindi mettendo delle eccezioni NotImplementedError.
+**Meglio avere tante interfacce specifiche piuttosto che una interfaccia con tanti possibili metodi dichiarati**.
+
+L'obiettivo è quello di evitare di implementare una interfaccia per poi essere forzati a definire dei metodi che non verranno usati da quella classe, quindi mettendo delle eccezioni NotImplementedError.
 I client (classi) non devono dipendere da intefacce che non utilizzano.
 
 Simile al punto precedente, questo principio permette di sapere esattamente cosa una classe può o non può fare. Utilizzando l'interfaccia ad alto livello nel codice, si potrà gestire meglio il codice.
@@ -348,7 +354,7 @@ class RobotWorker implements Worker {
 
 ## **D**ependency Inversion Principle
 
-Questo principio dice che una classe di alto livello non deve dipendere da classi di basso livello. Tutto deve dipendere da astrazioni. Le astrazioni non devono dipendere da dettagli di basso livello.
+**Una classe di alto livello non deve dipendere da classi di basso livello. Tutto deve dipendere da astrazioni. Le astrazioni non devono dipendere da dettagli di basso livello.**
 
 Sostanzialmente lo scopo è quello di utilizzare interfacce o classi astratte come variabili e parametri, in modo che in cascata io possa definire quale classe concreta uso in un certo contesto. Se definissi delle variabili come classi concrete, sarei strettamente legato a quelle e non potrei definirne delle altre versioni di quel tipo di classe per contesti diversi.
 

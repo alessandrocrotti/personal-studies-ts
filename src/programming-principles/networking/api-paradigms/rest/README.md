@@ -29,7 +29,7 @@ Principi:
 
 L'url deve essere significativo e preferibilmente scritto in **kebab-case**:
 
-- OPZIONALE: si puù includere una versione delle API
+- OPZIONALE: si può includere una versione delle API
   - `/v1`
 - Ogni risorsa usa il nome PLURALE in quanto a quel nome si compiono le operazioni generiche su tutte le istanze di quella risorsa
   - `/utenti`
@@ -47,15 +47,15 @@ Ogni HTTP Method ha uno scopo preciso nelle REST ed interagisce con la risorsa i
 
 Proprietà dei metodi:
 
-- IDEMPOTENZA: un metodo è idempotente se chiamandolo più volte, il risultato sul server non cambia. Può cambiare lo stato sul server. Questo non significa che il server non possa rispondere in modo diverso a 2 chiamate consecutive. Per esempio DELETE è idempotente, perchè una risorsa cancellata resta cancellata ad una seconda chiamata, ma il server risponderà in modo diverso se la risorsa non è più presente
-- SICURO: non cambia lo stato o i dati sul server
-- CACHABLE: la risposta può essere cachata
+- **IDEMPOTENZA**: un metodo è idempotente se chiamandolo più volte, il risultato sul server non cambia. Può cambiare lo stato sul server. Questo non significa che il server non possa rispondere in modo diverso a 2 chiamate consecutive. Per esempio DELETE è idempotente, perchè una risorsa cancellata resta cancellata ad una seconda chiamata, ma il server risponderà in modo diverso se la risorsa non è più presente
+- **SICURO**: non cambia lo stato o i dati sul server
+- **CACHABLE**: la risposta può essere cachata
 
 Funzionamento dei metodi:
 
 - **GET**:
   - Scopo: recuperare i dati di una risorsa
-  - IDEMPOTENTE: eseguendo più volte la request, non cambia lo stato sul server
+  - IDEMPOTENTE: eseguendo più volte la request, il risultato sul server non cambia
   - SICURO: Non modifica i dati sul server
   - CACHABILE: Si può cachare
 - **POST**:
@@ -63,8 +63,8 @@ Funzionamento dei metodi:
   - NON è IDEMPOTENTE: eseguendo più volte la request si possono creare duplicati o avere errori
 - **PUT**:
   - Scopo: aggiornare o sostituire completamente una risorsa. Quindi questo update rimuove i campi vuoti del body, visto che influenza tutte le proprietà della risorsa
-  - IDEMPOTENTE: eseguendo più volte la request, non cambia lo stato sul server e la risorsa viene riaggiornata sempre con lo stesso valore
     - Dettaglio importante: al contrario di POST, PUT avrà un url tipo `/api/deliveries/39660/` dove definisce nell'url l'id della risorsa e se quella risorsa non esiste, verrà creata con l'id scelto dal client
+  - IDEMPOTENTE: eseguendo più volte la request, non cambia lo stato sul server e la risorsa viene riaggiornata sempre con lo stesso valore
 - **PATCH**:
   - Scopo: aggiornare parte delle proprietà di una risorsa. Quindi se faccio un update, i campi vuoti non vengono influenzati.
   - NON è RICHIESTO CHE SIA IDEMPOTENTE: le regole non impongono che questo metodo sia idempotente, ma per sua natura molto spesso lo è. Comunque il client non si può aspettare che lo sia, quindi lo deve considerare NON IDEMPOTENTE
@@ -116,7 +116,7 @@ Svantaggi:
 
 - L'url non basta per sapere come chiamare il metodo, a volte serve anche il metodo, il body, eventuali header
 
-Per ovviare al problema di avere ogni dettaglio sulla chiamata da eseguire, devono usare delle strutture standard di descrizione delle operazioni possibili come **HAL-FORMS**, **Siren** o **JSON:API**. Inoltre l'utilizzo di Swagger/OpenAPI per documentare le API aiuta notevolmente la comprensione.
+Per ovviare al problema di avere ogni dettaglio sulla chiamata da eseguire, si devono usare delle strutture standard di descrizione delle operazioni possibili come **HAL-FORMS**, **Siren** o **JSON:API**. Inoltre l'utilizzo di Swagger/OpenAPI per documentare le API aiuta notevolmente la comprensione.
 
 **HAL-FORMS** e **Siren** strutturano i link per permettere di avere tutti i valori che servono per chiamare le operazioni.
 
@@ -205,7 +205,7 @@ Questo tipo di struttura è molto comune nelle API REST
 
 ## OpenAPI
 
-OpenAPI è lo standard per descrivere formalmente una API RESTFul in ogni sua forma.
+OpenAPI è lo standard per descrivere formalmente una API RESTFul in ogni sua forma. Inizialmente esisteva Swagger che è un insieme di tool per documentare le API RESTful, che è stata formalizzata nello standard OpenAPI.
 
 Tramite OpenAPI si può avere un OpenAPI Schema che permette di definire una struttura per descrivere in modo chiaro e leggibile un API RESTFul utilizzando JSON o YAML. Può essere utile per:
 

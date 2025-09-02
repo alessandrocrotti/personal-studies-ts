@@ -144,7 +144,7 @@ Il vantaggio è che è facilmente estendibile con nuove expression.
 Struttura:
 
 - Si crea una interfaccia con i metodi `next()` e `hasNext()`
-- Si applica classe che gestirà la collezione come iteratore. Questo oggetto conterrà i dati su cui scorrere, la posizione corrente e su questi potrà eseguire i metodi `next()` e `hasNext()`
+- Si applica alla classe che gestirà la collezione come iteratore. Questo oggetto conterrà i dati su cui scorrere, la posizione corrente e su questi potrà eseguire i metodi `next()` e `hasNext()`
 - Per redere più avanzato e disaccoppiato il contenuto dell'iterator dalla sua costruzione, si crea una interfaccia con metodo `createIterator()` che possa implementare la logica per restituire da una collezione un iteratore
 - Questa interfaccia si applica ad una classe separata dall'iteratore
 
