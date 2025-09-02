@@ -12,7 +12,7 @@
 
 ## Descrizione
 
-I pattern strutturali strutturare il codice e le relazioni tra classi e oggetti in modo da nascondere le complessità al client (cioè alla classe che chiama, solitamente tramite interfaccia) e gestirle a basso livello. Questi pattern non agiscono sul comportamento di un oggetto, ma possono strutturarlo in modo che il suo comportamento possa essere ampliato.
+I pattern strutturali servono a strutturare il codice e le relazioni tra classi e oggetti in modo da nascondere le complessità al client (cioè alla classe che chiama, solitamente tramite interfaccia) e gestirle a basso livello. Questi pattern non agiscono sul comportamento di un oggetto, ma possono strutturarlo in modo che il suo comportamento possa essere ampliato.
 
 ## Adapter
 
@@ -67,7 +67,7 @@ Ci sono vari contesti in cui può essere utile utilizzare un proxy:
 
 Utile per aggiungere una sovragestione ad un certo tipo di oggetto.
 
-**IMPORTANTE**: lo scopo del proxy non varia il comportamento dei metodi della classe originale, ma gestire l’accesso a essi. La logica aggiuntiva (come caching, logging, sicurezza) non altera il risultato o il significato del metodo. A differenza del Decorator, il Proxy non arricchisce il comportamento, ma lo incapsula. Inoltre, di solito si utilizza un solo Proxy per oggetto, e non si impilano più Proxy uno sopra l’altro, come invece accade spesso con i Decorator.
+**IMPORTANTE**: lo scopo del proxy non varia il comportamento dei metodi della classe originale, ma gestisce l’accesso a essi. La logica aggiuntiva (come caching, logging, sicurezza) non altera il risultato o il significato del metodo. A differenza del Decorator, il Proxy non arricchisce il comportamento, ma lo incapsula. Inoltre, di solito si utilizza un solo Proxy per oggetto, e non si impilano più Proxy uno sopra l’altro, come invece accade spesso con i Decorator.
 
 ## Flyweight
 
@@ -76,16 +76,18 @@ Utile per aggiungere una sovragestione ad un certo tipo di oggetto.
 Quando certe istanze possono essere riutilizzate in un certo contesto perchè hanno lo stesso stato intrinseco, si possono creare delle mappe di cache che, a fronte dello stesso stato intrinseco di un oggetto, l'istanza si crea se non esiste altrimenti si restituisce dalla cache se già creata precedentemente.
 Nei casi in cui ci sono milioni di istanze o tante istanze che si ripetono uguali, se non è necessario avere una diversa istanza per ogni caso, si può utilizzare questo pattern per risparmiare memoria.
 
-Questo concetto è utilizzato in parte nel contesto di ORM: quando richiamo uno stesso oggetto dal DB di cui non ho bisogno sia refreshato, recupero la sua istanza dal flyweight proxy e la riuso, piuttosto che avere molteplici istanze separate. Altri contesti in cui viene usato sono editor o grafica, dove ci sono molti elementi ripetuti.
+Per chiarire cosa si intende per "stesso stato intrinseco": un oggetto `{ "importo" : 100, "Valuta": "EUR" }` sarà sempre uguale ad un altro oggetto con le stesse proprietà, perchè è il set di valori che ne identifica lo stato. Inoltre se tali oggetti sono immutabili (cioè le proprietà sono readonly e assegnate solo al momento dell'istanzia) potranno essere riutilizzati e condivisi nel contesto del Flywieght. Al contrario, un oggetto `{ "id": 1, "name": "Alessandro" }` è identificata dall'id e non dal set di valori che può cambiare nel tempo, quindi rappresenta una identità propria. Si può vedere una analogia con i **Value Object** nel contesto del **Domain Driven Design** dove l'uguaglianza è basata sul contenuto e non sull'identità.
+
+Questo concetto è utilizzato in parte nel contesto di ORM: quando richiamo uno stesso oggetto dal DB di cui non ho bisogno sia refreshato, recupero la sua istanza dal flyweight factory e la riuso, piuttosto che avere molteplici istanze separate. Altri contesti in cui viene usato sono editor o grafica, dove ci sono molti elementi ripetuti.
 
 ## Facade
 
-**Permette di creare una "interfaccia" (classe) unificata e semplificata per nascondere l'insieme complesso di classi e funzionalità sottostanti."**
+**Permette di creare una "interfaccia" (classe) unificata e semplificata per nascondere l'insieme complesso di classi e funzionalità sottostanti.**
 
 **Concetti chiave**:
 
 - **Subsystems**: tutte le classi complesse che fanno il lavoro vero a basso livello
-- **Facate**: classe che espone dei metodi chiari e semplici per orchestrare il lavoro del basso livello
+- **Facade**: classe che espone dei metodi chiari e semplici per orchestrare il lavoro del basso livello
 - **Client**: classe o sistema che usa la Facade senza preoccuparsi del comportamento a basso livello
 
 Utile per disaccoppiare il client dai sistemi complessi sottostanti, semplificando l'utilizzo.
@@ -94,7 +96,9 @@ Può rischiare di crescere troppo come oggetto e di nascondere funzionalità dei
 
 ## Bridge
 
-**Ha lo scopo di separare l'astrazione dalla sua implementazione in modo che le due possano variare indipendentemente. Usando le interfacce e passando le implementazioni specifiche ai livelli di astrazione, si evita di creare classi specifiche per le varie combinazioni di implementazione possibili. Quindi, invece di legare rigidamente un’astrazione a una specifica implementazione tramite ereditarietà, il Bridge utilizza composizione: l’astrazione mantiene un riferimento a un oggetto implementatore, delegando a esso parte del comportamento.**
+**Ha lo scopo di separare l'astrazione dalla sua implementazione in modo che le due possano variare indipendentemente. Usando le interfacce e passando le implementazioni specifiche ai livelli di astrazione, si evita di creare classi specifiche per le varie combinazioni di implementazione possibili. Quindi, invece di legare rigidamente un’astrazione a una specifica implementazione tramite ereditarietà, il Bridge utilizza la "composizione" invece che l'ereditarietà: l’astrazione per mantiene un riferimento ad una interfaccia, delegando a essa parte del comportamento (che verrà definito dalla sua implementazione).**
+
+Cosa significa "composizione": avere nella classe astratta di alto livello una logica che è "composta" dai vari metodi dell'oggetto che gli viene passato tramite interfaccia. Quindi quando io chiami la logica di alto livello con una determinata implementazione di quella interfaccia, si ottiene il comportamento finale.
 
 Quando si hanno vari livelli di combinazione di oggetti e configurazioni, si potrebbero dover creare molte classi diverse che rappresentano quelle combinazioni. Per ovviare a questa proliferazione di classi, usando il bridge pattern si possono passare alle classi di alto livello, le classi di basso livello che fanno le operazioni.
 In questo modo, una classe di alto livello chiama le funzioni della specifica classe di basso livello che gli è stata passata.
@@ -116,6 +120,6 @@ Esempio:
 - **Decorator**: classe astratta che implementa Component e contiene un riferimento a un Component
 - **ConcreteDecorator**: aggiunge comportamenti specifici
 
-Utile per arricchire o comportamenti ad un oggetto esistente senza modificarlo. I decorator possono essere impilati per arricchire i comportamenti in maniera modulare.
+Utile per arricchire modificare il comportamento di un oggetto esistente senza modificarlo. I decorator possono essere impilati per arricchire i comportamenti in maniera modulare.
 
 **IMPORTANTE**: lo scopo di questo pattern è di arricchire o modificare il comportamento dell’oggetto originale; nonostante sembri simile al proxy pattern (perchè entrambi implementano la stessa interfaccia dell'oggetto che estendono), il Decorator interviene attivamente sul comportamento, mentre il Proxy si limita a controllare l’accesso.

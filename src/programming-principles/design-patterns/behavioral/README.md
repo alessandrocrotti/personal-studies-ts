@@ -34,7 +34,7 @@ Esempio di una preparazione di una bevanda:
 
 **Quando molti oggetti devono interagire tra loro, invece di interagire direttamente, si creà una classe intermedia che si occupa della comunicazione tra gli oggetti**
 
-In questo modo si sposta la complessità dai singoli oggetti, delegandola ad un oggetto il cui scopo è specifico. I riducono le dipendenze dirette tra gli oggetti, centralizzando e disaccoppiando le logiche di comunicazione nell'oggetto mediatore che ha il ruolo di orchestratore.
+In questo modo si sposta la complessità dai singoli oggetti, delegandola ad un oggetto il cui scopo è specifico. Si riducono le dipendenze dirette tra gli oggetti, centralizzando e disaccoppiando le logiche di comunicazione nell'oggetto mediatore che ha il ruolo di orchestratore.
 
 Esempio classico, la chat:
 
@@ -95,16 +95,16 @@ Un esempio può essere che strategia di pagamento utilizzare:
 
 Questa struttura disaccoppia le parti in cui:
 
-- **Receiver**: si occupa solamente di avere le logiche generiche di esecuzione a basso livello
+- **Receiver**: contiene le logiche generiche di esecuzione a basso livello che verranno richiamate dai command
+- **Command**: ogni command riceve il receiver, in quanto vero contenitore delle logiche; hanno un metodo `execute()` che usando il Receiver con opportuni parametri esegue le logiche specifiche di un comando
 - **Invoker**: si occupa di gestire/raccogliere e richiedere di eseguire i comandi, senza sapere cosa faranno di specifico. Questo puù gestire anche la lista di command, fare l'undo, metterli in coda
-- **Command**: hanno un metodo `execute()` che appoggiandosi al Receiver definisce le logiche specifiche di esecuzione si un comando
-- **Client**: crea i comandi, li configura e li passa all'invoker
+- **Client**: crea i comandi, li configura e li passa all'invoker, chiedendo di eseguirli o di fare undo
 
 Quindi si struttura in questo modo:
 
 - Creo un command che ha il receiver come parametro.
 - Ogni command usa il receiver per definire cosa fa il metodo `execute()`
-- Creo l'invoker e lo uso per ricevere e richiedo di eseguire un command: nel momento che chiamo `execute()` dell'invoker, questo chiamerà in cascata `execute()` del comando
+- Creo l'invoker e lo uso per ricevere e richiedo di eseguire un command: nel momento che chiamo `execute()` dell'invoker, questo chiamerà in cascata `execute()` del comando che a sua volta chiamerà il metodo del receiver con gli opportuni parametri
 
 ## State
 
@@ -115,6 +115,7 @@ Permette di gestire una classe contesto come una macchina a stati finiti:
 - Ogni stato definisce come funzioneranno i metodi del contesto
 - Il contesto inizia con un certo stato interno
 - I metodi del contesto che ha assunto un certo stato interno possono eseguire le logiche specifiche determinate dallo stato interno stesso. Il metodo che si esegue può anche cambiare lo stato interno ad uno stato successivo, cambiando automaticamente anche il comportamento stesso del contesto
+  - Non è detto che ogni stato possa eseguire ogni metodo del contesto, anzi, è possibile che solo un sottoinsieme di metodi siano accettabili a seconda dello stato e gli altri restituiscano un errore o un informazione che quel metodo non è utilizzabile per lo stato corrente
 - In questo modo si evitano eventuali catene di ifelse o switch che gestiscono le casistiche
 
 Normalmente il cambio di stato interno è determinato dai metodi stessi di ogni stato, ma volendo è possibile gestirlo gestirlo manualmente da fuori. In tal caso gli stati non avrebbero bisogno del contesto stesso come parametro perchè sarebbero semplicemente delle ridefinizioni dei metodi del contesto senza interazioni con esse (come era invece l'avanzamento di stato nel contesto dopo l'esecuzione di un certo metodo)
@@ -128,7 +129,7 @@ In questo modo si ha un comportamento modulare, estendibile con nuovi stati.
 Struttura:
 
 - si creano una interfaccia `Interpreter` con il metodo `interpret` da utilizzare in tutte le espressioni
-- Ci sono le TerminalExpression che rappresentano un simbolo atomico della grammatica che non puà essere scomposto, come un carattere, un numero o un booleano
+- Ci sono le TerminalExpression che rappresentano un simbolo atomico della grammatica che non può essere scomposto, come un carattere, un numero o un booleano
 - Ci sono le NonTerminalExpression che sono combinazioni di TerminalExpression, come gli operatori logici "AND", "OR", ma anche delle operazioni come "ADD" o "SUB"
 - Le TerminalExpression sono le foglie dell'albero sintattico, mentre le NonTerminalExpression sono i nodi interni di quell'albero
 - Componendo le expression si può ottenere un risultato come se fosse un linguaggio
@@ -138,7 +139,7 @@ Il vantaggio è che è facilmente estendibile con nuove expression.
 
 ## Iterator
 
-**consente di accedere sequenzialmente agli elementi di una collezione (lista, albero, set, ecc.) senza esporne la struttura interna. Il pattern definisce un oggetto iteratore separato che incapsula la logica di attraversamento, permettendo di iterare su collezioni diverse in modo uniforme e indipendente dalla loro implementazione.**
+**Consente di accedere sequenzialmente agli elementi di una collezione (lista, albero, set, ecc.) senza esporne la struttura interna. Il pattern definisce un oggetto iteratore separato che incapsula la logica di attraversamento, permettendo di iterare su collezioni diverse in modo uniforme e indipendente dalla loro implementazione.**
 
 Struttura:
 
