@@ -14,23 +14,28 @@
 function partition(array: number[], low: number, high: number): number {
   console.log("partition", array, "low", low, "high", high);
   const pivot = array[high];
-  let i = low - 1;
+  // Indice degli elementi più piccoli del pivot
+  let i = low;
 
   console.log("partition before for", "pivot", pivot, "i", i);
 
+  // Scorriamo tutti gli elementi tranne il pivot (high)
   for (let j = low; j < high; j++) {
     console.log("partition in for", "i", i, "j", j, "array[j]", array[j], "Pivot", pivot);
     if (array[j] <= pivot) {
-      i++;
+      // Se l'elemento corrente è più piccolo o uguale al pivot, scambialo con l'elemento all'indice i (anche se j e i sono uguali)
       console.log("partition", "i", i, "j", j);
       [array[i], array[j]] = [array[j], array[i]];
+      // Incrementa l'indice degli elementi più piccoli del pivot per il prossimo elemento
+      i++;
     }
     console.log("partition resulting arr", array);
   }
 
-  [array[i + 1], array[high]] = [array[high], array[i + 1]];
+  // Scambia il pivot con l'elemento all'indice i, mettendo il pivot nella sua posizione corretta
+  [array[i], array[high]] = [array[high], array[i]];
   console.log("partition final resulting arr", array);
-  return i + 1;
+  return i;
 }
 
 export function quickSortW3C(array: number[], low = 0, high = array.length - 1): number[] {

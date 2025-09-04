@@ -7,7 +7,7 @@
     - [HTTP Methods](#http-methods)
   - [Principio HATEOAS](#principio-hateoas)
     - [JSON:API](#jsonapi)
-  - [OpenAPI](#openapi)
+  - [OpenAPI/Swagger](#openapiswagger)
 
 ## Descrizione
 
@@ -203,13 +203,16 @@ Questo tipo di struttura è molto comune nelle API REST
 - included contiene le risorse correlate in modo “embedded” per ridurre le chiamate HTTP
 - links aiuta il client a navigare tra le risorse, rendendo l'API scoperta dinamicamente
 
-## OpenAPI
+## OpenAPI/Swagger
 
-OpenAPI è lo standard per descrivere formalmente una API RESTFul in ogni sua forma. Inizialmente esisteva Swagger che è un insieme di tool per documentare le API RESTful, che è stata formalizzata nello standard OpenAPI.
+OpenAPI è lo standard per descrivere formalmente una API RESTFul in ogni sua forma. Inizialmente esisteva Swagger che è un insieme di tool per documentare le API RESTful, che è stata formalizzata nello standard OpenAPI. Sostanzialmente si bassa su uno YAML o JSON che descrive tramite vari attributi codificati una API. Ci sono 2 versioni:
 
-Tramite OpenAPI si può avere un OpenAPI Schema che permette di definire una struttura per descrivere in modo chiaro e leggibile un API RESTFul utilizzando JSON o YAML. Può essere utile per:
+- 3.0.0: ancora ampiamente utilizzata perchè non tutti i tool hanno introdotto la nuova versione; ha uno schema più semplice e non gestisce alcuni componenti come i WebHook, ma ancora una scelta valida
+- 3.1.0: nuova versione che permette di usare if/then/else, descrivere WebHook e ha alcune migliorie nella struttura
 
-- Generare documentazione automatica (SwaggerUI)
-- Validare request e response
-- Generare automaticamente client/server in vari linguaggi
-- Testare l'API
+Utilizzando Swagger come tool, tramite annotation e commenti al codice, si può avere una pagina del proprio sito (/api-docs per esempio) che descrive le API automaticamente dal codice. Ci sono framework più raffinati che permettono di definire con varie annotation gli elementi dello YAML o altri più basilari che ti permettono di mettere in un commento all'api lo YAML che verrà usato dalla SwaggerUI per visualizzare la documentazione.
+
+Alcune implementazioni:
+
+- Express: `pnpm add swagger-ui-express swagger-jsdoc --save-dev @types/swagger-jsdoc @types/swagger-ui-express`
+- Fastify: `pnpm add @fastify/swagger @fastify/swagger-ui`

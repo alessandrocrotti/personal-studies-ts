@@ -58,7 +58,7 @@ Molte richieste al server tramite uno stream restituiscono una sola risposta.
 
 Configurazione nel file `.proto`: `rpc FOO (stream Req) returns (Res);`
 
-**Caso d'uso**: il client manda numerosi messaggi e il server risponde alla fine con il riepilogo o la conferma, comune un app che invia una serie di log o un sensore che invia una serie di valori.
+**Caso d'uso**: il client manda numerosi messaggi e il server risponde alla fine con il riepilogo o la conferma, comune in un app che invia una serie di log o un sensore che invia una serie di valori.
 
 Utile per ridurre l'overhead quando si inviano tanti dati di input.
 
@@ -76,7 +76,7 @@ Utile per i giochi multiplayer, trading, editing collaborativo
 
 ## Struttura in un progetto
 
-Considerando che i file `.proto` sono in comune e generano sia il codice per il server che per il client, ci vuole una strategia per non duplicare il codice. La scelta migliore è quella di creare un repo dedicato ai `proto` (unico per tutti i team o uno per microservizio) in cui si mettono i `.proto` e si genera il codice tramite CD/CI creando un package per ogni linguaggio che necessita di questo gRPC. Ci dovrebbe essere una logica di versionamento ed eventuali logiche di accesso alle cartelle del repo per team.
+Considerando che i file `.proto` sono in comune e generano sia il codice per il server che per il client, ci vuole una strategia per non duplicare il codice. La scelta migliore è quella di creare un repo dedicato ai `proto` (unico per tutti i team o uno per microservizio) in cui si mettono i `.proto` e si genera il codice tramite CI/CD creando un package per ogni linguaggio che necessita di questo gRPC. Ci dovrebbe essere una logica di versionamento ed eventuali logiche di accesso alle cartelle del repo per team.
 
 In questo modo, ogni progetto, sia client che server, dovrà importare il package senza duplicare codice.
 

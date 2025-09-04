@@ -1,7 +1,7 @@
 version: v2
 plugins:
   - remote: buf.build/community/stephenh-ts-proto
-    out: ./src/networking/api-paradigms/grpc/generated
+    out: ./src/programming-principles/networking/api-paradigms/grpc/generated
     opt:
       - esModuleInterop=true
       - forceLong=string
@@ -9,4 +9,4 @@ plugins:
       - env=node
       - outputServices=grpc-js
 inputs:
-  - directory: ./src/networking/api-paradigms/grpc/protos
+  - directory: ./src/programming-principles/networking/api-paradigms/grpc/protos

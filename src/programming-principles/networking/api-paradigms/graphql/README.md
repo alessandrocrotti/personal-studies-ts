@@ -4,7 +4,7 @@
 
 ## Descrizione
 
-Le GraphQL sono una struttura API che permette di chiamare un singolo endpoint e, tramite un body con delle query, richiedere dei dati al server. Le query permettono di chiedere al server esattamente i dati che servono, in modo da evitare un over-fetching o under-fetching.
+Le GraphQL sono una struttura API che permette di chiamare un endpoint tramite un body con una "query" per richiedere dati al server. Le query permettono di chiedere al server esattamente i dati che servono, in modo da evitare un over-fetching o under-fetching.
 Oltre che le query, si possono fare anche mutation che permettono di modificare i dati e subscription che permettono di ricevere in tempo reale degli aggiornamenti.
 
 Si tratta di un paradigma centrato sul client e sulla possibilità che esso abbia il massimo controllo sui dati che deve ricevere.
@@ -27,7 +27,7 @@ Normalmente un microservizio espone un singolo server GraphQL che gestisce le op
 
 ### Apollo Federation
 
-Oltre ai singoli server GraphQL esiste anche una versione di Apollo che si chiama Apollo Federation che fa da orchestrator per vari server GraphQL di vari microservizi. Questi in gergo vengono chiamati _subgraph_ e devono esportare in GraphQL compatibile con Federation.
+Oltre ai singoli server GraphQL esiste anche una versione di Apollo che si chiama Apollo Federation che fa da orchestrator per vari server GraphQL di vari microservizi. Questi in gergo vengono chiamati _subgraph_ e devono esportare un GraphQL compatibile con Federation.
 Grazie a dei connector può anche orchestare servizi REST come se fossero GraphQL
 
 Questo permette di avere un layer al di sopra di tutti i microservizi, con cui il client si interfaccia.
@@ -47,7 +47,7 @@ In produzione questo da diversi vantaggi:
 
 - Performance migliori, per meno payload inviato
 - Caching delle query via GET tramite CDN
-  - Invece di inviare l'hash in POST come si fa normalmente con GraphQL, si può mandare l'hash ne querystring in modo che la CDN possa cachare la request. Questo vale per le query, non le mutation che rimangono via POST.
+  - Invece di inviare l'hash in POST come si fa normalmente con GraphQL, si può mandare l'hash nel querystring in modo che la CDN possa cachare la request. Questo vale per le query, non le mutation che rimangono via POST.
   - Importante essere consapevoli che anche le variable devono essere passate nel queryparams, essendoci un limite nella lunghezza è meglio utilizzare le GET con variable contenute e query semplici
 - Sicurezza che solo le query pre-approvate vengono eseguite
   - Invece di ricevere automaticamente l'hash dal client, si può determinare manualmente la list di hash lato server come se fosse un whitelisting delle query approvate
@@ -55,11 +55,17 @@ In produzione questo da diversi vantaggi:
 
 ## Quickstart: Apollo GraphQL Server & Client
 
-La configurazione è stata aggiunta anche a `src/index.ts` e può essere eseguita anche tramite `pnpm dev`
+Si può avviare server e client in con:
+
+```shell
+pnpm dev:graphql
+```
 
 ### 1. Avviare il server GraphQL
 
-```bash
+Alternativamente si può con questo comando lanciare il server da solo:
+
+```shell
 pnpm ts-node src/networking/api-paradigms/graphql/server.ts
 ```
 
@@ -80,9 +86,9 @@ Il server sarà disponibile su `http://localhost:4000/graphql`.
 
 ### 3. Eseguire il client GraphQL
 
-Assicurati che il server sia in esecuzione, poi:
+Assicurati che il server sia in esecuzione, poi per eseguire delle chiamate client:
 
-```bash
+```shell
 pnpm ts-node src/networking/api-paradigms/graphql/client.ts
 ```
 

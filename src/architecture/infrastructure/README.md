@@ -18,9 +18,9 @@ Argomenti inerenti a come si struttura una architettura a livello di infrastrutt
 
 Principio di automazione del ciclo di vita di una applicazione:
 
-- Continuous Integration: quando il codice viene mergiato in **main** il codice viene buildato e vengono eseguiti i test automatici (unit test). Questo verifica che le nuove modifiche non causino problemi
-- Continuous Delivery: dopo aver passato lo step precedente, si prepara il codice per l'installazione e lo si installa su un ambiente di Test/Staging. A questo livello si fanno ulteriori test automatici (E2E e Performance). L'obiettivo è quello di aver preparato il codice per l'installazione in prod agevolmente, ma tramite una approvazione manuale
-- Continuous Deployment: dopo aver passato lo step precedente, automaticamente si deploaya il codice in produzione
+- **Continuous Integration**: quando il codice viene mergiato in **main**, viene automaticamente buildato e vengono eseguiti i test automatici (unit test). Questo verifica che le nuove modifiche non causino problemi
+- **Continuous Delivery**: dopo aver passato lo step precedente, si prepara il codice per l'installazione e lo si installa su un ambiente di Test/Staging. A questo livello si fanno ulteriori test automatici (E2E e Performance). L'obiettivo è quello di aver preparato il codice per poterlo installare in prod agevolmente, ma tramite una approvazione manuale e non automatica (in quanto prod è un ambiente delicato)
+- **Continuous Deployment**: dopo aver passato lo step precedente, automaticamente si fa il deploy del codice in produzione
 
 ### Strategie di deployment in produzione
 
@@ -39,7 +39,7 @@ Principio di automazione del ciclo di vita di una applicazione:
 - Prepari e testi Green mentre Blue è ancora funzionante in parallelo
 - Quando tutto è pronto su Green, switchi il traffico da Blue a Green
 - Se ci sono problemi puoi riportare il traffico su Blue per fare il rollback
-- Se l'applicazione è su Kubernetes, non è necessario creare 2 cluster, ma creare nuovi pod con delle label dedicate e usare il label selector del service relativo all'applicazione per passare da una applicazione all'altra
+- Se l'applicazione è su Kubernetes, non è necessario creare 2 cluster, ma puoi creare nuovi pod con delle label dedicate e usare la label selector del service relativo all'applicazione per passare da una applicazione all'altra
 - Vantaggi
   - Rilascio e rollback immediato
 - Limiti
@@ -53,7 +53,7 @@ Principio di automazione del ciclo di vita di una applicazione:
 - aumenti gradatamente il traffico fino al 100%
 - In caso di problemi fermi e ripristini il traffico alla versione precedente
 - Vantaggi
-  - Bug impattano su pochi utenti
+  - I bug impattano su pochi utenti
   - Feedback dal traffico reale immediato
 - Limiti
   - Processo più lungo e complesso in quanto devi gestire percentuali di pod che vengono eseguite per la nuova release insieme alla vecchia

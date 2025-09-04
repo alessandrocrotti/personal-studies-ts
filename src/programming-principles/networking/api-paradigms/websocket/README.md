@@ -25,7 +25,7 @@ La logica di base è ad eventi, in modo che alla connessione/ricezione di un mes
 - **Server-Driven (pub/sub)**:
   - Il server invia in broadcast degli eventi ai client che si sono connessi
   - I client possono connettersi per ricevere certi tipi di messaggi (subscription), in modo che il server implementi una logica di filtro
-  - Il server, per qualsiasi ragione, deve mandare una notifica. Le notifiche possono essere generati da cambi di stato nel server causati da altre logiche di backend come: notifiche di altri microservizi, messaggi da Kafka/RabbitMQ, cambi di stato sul db, valore di un sensore che viene mandato regolarmento o ad ogni cambio di stato
+  - Il server, per qualsiasi ragione, deve mandare una notifica. Le notifiche possono essere generate da cambi di stato nel server causati da altre logiche di backend come: notifiche di altri microservizi, messaggi da Kafka/RabbitMQ, cambi di stato sul db, valore di un sensore che viene mandato regolarmente o ad ogni cambio di stato
   - Questa notifica sarà relativa ad una subscription e solo i client che hanno richiesto i messaggi per questa subscription riceveranno il messaggio
   - Il server quindi deve avere una mappa che associa ad ogni client connesso la lista di subscription richieste
 - **Client-Driven (request/response)** :

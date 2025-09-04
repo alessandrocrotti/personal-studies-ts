@@ -2,7 +2,7 @@
 
 - [Software Architecture](#software-architecture)
   - [Descrizione](#descrizione)
-  - [Architetture software e infrastracture](#architetture-software-e-infrastracture)
+  - [Architetture software](#architetture-software)
     - [N-Tier / Layer](#n-tier--layer)
     - [Web-Queue-Worker](#web-queue-worker)
     - [Event-Driven](#event-driven)
@@ -10,13 +10,19 @@
     - [Big Compute](#big-compute)
     - [Microservizi](#microservizi)
       - [Progettazione dei microservizi](#progettazione-dei-microservizi)
-        - [Comunicazione asicrona](#comunicazione-asicrona)
-        - [Service Mesh](#service-mesh)
-        - [API Design](#api-design)
-        - [API Versioning](#api-versioning)
-        - [Operazioni Idempotenti](#operazioni-idempotenti)
-        - [Gestione dei dati](#gestione-dei-dati)
-        - [Container orchestration](#container-orchestration)
+      - [Comunicazione asicrona](#comunicazione-asicrona)
+      - [Service Mesh](#service-mesh)
+      - [API Design](#api-design)
+      - [API Versioning](#api-versioning)
+      - [Operazioni Idempotenti](#operazioni-idempotenti)
+      - [Gestione dei dati](#gestione-dei-dati)
+      - [Container orchestration](#container-orchestration)
+    - [CQRS (Command Query Responsability Segregation) e Event Sourcing](#cqrs-command-query-responsability-segregation-e-event-sourcing)
+      - [CQRS](#cqrs)
+      - [Event Sourcing](#event-sourcing)
+        - [CQRS + Event Sourcing](#cqrs--event-sourcing)
+    - [Event-Driven Architecture](#event-driven-architecture)
+      - [Event-Carried State Transfer VS Notification Event](#event-carried-state-transfer-vs-notification-event)
   - [Metodologie](#metodologie)
     - [Domain Driven Design (DDD)](#domain-driven-design-ddd)
       - [Strategic DDD](#strategic-ddd)
@@ -26,7 +32,7 @@
 
 Le software architecture sono quelle strutture che servono a gestire l'operatività dell'applicazione, che può coinvolgere indirettamente l'architettura, ma comunque si parla di come il software interagisce coi suoi componenti per funzionare. Non si parla solamente di come sviluppare il codice, ma la struttura intera dell'applicazione, senza occuparsi di come verrà gestita nell'infrastruttura.
 
-## Architetture software e infrastracture
+## Architetture software
 
 Descrive alcuni pattern per creare architetture software su Cloud Platform a livello di infrastruttura. [Azure Architecture Styles](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/) è un buon link per vedere questi pattern.
 
@@ -66,7 +72,7 @@ Questo pattern ha il vantaggio di riuscire a utilizzare tutti dei Managed Servic
 Ha i seguenti livelli:
 
 - Web: il Web Front End dell'applicazione che gestisce la parte di Web App o Static Web App
-- Queue: il Front End riceve dal client una operazione da eseguire, quindi genera e manda un messaggio alla coda che verrà utilizzato dal worker
+- Queue: il Front End riceve dal client una operazione da eseguire, quindi genera e manda un messaggio alla coda che verrà utilizzata dal worker
 - Worker: applicazione che consuma i messaggi della Queue ed effettua le operazioni richieste
 - Componenti aggiuntivi:
   - Database: sia Frontend che Worker possono comunicare col Database
@@ -109,7 +115,7 @@ La struttura a microservizi spezzetta una struttura monolitica in servizi piccol
 
 Componenti:
 
-- **Management or orchestration**: gestisce il deploy, lo scaling e il riavvio dei microservizi sui nodi. Normalmente si può usare Kubernetes ma ci sono anche componenti Cloud-Native analoghi
+- **Management / orchestration**: gestisce il deploy, lo scaling e il riavvio dei microservizi sui nodi. Normalmente si può usare Kubernetes ma ci sono anche componenti Cloud-Native analoghi
 - **API gateway**: entrypoint per i servizi invece di chiamare i servizi direttamente, poi lui si occupa di inoltrare la chiamata al backend service corretto. Si occupa di authentication, logging e load balancing. Normalmente si usa NGINX.
 - **Message-oriented middleware**: strumenti come Apache Kafka o Azure Service Bus (o altri AMQP broker) si occupano di gestire la comunicazione asincrona e real time tra servizi per gestire l'event-driven architecture. Il concetto di real-time è sostanzialmente dato dal fatto che c'è bassa latenza tra il producer che mette il messaggio e il consumer che lo processa.
 - **Observability**: centralizza i log e la diagnostica dell'intero sistema. Si possono verificare le performance e tracciare le request attraverso i servizi verificando gli eventuali rallentamenti. Lo standard è Open Telemetry.
@@ -132,7 +138,7 @@ Complessità:
 - Troppa flessibilità può portare al caos, con microservizi implementati con tecnologie e approcci totalmente diversi, meglio imporre delle regole per creare uno standard comune
 - Gestione della rete: ci sono molte più comunicazioni di rete che devono essere gestite e possono creare latenza. Bisogna cercare di utilizzare le code il più possibile ed non avere catene di servizi dipendenti troppo lunge per evitare congestioni nella rete
 - Integrità dei dati: essendo ogni servizio indipendente anche dal punto di vista dei dati, quando uno stesso dato deve persistere su più microservizi non si può agevolmente gestire questa come una operazione atomica, ma si deve tollerare un periodo di disallineamento del dato. Tramite l'event-driven architecture poi questo disallineamento verrà allineato consumando il messaggio.
-  - Si può applicare il pattern **SAGA** che ad ogni ti po di azione deve prevedere una azione di compensazione che possa annullare la precedente in caso di fallimento (esempio: un evento OrderCreated compensato da CancelOrder oppure un pagamento andato a buon fine con un evento PaymentProcessed compensato da un evento RefundPayment). Questo significa che ad ogni passo, se un intero processo dovrebbe completarsi insieme ma fallisce ad un certo step, vengono lanciati gli eventi compensativi degli step già effettuati.
+  - Si può applicare il pattern **SAGA** che ad ogni azione deve prevedere una azione di compensazione che possa annullare la precedente in caso di fallimento (esempio: un evento OrderCreated compensato da CancelOrder oppure un pagamento andato a buon fine con un evento PaymentProcessed compensato da un evento RefundPayment). Questo significa che ad ogni passo, se un intero processo dovrebbe completarsi insieme ma fallisce ad un certo step, vengono lanciati gli eventi compensativi degli step già effettuati.
 - Gestione DevOps articolata e consapevole
 - Versionamento: ogni nuova release di un servizio deve essere versionata per evitare di rompere dei servizi che lo utilizzano. Questi servizi dipendenti aggiorneranno la versione usata nel momento in cui saranno pronti
 - Richiede capacità avanzate per tutti i membri del team
@@ -140,13 +146,13 @@ Complessità:
 Best Practices:
 
 - Usare il DomainDrivenDesign per definire i confini di un service, ma evitare di creare troppi microservizi inutilmente piccoli che aumenterebbero la complessità e ridurrebbero le performance
-- Decentralizzare ogni aspetto, i team non devono essere totalmente indipendentim sia come codice che come schemi
+- Decentralizzare ogni aspetto, i team devono essere totalmente indipendenti sia come codice che come schemi
 - Crea delle regole standard di approccio comuni per tutti i microservizi, come logging, monitoring, deployment, e limita il numero di tecnologie diverse
 - I data storage devono essere privati di ogni service
 - Le API con cui comunica un microservizio devono essere rappresentative del contesto di quel dominio e non della sua struttura interna (per esempio, non devi usare per forza gli stessi nomi di oggetti nelle API e internamente, ma devono essere chiari all'esterno per gli altri)
 - Utilizza il mutual TLS/SSL per la comunicazione tra microservizi per aumentare la sicurezza, dove sia client che server si devono autenticare via certificato. Può sembrare inutile in una rete interna, ma serve ad aumentare la sicurezza in casi di container compromessi, utilizzo di ambienti DEV e PROD nella stessa rete o utilizzo di più tenant rappresentanti clienti diversi insieme
 - Utilizza il gateway per tutte le operazioni comuni e trasversali ai vari service (come l'authentication)
-- Il gateway però non deve contenere alcuna business logic, al contrario dei microservizi, altrimenti avrebbe una dipendnza che potrebbe causare la perdita di indipendenza
+- Il gateway però non deve contenere alcuna business logic, al contrario dei microservizi, altrimenti avrebbe una dipendenza che potrebbe causare la perdita di indipendenza del componente stesso
 - I servizi dovrebbero avere un accoppiamento debole. Se delle funzioni di due microservizi richiedono di essere modificate e installate insieme, significa che c'è un accoppiamento forte ed è sbagliato
 - Usare CI/CD per testare e deployare un servizio
 - Utilizzare la Chaos Engineering per verificare la stabilità dell'applicazione: consiste nell'introdurre errori o rallentamenti controllati e mirati in alcuni componenti per vedere come gli altri reagiscono ed eventualmente testare meccaniche di fallback, retry, circuit breaker.
@@ -160,13 +166,13 @@ Antipattern nei microservizi:
 - Evitare di fare messaggi generici dove il client deve andare a verificare se è di sua competenza, ma piuttosto creare dei messaggi dedicati che il client può interpretare più facilmente
 - Generalmente fare una libreria comune condivisa con i microservizi è un antipattern: lega all'utilizzo di una stessa tecnologia, se contiene business logic, quando questa cambia si devono aggiornare contemporaneamente tutti i servizi (la business logic deve stare nel suo domain e non in uno common). Si può fare una libreria comune se questa è di sole utilità e non business logic
 - Usare un API Gateway invece di raggiungere i singoli microservizi direttamente, sia dall'interno che dall'esterno del cluster
-- Gestire le configurazione all'esterno del microservizio per renderlo più flessibile e non all'interno (evitare file interni o valori hard-coded ma passare variabili d'ambiente)
+- Evitare configurazioni interne al microservizio, ma invece gestirle all'esterno per renderlo più flessibile (evitare file interni o valori hard-coded ma passare variabili d'ambiente)
 - Evitare di avere logiche di validazione e sicurezza in ogni microservizio, invece è meglio avere un componente dedicato (esempio, l'API Gateway che controlla e valida il JWT e aggiunge i dati come header alle chiamate dirette nei singoli microservizi sottostanti)
-- Evitare di replicare operazioni astratte comuni nei microservizi: separare l'astrazione dell'infrastrutturo dalla business logic e gestire l'astrazione dell'infrastruttura tramite framework come **Dapr**. Nella pratica, se vuoi inviare messaggi ad un broker di code, se usi Dapr hai una unica interfaccia tramite API indipendentemente dal provider (RabbitMQ, Kafka, Azure Service Bus), il provider viene configurato su Dapr che fa da layer intermedio rendendo la tua applicazione indipendente dalla tecnologia e dai relativi cambiamenti. Sostanzialmente Dapr è un sidecar container che gira insieme a quello dell'applicazione per gestire tutte queste interazioni astratte infrastrutturali
+- Evitare di replicare operazioni astratte comuni nei microservizi: separare l'astrazione dell'infrastruttura dalla business logic e gestire l'astrazione dell'infrastruttura tramite framework come **Dapr**. Nella pratica, se vuoi inviare messaggi ad un broker di code, se usi Dapr hai una unica interfaccia tramite API indipendentemente dal provider (RabbitMQ, Kafka, Azure Service Bus), il provider viene configurato su Dapr che fa da layer intermedio rendendo la tua applicazione indipendente dalla tecnologia e dai relativi cambiamenti. Sostanzialmente Dapr è un sidecar container che gira insieme a quello dell'applicazione per gestire tutte queste interazioni astratte infrastrutturali
 
 #### Progettazione dei microservizi
 
-L'approccio più vicino ad una struttura a microservizi è il [Domain Driven Design](#domain-driven-design-ddd). Applicando questa metodologia si possono definire dei **Bounded Context** che normalmente poi verranno implementati come microservizi: un microservizio non dovrebbe superare i confini del **Bounded Context**, ma potenzialmente si potrebbe implementare tramite più microservizi.
+L'approccio più vicino ad una struttura a microservizi è il [Domain Driven Design](#domain-driven-design-ddd). Applicando questa metodologia si possono definire dei **Bounded Context** che normalmente poi verranno implementati come microservizi: un microservizio non dovrebbe superare i confini del **Bounded Context**, ma potenzialmente un **Bounded Context** si potrebbe implementare tramite più microservizi.
 Definiti gli **aggregate** del **Bounded Context**, questi possono aiutare ad identificare l'area del microservizio, perchè solitamente gli aggregate riuniscono aree strettamente legate tra loro, ma debolmente accoppiate col resto. Anche i Domain Service che gestiscono logiche trasversali senza stato, possono essere implementati come microservizi.
 Inoltre altre richieste, come dimensione del team, scalabilità, sicurezza, possono determinare se un microservizio deve essere spezzato in sotto microservizi o viceversa se più microservizi piccoli dovrebbero far parte di un singolo microservizio.
 
@@ -182,15 +188,16 @@ I principi sono:
 
 Complessità da affrontare:
 
-- Resilienza: per qualsiasi motivo uno o più microservizi potrebber non rispondere (guasti, troppe richieste, riavvii). Ci sono due modelli per affrontare questi problemi:
-  - Retry: se il problema è temporaneo e si risolve da solo, riprovare la chiamata verso il servizio per un certo numero di volte può ottenere un risultato positivo. Però, se la chiamata non è idempotente (come POST, PATCH) è una soluzione rischiosa, perchè il server potrebbe aver elaborato la request ma non aver restituito la response e quindi si invierebbero ed elaborerebbero più volte la stessa request.
-  - Circuit Breaker: se un servizio inizia a fallire per le troppe richieste, le richieste si accumulano in coda consumando risorse critiche del sistema. Per evitare questo sovraccarico, il servizio può gestire 3 stati: closed (tutto funziona regolarmente), open (il flusso si interrompe e le chiamate vengono bloccate immediatamente), half-open (dopo un po' che è aperto, una parte di chiamate vengono fatte passare per verificare se il sistema è tornato a funzionare e si può chiudere o si deve mantenere aperto)
-- Load balancing: normalmente un Service in Kubernetes gestisce il traffico assegnando la request ad un pod casuale, ma tramite il Service Mesh si possono avere logiche migliori
-- Distributed Tracing: gestire flussi e transazioni che sono trasversali a più servizi può rendere difficile il monitoring del sistema. Serve un modo per collegarli
-- Service versioning: quando si evolve un servizio i chiamanti potrebbero avere dei malfunzionamenti, quindi è necessario fare un versioning e mantenere più versioni funzionanti in parallelo per non rompere i chiamanti del servizio modificato
-- TLS encryption and mutual TLS authentication: per aumentare la sicurezza si può crittografare tramite TLS anche il traffico interno ai microservizi
+- **Resilienza**: per qualsiasi motivo uno o più microservizi potrebbero non rispondere (guasti, troppe richieste, riavvii). Ci sono due modelli per affrontare questi problemi:
+  - **Retry**: se il problema è temporaneo e si risolve da solo, riprovare la chiamata verso il servizio per un certo numero di volte può ottenere un risultato positivo. Però, se la chiamata non è idempotente (come POST, PATCH) è una soluzione rischiosa, perchè il server potrebbe aver elaborato la request ma non aver restituito la response e quindi si invierebbero ed elaborerebbero più volte la stessa request.
+  - **Circuit Breaker**: se un servizio inizia a fallire per le troppe richieste, le richieste si accumulano in coda consumando risorse critiche del sistema. Per evitare questo sovraccarico, il servizio può gestire 3 stati: closed (tutto funziona regolarmente), open (il flusso si interrompe e le chiamate vengono bloccate immediatamente), half-open (dopo un po' che è aperto, una parte di chiamate vengono fatte passare per verificare se il sistema è tornato a funzionare e si può chiudere o si deve mantenere aperto)
+  - **Rate Limit**: è una strategia aggiuntiva che permette di limitare il numero di richieste ricevute. Anche questo aiuta la resilienza, perchè si può scegliere di permettere solo una certa frequenza di chiamate, rimuovere certi IP, proteggere dal DoS attack. Quando si supera una certa frequenza di chiamate, si permette solo ad alcune di raggiungere il server in modo da evitare di sovraccaricarlo e renderlo inaccessibile a tutti. Solitamente si risponde con un 429 Too Many Request e/o un header `Retry-After` per indicare quando riprovare
+- **Load balancing**: normalmente un Service in Kubernetes gestisce il traffico assegnando la request ad un pod casuale, ma tramite il Service Mesh si possono avere logiche migliori
+- **Distributed Tracing**: gestire flussi e transazioni che sono trasversali a più servizi può rendere difficile il monitoring del sistema. Serve un modo per collegarli
+- **Service versioning**: quando si evolve un servizio i chiamanti potrebbero avere dei malfunzionamenti, quindi è necessario fare un versioning e mantenere più versioni funzionanti in parallelo per non rompere i chiamanti del servizio modificato
+- **TLS encryption and mutual TLS authentication**: per aumentare la sicurezza si può crittografare tramite TLS anche il traffico interno ai microservizi
 
-##### Comunicazione asicrona
+#### Comunicazione asicrona
 
 Comunicazione tra microservizi può essere sincrona (chiamate HTTP o gRPC) o asincrona (attraverso messaggi). La comunicazione sincrona è più naturale, ma quella asincrona ha diversi vantaggi che la rendono preferibile, ma anche delle complessità:
 
@@ -211,15 +218,15 @@ Comunicazione tra microservizi può essere sincrona (chiamate HTTP o gRPC) o asi
 **Distributed transaction**: Ci sono circostanze in cui una operazione richiede una transazione e scambia un messaggio asincrono con altri servizi che a loro volta devono applicare le modifiche tramite una transazione. Questo flusso richiede che più step di transazione in diversi servizi debbano essere applicati insieme per avere una consistenza, ma non si può avere la garanzia che in ogni servizio la transazione abbia successo. Per gestire questa casistica, si usa il modello **SAGA** dove le operazioni transazionali che sono compiute da un messaggio devono prevedere anche delle operazioni compensative che vengono attivate da un altro messaggio. In questo modo, a fronte di un errore nel flusso, si inserisce un messaggio compensativo che annulla tutte le operazioni transazionali già effettuate.
 Nel concreto:
 
-- solitamente c'è un microservizio (per esempio "scheduler") che si occupa di gestire le operazioni transazionali che devono essere effettuate e chiama in maniera SINCRONA i relativi servizi per effetttuarle. Usa la chiamata SINCRONA perchè ha bisogno di avere una risposta immediata per poter procedere negli step successivi
-- quando uno di questi step sincroni fallisce, in maniera non transitoria (cioè, per esempio, si è ripetuta la chiamata per un certo periodo di tempo, ma continua a fallire) allora si procede ad eseguire le operazioni transitorie
+- solitamente c'è un microservizio (per esempio "scheduler") che si occupa di gestire le operazioni transazionali che devono essere effettuate e chiama in maniera SINCRONA i relativi servizi per effettuarle. Usa la chiamata SINCRONA perchè ha bisogno di avere una risposta immediata per poter procedere negli step successivi
+- quando uno di questi step sincroni fallisce, in maniera non transitoria (cioè, per esempio, si è ripetuta la chiamata per un certo periodo di tempo, ma continua a fallire) la transazione è considerata _partially failed_ allora si procede ad eseguire le operazioni compensative
 - il servizio pubblica sulla coda un messaggio per innescare le operazioni di compensazione
-- una altro servizio dedicato (per esempito "supervisor"), consuma il messaggio e lancia le operazioni di compensazione ed eventualmente fa operazioni aggiuntive del contesto (per esempio notifica che c'è stato un errore via email)
+- una altro servizio dedicato (per esempio "supervisor"), consuma il messaggio e lancia le operazioni di compensazione ed eventualmente fa operazioni aggiuntive del contesto (per esempio notifica che c'è stato un errore via email)
   - non è obbligatorio avere un servizio dedicato, ma è utile se la logica è complessa
   - è importante essere consapevoli che anche le operazioni di compensazione possono fallire e vanno gestite
 - Inoltre potrebbe esserci la casistica che il servizio "scheduler" fallisca, si riavvii, e quindi interrompa la sua esecuzione degli step. Per questa casistica si può pensare ad un concetto di "check-point": si memorizza lo step che si è fatto e quelli mancanti, in modo che si possano eseguire gli step mancanti; oppure si possono gestire tutti gli step in maniera idempotente e si ripetono tutti non appena il servizio "scheduler" torna in funzione
 
-##### Service Mesh
+#### Service Mesh
 
 Per gestire le complessità dei microservizi si usa un software di **Service Mesh**. Si tratta di un layer proxy che gestisce tutte le comunicazioni tra microservizi in un contesto con container orchestrator. Su Kubernetes si possono usare **Linkerd** o **Istio**. Questi componenti migliorano il contesto tra microservizi, ma aumentano la complessità e possono avere impatto sulle performance, visto che sono dei proxy attraverso cui passano le chiamate. Cosa fanno:
 
@@ -230,7 +237,7 @@ Per gestire le complessità dei microservizi si usa un software di **Service Mes
 - Aggiunge correlazione nel tracing tra messaggi per le metriche
 - Gestisce il Mutual TLS (mTLS) nelle chiamate tra service
 
-##### API Design
+#### API Design
 
 Le API sono il modo con cui una applicazione comunica all'esterno, nel caso dei microservizi ci sono API con cui si comunica con l'esterno ed API con cui si comunica tra microservizi. Solitamente le API verso l'esterno sono delle REST su HTTP, perchè sono chiare, semplici e supportate da tutti i client senza problemi. Internamente invece si possono fare scelte che migliorano le performance, a discapito della complessità (come ad esempio le gRPC). Senza entrare nel dettaglio, la regola base è che le REST possono andare bene anche per il backend a meno di particolari necessità di performance. A quel punto si scelgono tecnologie più performanti sulla base delle tecnologie usate nei singoli microservizi, sul service mesh utilizzato e sulle esigenze necessarie.
 
@@ -241,16 +248,16 @@ Alcune linee guida di come fare delle buone REST API:
 - Valutare di rendere le operazioni idempotenti, quindi usare il metodo PUT, in modo che sia possibile eseguire l'operazione più volte senza problemi
 - Utilizzare il response code 202 Accepted ogni volta che la chiamata riceve i dati e risponde in maniera asincrona prima di aver completato l'elaborazione. Si usa quando il server ti risponde di aver preso in carico l'esecuzione
 
-##### API Versioning
+#### API Versioning
 
 Quando si introducono delle modifiche nelle proprie API, si deve cercare sempre di rendere retrocompatibili, per evitare che i client abbiano dei problemi dovuti alle modifiche. Se la modifica introduce nuovi campi e non rimuove o modifica gli attuali in maniera che i client abbiano dei side-effect, la modifica non richiede una nuova versione. Altrimenti è bene cambiare la versione della propria API e far convivere la versione precedente e quella nuova per garantire ai client continuità e tempo per la migrazione. Ci sono 2 modi per gestire la presenza di più versioni:
 
 - Il codice del microservizio gestisce entrambe le versioni ed espone le due versioni
-- Si esegue sia il microservizio con la vecchia versione che quello con la nuova versione e tramite delle regole di instradamento, si invia la chiamata al service corretto rispetto alla versione del URL
+- Si esegue contemporaneamente su nodi diversi del cluster, sia il microservizio con la vecchia versione che quello con la nuova versione e, tramite delle regole di instradamento, si invia la chiamata al service corretto rispetto alla versione del URL
 
 Il versionamento dovrebbe essere fatto tramite SemVer quindi MAJOR.MINOR.PATCH, ma i client dovrebbero sempre e solo basarsi sulla Major version. Mantenere numerose versioni può diventare particolarmente costoso, per cui deve essere resa obsoleta e rimossa ogni versione precedente il prima possibile. Se si parla di versioni ad uso interno dei microservizi, basterà il coordinamento tra team per migrare tutti all'ultima versione, mentre per api esposte all'esterno è più difficile perchè non si ha il controllo sulle terze parti.
 
-##### Operazioni Idempotenti
+#### Operazioni Idempotenti
 
 Una operazione idempotente avviene quando può essere richiamata senza alcun problema. Non significa che viene ogni volta ripetuta la stessa operazione, nè che si ottiene lo stesso response code, anzi, solo che l'esito finale sul server è sempre lo stesso. I metodi GET, PUT, DELETE sono idempotenti (cioè devono essere implementati per esserlo). POST invece crea una risorsa ma non garantisce che il risultato sia lo stesso per ulteriori tentativi.
 
@@ -267,23 +274,128 @@ Utilizzare PUT al posto di POST non è scontato:
   - Se la risorsa non esiste, la crea, altrimenti la aggiorna. Il risultato finale ad ogni chiamata è sempre lo stesso: esiste quella risorsa con quello stato
   - Potrebbe cambiare il response code, la prima volta 201 Created, la seconda volta 204 No Content o 200 Success
 
-##### Gestione dei dati
+#### Gestione dei dati
 
-Ogni microservizio deve avere il suo database e non può accedere direttamente a quelli degli altri. Questo significa che ognuno è indipendente e può scegliere come salvare i dati (SQL, NoSQL, altro). Se più microservizi scelgono lo stesso tipo di DB, è accettabile utilizzare la stessa applicazione di DB, ma l'importante è che ogni microservizio abbia il suo DB Schema separato.
+Ogni microservizio deve avere il suo database e non può accedere direttamente a quelli degli altri. Questo significa che ognuno è indipendente e può scegliere come salvare i dati (SQL, NoSQL, altro). Se più microservizi scelgono lo stesso tipo di DB, è accettabile utilizzare la stessa applicazione di DB, ma l'importante è che ogni microservizio abbia il suo DB Schema separato. Comunque avere un unica applicazione di DB crea un vincolo in termini di scaling, tutti i microservizi con uno Schema al suo interno potrebbero sovraccaricarlo e richiederne lo scaling, per cui solitamente è sempre meglio avere anche applicazioni separate.
 
 Questa strategia introduce la complessità nella gestione della coerenza dei dati e la duplicazione di dati tra microservizi differenti. Alcune strategie che possono essere utili per gestire la complessità:
 
-- Definire quali parti necessitano di una **strong consistency** dove i dati devono essere sempre perfettamente sincronizzati e si applica il principio ACID (Atomicity Consistency Isolation Durability) o **eventual consistency** dove è legittimo che siano consistenti dopo un possibile ritardo. Cercare di preferire quanto più possibile le **eventual consitency** alle **strong consistency**.
+- Definire quali parti necessitano di una **strong consistency**, dove i dati devono essere sempre perfettamente sincronizzati e si applica il principio ACID (Atomicity Consistency Isolation Durability), o quali parti accettano una **eventual consistency**, dove è legittimo che siano consistenti dopo un possibile ritardo. Cercare di preferire quanto più possibile le **eventual consitency** alle **strong consistency**.
 - Quando si duplicano i dati, si può considerare un singolo servizio come master di quel dato
 - Usare i pattern **Scheduler Agent Supervisor** e **Compensating Transaction** per mantenere la coerenza tra servizi ed eventuali principi di checkpoint quando si eseguono workflow che eseguono insieme più step transazionali
 - Salvare nel proprio microservizio solo i dati necessari
-- Usare il modello **event driven** per pubblicare eventi da un microservizio che altri microservizi posso consumare e utilizzare (pub/sub)
-- Se un microservizio invia degli eventi, dovrebbe pubblicare uno schema che formalizza gli eventi e come utilizzarli da parte dei subscriber, un contratto sostanzialmente. Tramite lo schema ogni servizio si crea la sua struttura, indipendentemente dal linguaggio e senza condividere classi che creerebber un accoppiamento. In questo modo il publisher può validare il messaggio prima di inviarlo e il subscriber deserializzarlo alla ricezione
+- Usare il modello **event-driven** per pubblicare eventi da un microservizio che altri microservizi posso consumare e utilizzare (pub/sub)
+- Se un microservizio invia degli eventi, dovrebbe pubblicare uno schema (JSON Schema, proto o strumenti come [asyncapi](https://www.asyncapi.com/en)) che formalizza gli eventi e come utilizzarli da parte dei subscriber, un contratto sostanzialmente. Tramite lo schema ogni servizio si crea la sua struttura, indipendentemente dal linguaggio e senza condividere classi che creerebbero un accoppiamento. In questo modo il publisher può validare il messaggio prima di inviarlo e il subscriber deserializzarlo alla ricezione
 - Se i messaggi sono numerosi, possono essere un collo di bottiglia e devono essere gestiti con aggregation o batch per ridurre il carico
 
-##### Container orchestration
+#### Container orchestration
 
-Solitamente in microservizio viene eseguito tramite un container. In locale è semplice quando si ha una singola esecuzione per ogni service sulla stessa macchina, ma in un cluster è più complesso. Solitamente ci sono più istanze del microservice che girano su nodi diversi, con un load balance (reverse proxy) che gestisce il traffico. Il cluster stesso si occupa di mantenere lo stato coerente dei microservizi, se un container muore, viene eseguito un nuovo container per ripristinare lo stato. Solitamente si usa Kubernetes, ma ci sono altri software e configurazioni specifiche del proprio Cloud Provider.
+Solitamente un microservizio viene eseguito tramite un container. In locale è semplice quando si ha una singola esecuzione per ogni service sulla stessa macchina, ma in un cluster è più complesso. Solitamente ci sono più istanze del microservice che girano su nodi diversi, con un load balance (reverse proxy) che gestisce il traffico. Il cluster stesso si occupa di mantenere lo stato coerente dei microservizi (se un container muore, viene eseguito un nuovo container per ripristinare lo stato). Solitamente si usa Kubernetes, ma ci sono altri software e configurazioni specifiche del proprio Cloud Provider.
+
+### CQRS (Command Query Responsability Segregation) e Event Sourcing
+
+Questi due pattern possono anche essere utilizzati separatamente, ma quando combinati si ottiengono grossi vantaggi perchè si riescono a gestire le complessità di entrambi e mantenerne i benefici.
+
+#### CQRS
+
+Questo pattern architetturale indica di separare la lettura (query) dalla scrittura (command) in classi separate. Il principio si basa sul fatto che lettura e scrittura siano operazioni diverse, anche se dello stesso oggetto.
+
+Vantaggi:
+
+- puoi avere modelli dedicati alla scritture e alla lettura. Capita che i dati necessari in scrittura siano diversi dai dati necessari in lettura.
+- puoi separare i database e usare in lettura un DB (es MongoDB) e in scrittura un altro db (es PostgreSQL)
+- puoi avere letture più veloci e scritture più sicure
+- puoi mantenere il codice meglio e renderlo più chiaro
+
+Utile quando:
+
+- hai un dominio molto complesso
+- hai molte letture rispetto alle scritture
+- necessiti scalare separatamente letture e scritture
+- in combinazione con Event Sourcing, perchè l'Event Sourcing ha naturalmente 2 azioni e basta, la scrittura di un evento e la lettura dei dati
+
+Complessità:
+
+- il principio è semplice da capire ma comporta un aumento della complessita, soprattutto nel contesto di 2 differenti database, uno per la scrittura e uno per la lettura
+- devi gestire i messaggi quando processi i command e devi aggiornare gli eventi per le query. Questa gestione è complessa
+- con 2 db divisi, devi considerare che avrai una **eventual consistency**, quindi la lettura potrebbe non essere ancora allineata alla scrittura. Questo è da gestire
+
+#### Event Sourcing
+
+Questo approccio si basa su un **Event Store** che rappresenta un database di sequenza cronologica degli eventi. Questo è immutabile e possono solamente essere aggiunti nuovi eventi. Leggendo e applicando la cronologia degli eventi, si può avere lo stato in un certo momento del tempo. Un esempio classico è SVN che memorizza ogni commit come evento di modifica e per ricostrurire lo stato di un punto nel tempo, agisce utilizzando gli eventi.
+
+I principi sono:
+
+- Event: registrazioni immutabili del cambiamento di stato del sistema (e non dello stato del sistema) su una certa entity. Ogni azione compiuta viene registrata
+- Stream: una sequenza ordinata di Event di una particolare entity
+- Projection: modelli di lettura degli stream di event che permettono di ottenere lo stato dell'entity applicando lo stream di event.
+
+Vantaggi:
+
+- Hai tutti i cambiamenti di stato e quindi puoi fare audit e debugging di cos'è successo più facilmente
+- Puoi ricostruire lo stato di ogni punto nel tempo, non solo lo stato corrente
+- Puoi usare proiezioni che agevolino la lettura, raccogliendo solo i dati necessari e creando delle strutture che ne semplificano la lettura
+- Scalabile orizzontalmente e permette chi consuma gli eventi di farlo in maniera asincrona
+
+Complessità:
+
+- Nonostante la scrittura di un evento sia molto semplice, la lettura dei dati è molto complessa
+- Se ho tantissimi eventi, la projection sarà molto lunga da calcolare ad ogni richiesta, quindi bisogna gestire delle sorte di semplificazioni per poter leggere i dati velocemente
+
+##### CQRS + Event Sourcing
+
+Combinando le 2 metodologie si può:
+
+- Separare la scrittura dalla lettura radicalmente con 2 flussi completamente diversi e database ottimizzati per questo scopo
+- La scrittura usa l'Event Store del Event Sourcing e quindi memorizza solo gli eventi
+  - Gli schemi nel db in scrittura devono mirare ad avere una certezza e sicurezza nella qualità dei dati, quindi avranno una logica più complessa
+- La lettura utilizza delle Materialized View ad ogni modifica del Event Store per aggiornare le tabelle che saranno lette
+  - Gli schemi nel db in lettura devono mirare alla semplicità e velocità, le tabelle create tramite Materialized View potranno essere destrutturate per evitare JOIN/ORM e altre complessità, agevolando chi dovrà poi leggerle
+- Entrambi i database potranno essere scalati separatamente secondo le relative esigenze
+
+Complessità:
+
+- Eventual Consistency: tra la scrittura di un evento e l'aggiornamento del db in lettura è necessario un periodo di sincronizzazione che rende NON Atomica la transazione, quindi ci possono essere dei momenti di non consistenza. Se necessario, si possono adottare delle metodologie per ridurre questo problema
+- Aumento dello storage necessario visto l'utilizzo di 2 database
+- Aumento della complessità e della competenza necessaria per gestire 2 database
+- Il processo di sicronizzazione dei dati inserisce un punto aggiuntivo da sviluppare e che può avere errori e che deve essere analizzato quando ci sono problemi
+- I Command potrebbero cambiare nel tempo, ma questi rimangono salvati nello stream, significa che vanno versionati e gestiti i cambiamenti di versione nel tempo
+
+Componenti:
+
+- **Struttura software**: consigliata è a microservizi usando Clean Architecture e DDD
+  - Valutare framework che supportino questo tipo di architettura a seconda del linguaggio usato
+- **Event Store**: si possono usare diversi DB come
+  - EventStoreDB che è specifico nativo per event sourcing
+  - ma anche db relazionali come PostgreSQL configurandolo per l'event sourcing
+  - o non relazionali come MongoDB
+  - Apache Kafka è un event streamer che può essere utile ma non è un event store persistente che permette di ricostruire lo stato
+- **Read Store**: si possono usare diversi DB ma dipende dallo scopo
+  - Db relazionali come PostgreSQL permettono materialized views per ottimizzare le query in lettura
+  - MongoDB utile se il read model cambia spesso
+  - ElasticSearch se servono aggrezioni e ricerche complesse
+  - Redis per avere performance altissime salvando in memoria i dati
+- **Message Bus**: sono validi sia RabbitMQ che Kafka
+
+### Event-Driven Architecture
+
+Generica architettura che si basa sullo scambio di messaggi tramite code (come RabbitMQ, Kafka...) invece di comunicazione sincrona.
+
+#### Event-Carried State Transfer VS Notification Event
+
+**Event-Carried State Transfer** fa si che quanto un evento è pubblicato da un servizio, questo contiene già tutte le informazioni necessarie agli altri servizi per aggiornare il proprio stato locale senza dover interrogare nuovamente il servizio originario.
+
+Questo significa che se per esempio ho creato un nuovo ordine tramite il microservizio Order e devo mettere il relativo messaggio nella coda, questo conterrà tutti i dati dell'ordine. Quando l'eventuale microservizio Shipping consumerà quel messaggio, avrà immediatamente a disposizione tutto quello che gli serve a riguardo della spedizione perchè è già dentro al messaggio, visto che l'ordine conterrà la sua sezione shipping.
+
+Questo costringe a generare messaggi più grandi, ma disaccoppia i servizi perchè non avranno necessità di chiedere ulteriori dati una volta consumato il messaggio.
+
+**Notification Event** invece ha lo scopo di minimizzare la dimensione del messaggio, lasciando a chi consuma il compito di chiamare sincronicamente (tramite REST o analoghe) il servizio originario per ottenere i dati che gli servono.
+
+Il caso precedente, dove viene creato un nuovo ordine, produrrebbe un messaggio che contiene solo l'id dell'ordine e il suo stato OrderCreated. Quando lo Shipping microservice consuma il messaggio farà una chiamata all'Order microservice per ottenere gli specifici dati di spedizione.
+
+Questo permette di generare messaggi più piccoli e non divulgare a tutti i microservizi tutti i dati dell'entità (ne caso di dati sensibili), ma crea un accoppiamento tra i microservizi che potrebbe essere rischioso, visto che la chiamata sincrona potrebbe poi fallire. In alcuni casi può essere vantaggioso, per esempio se è comunque sempre necessario fare una chiamata REST per ottenere dati sempre aggiornati ed avere una certezza della consistenza (non solo al momento in cui si consuma il messaggio).
+
+Quindi ECST (Event-Carried State Transfer) è da considerare la scelta principale a meno di condizioni particolari che non la permettono.
 
 ## Metodologie
 
@@ -303,21 +415,21 @@ Nel contesto del DDD il **dominio**:
 - non è immutabile, può evolvere nel tempo con l'evolvere del business e della complessità
 - il dominio contiene degli **esperti di dominio**, figure che lavorano all'interno di quel dominio, che lo sanno descrivere e sanno come vogliono che funzioni il software per agevolare il business del dominio
 
-Esempio: un ecommerce ha tantissime cose dentro il suo dominio, carrello, prodotti, utenti, pagamenti, ordini... Tutti questi fanno parte del suo dominio e per capire meglio questo dominio si deve creare un modello del dominio. Attenzione, l'ecommerce di una azienda che fa anche vendita fisica, anche la vendita fisica fa parte dello stesso dominio, perchè è parte del core business aziendale. Eventualmente ci possono essere sottodomini.
+Esempio: una azienda con un ecommerce ha tantissime cose dentro il suo dominio, carrello, prodotti, utenti, pagamenti, ordini... Tutti questi fanno parte del suo dominio in quanto il core business è rappresentato dalla vendita di prodotti online. Per capire meglio questo dominio si deve creare un modello del dominio. Attenzione, se l'ecommerce di una azienda che fa anche vendita fisica, anche la vendita fisica fa parte dello stesso dominio, perchè è parte del core business aziendale. Eventualmente ci possono essere sottodomini.
 
 La progettazione del modello del dominio si divide in due parti:
 
-- Strategic DDD: Definisce i **Bounded Context**, cioè quelle aree logiche all'interno di un dominio, e il relativo **Obiquitous Language**
-- Tactical DDD: si usano gli elementi base del DDD per creare il modello
+- **Strategic DDD**: Definisce i **Bounded Context**, cioè quelle aree logiche ben delimitate all'interno di un dominio, e il relativo **Obiquitous Language**
+- **Tactical DDD**: si usano gli elementi base del DDD per creare il modello
 
 #### Strategic DDD
 
-Quando si deve partire con un nuovo progetto, l'intero progetto è considerabile il dominio. La fase di progettazione di un dominio è complessa e richiede di coinvolgere diversi esperti di quel contesto per capire come funziona, interagisce e di cosa ha bisogno. Non è solo una questione da software architect, ma anche altre figure aziendali dovrebbero essere coinvolte. Qui si genera un diagramma dei flussi coinvolti. Da questo diagramma si possono iniziare a identificare i **sottodomini** distinti per aree di business circoscritte da regole e obiettivi ben definiti.
+Quando si deve partire con un nuovo progetto, l'intero progetto è considerabile il dominio. La fase di progettazione di un dominio è complessa e richiede di coinvolgere diversi esperti di quel contesto per capire come funziona, come interagisce e di cosa ha bisogno. Non è solo una questione da software architect, ma anche altre figure aziendali dovrebbero essere coinvolte. Qui si genera un diagramma dei flussi coinvolti. Da questo diagramma si possono iniziare a identificare i **sottodomini** distinti per aree di business circoscritte da regole e obiettivi ben definiti.
 
-Una volta mappato il dominio in **sottodomini**, se sceglie come implementarli. L'implementazione verrà fatta nel **Bounded Context**:
+Una volta mappato il dominio in **sottodomini**, si sceglie come implementarli. L'implementazione verrà fatta nel **Bounded Context**:
 
 - Solitamente un **sottodominio** viene implementato da un singolo **Bounded Context**
-- Se il **sottodominio** è particolarmente grande con sotto-aree circoscritte, può essere implementato da più **Bounded Context**. Una alternativa è scomporre il **sottodominio** in ulteriori **sottodomini** per rendere più chiara la distinzione
+- Se il **sottodominio** è particolarmente grande con sotto-aree circoscritte, può essere implementato da più **Bounded Context**. Una alternativa è scomporre tale **sottodominio** in ulteriori **sottodomini** per rendere più chiare le aree
 - Se più di un **sottodominio** è piccolo e ha logiche accumunabile ad altri, possono essere implementati insieme da un singolo **Bounded Context**. Questo caso è più raro.
 
 Non ci sono regole fisse e quindi è lasciato alla progettazione del singolo caso, ma solitamente si sceglie come creare un **Bounded Context** facendosi queste domande:
@@ -333,16 +445,16 @@ Spesso un approccio potrebbe essere anche quello di:
 - Utilizzare questo diagramma come punto di partenza
 - Nell'evoluzione, distinguere i sottodomini e i bounded context: potrebbe esserci un dominio che cresce troppo e richiede 2 bounded context per essere diviso o alcuni domini che si rivelano accumunabili e vengono poi messi in un singolo bounded context.
 
-Una volta definiti i **Bounded Context** si definiscono i relativi **Obiquitous Language**: per definire la terminologia comune da utilizzare all'interno del **Bounded Context** tra sviluppatori e esperti di dominio, si definisce un vero e proprio glossario con le definizioni dei termini da utilizzare. Questa terminologia diventerà universare e trasversale all'interno del **Bounded Context** per ogni figura coinvolta. Anche il codice dovrà sottostare al questo linguaggio, per cui le classi, le entity e così via dovranno utilizzare questa terminologia. Il grande vantaggio è che rende ogni attore consapevole di cosa si stia parlando, creando una base knowledge comune e trasversale che agevola l'evoluzione del software.
+Una volta definiti i **Bounded Context** si definiscono i relativi **Obiquitous Language**: per definire la terminologia comune da utilizzare all'interno del **Bounded Context** tra sviluppatori e esperti di dominio, si definisce un vero e proprio glossario con le definizioni dei termini da utilizzare. Questa terminologia diventerà universare e trasversale all'interno del **Bounded Context** per ogni figura coinvolta. Anche il codice dovrà sottostare al questo linguaggio, per cui le classi, le entity e così via dovranno utilizzare questa terminologia. Il grande vantaggio è che rende ogni attore consapevole di cosa si stia parlando, creando una Knowledge Base comune e trasversale che agevola l'evoluzione del software.
 
 Ci possono essere 3 tipi di relazione tra i **Bounded Context**:
 
-- Partnership: i 2 **Bounded Context** cercano di collaborare e allineare i loro modelli
-- Upstream / Downstream: un **Bounded Context** influenza il modello dell'altro.
+- **Partnership**: i 2 **Bounded Context** cercano di collaborare e allineare i loro modelli
+- **Upstream** / **Downstream**: un **Bounded Context** influenza il modello dell'altro.
   - Upstream è indipendente da Downstream
   - Upstream è la fonte delle informazioni
   - Downstream riceve le informazioni
-- Free: nessuna dipendenza tra **Bounded Context**
+- **Free**: nessuna dipendenza tra **Bounded Context**
 
 Quando diversi **Bounded Context** devono interagire, non hanno lo stesso **Obiquitous Language** anche se si parla dello stesso concetto, per cui ci vuole un modo per comunicare tra contesti diversi: le **Context Map**. Questi sono vari pattern di **Context Map**:
 
@@ -353,7 +465,7 @@ Quando diversi **Bounded Context** devono interagire, non hanno lo stesso **Obiq
 - **Open Host Service**: un contesto espone un protocollo/API standard per tutti e il linguaggio è definito dal contratto dell'api
 - **Published Language**: i dati/eventi condivisi usano un linguaggio comune e documentato per le integrazioni
 
-Alla fine di tutto lo strategic layer si è prodotto i seguenti documenti documenti:
+Alla fine di tutto lo strategic layer si è prodotto i seguenti documenti:
 
 - diagramma dei sottodomini
 - Classificazione dei sottodomini (core, support, generic)
@@ -369,19 +481,21 @@ Alla fine di tutto lo strategic layer si è prodotto i seguenti documenti docume
 
 Una volta definiti i confini, si inizia la modellazione vera e propria degli elementi del **Bounded Context** per poi creare le classi, metodi, interfacce. Questi sono alcuni degli oggetti:
 
-- Entity: sostanzalmente una classe con una identità (ID). Il suo stato può cambiare una volta creati (cambiano gli attributi), ma l'entity è la stessa visto che l'ID è lo stesso (Esempio un utente)
+- **Entity**: sostanzalmente una classe con una identità (ID). Il suo stato può cambiare una volta creata (cambiano gli attributi), ma l'entity è la stessa visto che l'ID è lo stesso (wsempio: un utente)
   - Le entità dovrebbero incorporare la loro logica di business e non essere solo dei contenitory di get/set
-- Value Object: è una classe che non ha idendità e solitamente esiste in relazione ad un altro oggetto. Non avendo un ID, due oggetti valore sono uguali quando i suoi attributi sono uguali (Esempio un indirizzo di un utente). Sono oggetti immutabili una volta creati.
+- **Value Object**: è una classe che non ha idendità e solitamente esiste in relazione ad un altro oggetto. Non avendo un ID, due value object sono uguali quando i loro attributi sono uguali (esempio: un indirizzo di un utente). Sono oggetti immutabili una volta creati.
   - Esempi possono esere i colori, le date, gli importi
-- Aggregate: sono un insieme di entity e value object che sono tutte dipendenti da una singola Root Entity. Questo permette di gestirli insieme perchè sono strettamente legati a quell'entity.
-  - L'aggregate può anche contenere la logica che definisce come le entity al suo interno interagiscono, quando tale logica non è dipendente dall'entity stessa ma dall'interazione con le altre all'interno dell'aggregate
+- **Aggregate**: sono un insieme di entity e value object che sono tutte dipendenti da una singola Root Entity. Questo permette di gestirli insieme perchè sono strettamente legati a quell'entity.
+  - L'aggregate contiene la logica che definisce come le entity al suo interno interagiscono, quando tale logica non è dipendente dall'entity stessa ma dall'interazione con le altre all'interno dell'aggregate
+  - L'aggregate contiene le regole di **Invarianza**, cioè quelle regole di validazione che rende l'intero aggregate con tutti le sue entity valido per i principi dell'applicazione (un Agggregate che gestisce un BankAccount valida che non si possa prelevare più del saldo corrente)
   - Nel modello ci si riferisce direttamente alla Root Entity per riferirsi all'aggregato nel suo insieme
-- Service: un service è un oggetto che contiene della logica che non ha stato e non è legata a entity e value object. Sostanzalmente sono i metodi che effettuano logiche generiche
+  - Le entity e i value object che dipendono dal Root Entity e quindi non sono indipendenti, devono essere messi dentro la stessa cartella dell'aggregate perchè quello è il loro contesto di esistenza; la logica con cui si muovono e per cui esistono è definita lì
+- **Service**: un service è un oggetto che contiene della logica che non ha stato e non è legata a entity e value object. Sostanzalmente sono i metodi che effettuano logiche generiche
   - Domain service: sono logiche generiche di dominio che solitamente coinvolgono più entity e sono di basso livello
-  - Application service: sono funzioni tecniche come user authentication, dove si orchestrano altri componenti del dominio ma non contiene logica di dominio e possono aver dipendenze con livelli più bassi del software
-- Repository: si occupa di trovare le istanze delle entity e, solitamente, gestire la persistenza su db
-- Factory: classi o metodi con lo scopo di creare le entity nascondendone la complessità della creazione
-- Domain Event: servono a notificare ad altri sistemi eventi che sono successi, per esempio "un nuovo elemento è stato creato" NON è un evento, mentre "una spedizione è stata cancellata" è un evento.
+  - Application service: sono funzioni tecniche come user authentication, dove si orchestrano altri componenti del dominio ma non contengono logica di dominio e possono aver dipendenze con livelli più bassi del software
+- **Repository**: si occupa di trovare le istanze delle entity e, solitamente, gestire la persistenza su db
+- **Factory**: classi o metodi con lo scopo di creare le entity nascondendone la complessità della creazione
+- **Domain Event**: servono a notificare ad altri sistemi eventi che sono successi. Non tutti gli eventi sono sempre utili, per esempio "un nuovo elemento è stato creato" potrebbe NON essere un evento utile, mentre "una spedizione è stata cancellata" magari è un evento utile.
   - Sono molto usati nel contesto dei microservizi per scambiare messaggi ed aggiornare gli stati tramite eventi asincroni
 
 Questa potrebbe essere una mappatura dei concetti di DDD in una Clean Architecture:
