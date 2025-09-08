@@ -27,6 +27,16 @@
     - [Domain Driven Design (DDD)](#domain-driven-design-ddd)
       - [Strategic DDD](#strategic-ddd)
       - [Tactical DDD](#tactical-ddd)
+  - [Protocolli](#protocolli)
+    - [Firma Digitale](#firma-digitale)
+    - [Authentication / Authorization](#authentication--authorization)
+      - [Password-based](#password-based)
+        - [Sessione](#sessione)
+        - [JWT](#jwt)
+      - [SAML](#saml)
+      - [OAuth 2.0 / OIDC (OpenID Connect)](#oauth-20--oidc-openid-connect)
+        - [OAuth 2.0](#oauth-20)
+        - [OIDC (OpenID Connect)](#oidc-openid-connect)
 
 ## Descrizione
 
@@ -548,3 +558,122 @@ src/
 │
 └── main.ts                     # Entry point dell’applicazione
 ```
+
+## Protocolli
+
+### Firma Digitale
+
+Non è un protocollo in senso stretto, ma più un processo che si occupa di rendere sicuro una flusso di dati attraverso la firma di un hash utilizzando la chiave privata/pubblica di un certificato:
+
+- Si sceglie un protocollo di hashing, per esempio SHA256, e si applica questo protocollo per ottenere una stringa hash da una stringa originale (che potrebbe essere un body di una request)
+- Questo hash viene firmato tramite la chiave privata di un certificato, ottenendo una striga criptata
+- Il destinatario otterrà la stringa in chiaro da cui l'hash è stato generato e l'algoritmo utilizzato, per cui ricostruirà l'hash come ha fatto il mittente
+- Inoltre, sempre il destinatario, utilizzando la chiave pubblica decripterà l'hash firmato e inviato dal mittente per confrontarlo con quello che si è costruito
+- Se il risultato è identico, il file è corretto, altrimenti il file è stato manipolato e non è sicuro
+
+Questo processo garantisce che i dati inviati e ricevuti siano gli stessi, ma richiede che a monte il mittente abbia prodotto la chiave privata e la relativa chiave pubblica, quindi che abbia dato al destinatario la chiave pubblica per usarla nella sua configurazione allo scopo di validare la firma digitale.
+
+### Authentication / Authorization
+
+- L'authorization è quell'operazione che risponde alla domanda _"puoi accedere a questa risorsa?_" e quindi definisce cosa puoi fare.
+- L'authentication è quellì operazione che risponde alla domanda _"sei davvero chi dici di essere?"_ e quindi definisce il login e quindi che utente sta navigando l'applicazione.
+
+#### Password-based
+
+Si inserisce un nome utente e una password "segreta". Il sistema non deve mai salvare la password in chiaro (anche se non c'è alcuna garanzia che un servizio non lo faccia). Il processo funziona che:
+
+- La password (o la stringa risultante dalla concatenazione di username e password) viene trasformata in un hash tramite un algoritmo non reversibile (SHA256)
+- Nel processo di autenticazione si applica lo stesso algoritmo e si verifica che l'hash risultante sia lo stesso
+
+Ci sono vulnerabilità a questo processo dato da: phishing, brute force, riutilizzo della stessa password su vari siti. Per rafforzare questa vulnerabilità intrinseca, si usa:
+
+- Autenticazione a 2 Fattori (2FA / MFA): serve un secondo elemento per avere l'approvazione su un dispositivo personale, come la ricezione di un OTP temporaneo
+- Autenticazione biometrica: è necessaria l'impronta digitale o il riconoscimento facciale
+- Token: applicazioni come Authenticator che generano token temporanei
+
+##### Sessione
+
+Autenticazione **Stateful** dove il server conserva la sessione una volta effettuata il login. VIene quindi generato un SessionID come Cookie utilizzato per riconoscere l'utente e quello che può fare. Non è molto scalabile ed occupa memoria per memorizzare le sessioni, ma è semplice da revocare cancellando la sessione. Utilizzata maggiormente nelle applicazioni tradizionali.
+
+##### JWT
+
+Si basa su un JWT Token che contiene i dati dell'utente loggato che il client si scambia ogni volta col server, per questo è una Autenticazione **Stateless**. Sicuramente più scalabile e non occupa memoria, ma è più complessa la revoca, per questo solitamente si utilizzano validità molto brevi (15 min). Tramite un processo di refresh si può richiedere un nuovo token:
+
+- Al login si ottiene un AccessToken e un RefreshToken
+- L'AccessToken ha durata breve, il RefreshToken ha durata lunga
+- Entrambi possono essere revocati in caso di furto
+
+Utilizzato in applicazioni moderne, con microservizi e ambienti distribuiti.
+
+#### SAML
+
+Questo processo è un processo classico che gestisce l'authorization tramite un provider esterno. Si basa su dei redirect di XML chiamati **SAML Request** e **SAML Response**.
+
+I componenti sono:
+
+- **SP (Service Provider)**: l'applicazione che necessita che l'utente effettui il login e che lo delega al IdP
+- **IdP (Identity Provider)**: l'applicazione che ha tutti i dati per effettuare il login ed indicare al SP che l'utente è loggato ed ha un certo ID
+
+Flusso:
+
+- l'utente sul SP richiede di fare il login
+- SP fa redirect verso IdP su un endpoint in POST con un body che contiene l'XML della SAML Request
+  - Questa request contiene vari campi tra cui:
+    - Issuer: entityID del tuo SP che lo identifica univocamente nell IdP (quindi un ID che è stato registrato precedentemente nel IdP)
+    - AssertionConsumerServiceURL (ACS endpoint): endpoint del tuo SP dove IdP redirigerà all'indietro l'utente dopo il login
+    - NameIDPolicy: specifica il formato in cui riceverà indietro l'identità (per esempio email, userId,...)
+    - La request può essere firmata tramite il processo di [Firma Digitale](#firma-digitale)
+- IdP mostra la form di login ed attua il processo di login nel modo che preferisce (MFA, Biometria...)
+- Una volta loggato con successo, IdP redirige su un endpoint di SP su cui riceve la SAML Response che sarà firmata tramite il processo di [Firma Digitale](#firma-digitale)
+  - Questa response contiene vari campi tra cui:
+    - NameID: l'id dell'utente loggato
+    - Firma col certificato dell'IdP, che SP validerà alla ricezione secondo il processo di [Firma Digitale](#firma-digitale)
+    - NotBefore/NotOnOrAfter: validità temporale che SP validerà alla ricezione
+
+#### OAuth 2.0 / OIDC (OpenID Connect)
+
+OAuth 2.0 è un protocollo che fornisce solo l'**autorizzazione**, mentre OIDC fornisce anche l'**autenticazione**.
+
+##### OAuth 2.0
+
+Controlla e fornisce l'autorizzazione all'accesso alle risorse protette da parte di applicazioni client che lo richiedono. LO scopo sostanzialmente è quello di dare ad una applicazione client il permesso di operare su una app esterna, utilizzando le sue API come se tu fossi il Resource Owner su quell'altra app. Per esempio: creo una app che possa creare dei file su Drive, quindi faccio un flusso OAuth 2.0, dove chiedo l'interazione all'utente Resource Owner di permettere all'app di creare file su Drive come se fosse lui. In questo contesto l'app non ha consapevolezza di chi sia l'utente Resource Owner perchè l'identità non è rilevante, ma sa che può chiamare le API ed eseguire le operazioni al suo posto.
+
+Questo flusso si basa sulla gestione di questi componenti:
+
+- **Resource Owner**: l'utente che possiede i dati
+- **Client**: l'applicazione che vuole accedere ai dati
+- **Authorization Server**: server dedicato a gestire il consenso e rilasciare i token
+- **Resource Server**: server che ospita le effettive risorse protette
+
+Flusso:
+
+- L'utente accede all'appicazione client e chiede l'accesso ad una certa risorsa
+- Il client reindirizza l'utente all'Authorization Server (es. Google) con degli scope **scope** e un **endpoint uri** su cui ritornare
+- L'utente (Resource Owner) autorizza l'accesso (essendo autenticato sull'Authorization Server con varie metodologie possibili)
+- L'utente viene rediretto sull'applicazione client con o un AuthorizationCode o direttamente l'AccessToken e opzionalmente n RefreshToken (come nel [JWT](#jwt))
+- L'applicazione Client può usare l'AccessToken per accedere al ResourceServer rispetto allo scope richiesto
+
+I principali Grant Types (flussi interni):
+
+- Authorization code: si riceve al redirect solamente un Authorization Code utilizzabile una sola volta per ricevere indietro un AccessToken tramite una chiamata Rest. Utile per app web e mobile con interazioni utente, ma un lato server che posso fare la chiamata per gestire in sicurezza l'Authorization Code senza che malintenzionati lo intercettino e usino.
+  - Per le SPA (SinglePageApp) o comunque quelle applicazioni che non possono basarsi su un lato server per l'autenticazione, c'è una variante più avanzata che gestisce questa vulnerabilità chiamata **Authorization Code Flow with Proof Key for Code Exchange**:
+    - il client prima di tutto genera un Code Verifier (una stringa casuale e segreta) e ne calcola il Code Challenge applicando un algoritmo di hashing (SHA256 + Base64) e invia nel redirect verso l'Authorization Server solo il Code Challenge e il Code Challenge Method (l'algoritmo di hashing usato)
+    - L'utente si autentica e nel redirect back il client riceve l'Authorization Code
+    - Per avere AccessToken e RefreshToken, il client chiama il token endpoint passando sia Authorization Code e Code Verifier
+    - L'authorization server verifica che il Code Verifier corrisponda al Code Challenge utilizzando il Code Challenge Method passato precedentemente
+- Client Credentials: si usa solo per le applicazione server-to-server senza interazioni con l'utente, dove l'autenticazione viene fatta direttamente tramite una chiamata passando il ClientId e ClientSecret, senza necessità di redirects
+- Refresh Token: si invia il RefreshToken ottenuto precedentemente alla authorization per rinnovare l'AccessToken quando questo è scaduto. In questo modo si evita di dover eseguire un nuovo processo di authorization
+
+##### OIDC (OpenID Connect)
+
+Implementa l'autenticazione a il Single Sign-On. Permette di recuperare e memorizzare le informazioni dell'utente tramite un ID Token in aggiunta ad Access e Refresh Token di OAuth 2.0. Infatti questo protocolle **estende** OAuth 2.0 ed è l'approccio moderno consigliato. Lo scopo è fondamentalmente quello di esternalizzare il login dalla tua applicazione client ad un provider esterno (Google, Microsoft, SPID...) utilizzando sempre lo stesso utente e delegando la parte di sicurezza all'esterno.
+
+Componenti:
+
+- **OpenID provider**: è l'Authorization Server che genera l'ID Token
+- **End user**: l'utente le cui informazioni sono contenute nel ID Token
+- **Relying Party**: l'applicazione client che richiede l'ID Token
+- **ID Token**: il token creato dal OpenID provider con le informazioni dell'end user sottoforma di **claims**
+- **Claims**: pezzi di informazione riguardo l'end user, cioè attributi del JWT
+
+Il flusso è come quello di OAuth 2.0 aggiungendo lo scope `openid`, ma quando ricevi l'AccessToken, ricevi anche l'ID Token. Questo è utile se vuoi avere sia l'authorize che l'authenticate insieme. Ovviamente sulla base degli scope che invii, ricevi indietro i rispettivi token: se usi OIDC solo come SSO ma non ti servono le API di quel provider, ID Token è sufficiente e non serve l'AccessToken, ma se oltre al SSO vuoi anche chiamare delle relative API ti serve anche l'AccessToken (magari usando Microsoft salvi dei dati riguardo gli utenti su Azure che vuoi poter ispezionare tramite API)

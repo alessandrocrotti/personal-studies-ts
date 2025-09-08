@@ -70,6 +70,7 @@ export async function sendRpcRequest(requestQueue: string, message: string): Pro
       { noAck: true }
     );
 
+    // Send the RPC request message to the main queue with the replyTo and correlationId properties set. The consumer will use these to send back the response.
     channel.sendToQueue(requestQueue, Buffer.from(message), {
       correlationId,
       replyTo: replyQueue,
