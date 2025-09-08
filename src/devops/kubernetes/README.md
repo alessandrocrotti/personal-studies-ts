@@ -73,7 +73,7 @@ Nella sezione Settings > Kubernetes si può attivare Kubernetes come servizio ag
 
 ## CLI
 
-Ci sono diverse cli importanti da usare:
+Ci sono diverse cli importanti da usare (e installabili tramite Choco):
 
 - `kubectx`: permette di gestire facilmente l'accesso a cluster diversi. Puoi definire qual è l'attuale in utilizzo e passare ad un altro
 - `kubens`: permette di definire qual è il namespace in utilizzo attualmente e cambiarlo
@@ -87,7 +87,7 @@ I nodi master insieme creano un Control Plane distribuito ed ogni nodo master è
 - **Control Manager**: è come se fosse un loop infinito che controlla costantemente che lo stato del cluster sia corretto, se non lo fosse prende decisioni correttive per ripristinare lo stato voluto
 - **API Server**: è il gateway del cluster che espone le API REST con cui si comunica dall'esterno verso l'interno (per esempio facendo comandi `kubectl` si comunuca con questo componente). Anche i componenti interni lo usano, come etcd, da cui legge e scrive lo stato. Punto di ingresso del cluster.
 - **etcd**: è un database distribuito key-value altamente affidabile dove vengono salvate le configurazioni del cluster. Quando si da un comando al API Server per cambiare lo stato, il cambio di stato viene salvato dentro etcd. Viene consultato da API Server quando si vogliono recuperare informazioni del cluster
-- **scheduler**: si occupa di scegliere su quale nodo assegnare i pod sulla base di vincoli e risorse. I vincoli pososno essere di Risorse (CPU, RAM), Affinity/Anti-affinity, Taints/Tolerations, Priority
+- **scheduler**: si occupa di scegliere su quale nodo assegnare i pod sulla base di vincoli e risorse. I vincoli possono essere di Risorse (CPU, RAM), Affinity/Anti-affinity, Taints/Tolerations, Priority
 - **Cloud-control-manager**: (opzionale) interagisce col cloud provider su cui è installato (AWS, GCP, Azure). Per esempio, creare un nuovo nodo scatena la creazione di una nuova VM nel cloud provider
 
 Esempio di interazione:
@@ -108,7 +108,7 @@ Un nodo è sostanzialmente una macchina (fisica o virtuale) che esegue i contain
 
 ## Namespace
 
-Il namespace in kubernets è un modo per organizzare e isolare le risorse in gruppi logici. Paragonabile ad una cartella virtuale in cui metto le mie risorse. Si usano per isolare le risporse per team, ambiente, scope applicativi.
+Il namespace in kubernets è un modo per organizzare e isolare le risorse in gruppi logici. Paragonabile ad una cartella virtuale in cui metto le mie risorse. Si usano per isolare le risorse per team, ambiente, scope applicativi.
 
 Inoltre puoi usare i namespace per creare:
 
@@ -122,7 +122,7 @@ Di default esistono già 4 namespace:
 - **kube-public**: componenti leggibili da tutti, anche da utenti non autenticati, per condividere configurazioni pubbliche. Raramente utilizzato in ambienti reali
 - **kube-node-lease**: contiene gli oggetti `Lease` presenti nei nodi che vengono usati dal `kubelet` del nodo per effettuare heartbeat col `Control Plane` e monitorare lo stato per capire se un nodo è disponibile e funzionte
 
-I namespace si possono chiedere da riga di comando o da manifest yaml:
+I namespace si possono creare da riga di comando o da manifest yaml:
 
 ```shell
 kubectl create namespace my-namespase
@@ -184,22 +184,23 @@ kubectl delete -f nginx-pod.yaml
 
 ### Port-Forwarding
 
-Il singolo pod non è raggiungibile dall'esterno perchè è isolato, analogamento come accade per i container su Docker. Per cui si deve esporre una porta dalla rete del pod alla rete locale e questo si fa attraverso il comando `port-forward`. Si utilizza il seguente pattern:
+Il singolo pod non è raggiungibile dall'esterno perchè è isolato, analogamente ai container su Docker. Per cui si deve esporre una porta dalla rete del pod alla rete locale e questo si fa attraverso il comando `port-forward`. Si utilizza il seguente pattern:
 
 - `kubectl port-forward <nome_pod> <porta_locale>:<porta_pod>`
   - `<porta_locale>` è la porta che uso io dalla mia rete locale per accedere al pod
   - `<porta_pod>` è la porta che il container sul pod utilizza per la sua applicazione
 
 ```shell
-# comando port-forward <nome_pod> <porta_locale>:<porta_pod> dove nginx lavora sul pod utilizzando la porta 80, mentre noi vogliamo accedere tramite http://localhost:8080
+# comando port-forward <nome_pod> <porta_locale>:<porta_pod> dove nginx lavora sul pod utilizzando la porta 80,
+# mentre noi vogliamo accedere tramite http://localhost:8080
 kubectl port-forward nginx-pod 8080:80
 ```
 
 ## Custom Resource Definition (CRD)
 
-Oltre alle risorse standard, su kubernetes si possono creare delle risorse custom. Una CRD e la definizione di un nuovo tipo di risorsa su Kubernetes. Questo tipo di risorsa si aggiunge a quelle standard e può essere usato nel parametro "kind" degli YAML. Questa risorsa è cluster-wide e la si può vedere tra le configurazioni del cluster. Questo ti permette di estendere con nuove risorse Kubernetes.
+Oltre alle risorse standard, su kubernetes si possono creare delle risorse custom. Una CRD è la definizione di un nuovo tipo di risorsa su Kubernetes. Questo tipo di risorsa si aggiunge a quelle standard e può essere usato nel parametro "kind" degli YAML. Questa risorsa è cluster-wide e la si può vedere tra le configurazioni del cluster. Questo ti permette di estendere Kubernetes con nuove risorse.
 
-Quindi una **Custom Resource (CR)** è una istanza concreta di una CRD, come quando lancio un Pod e quel pod creato è una istanza di un kind Pod di default. Questa istanza invece può essere creata in un namespace o cluster-wide.
+Quindi una **Custom Resource (CR)** è una istanza concreta di una CRD, come quando lancio lo YAML di un Pod con `kind: Pod`. Questa istanza (CR) invece può essere creata in un namespace o cluster-wide, al contrario della CRD.
 
 Solitamente queste vengono creati tramite tool che autogenerano il codice YAML, come `kubebuilder`.
 
@@ -210,7 +211,7 @@ I controller sono dei componenti di K8S che ricevuto un file manifest YAML, si a
 ### Deployment
 
 Deployment è un oggetto più complesso rispetto al singolo pod per gestire una applicazione e i relativi pod, gestendo il ciclo di vita e il numero di istanze. Si occupa di applicazioni **stateless** con aggiornamenti frequenti (WebApp, API, microservizi), dove i pod sono intercambiabili. Suppota il rolling update e rollback.
-Per esempio il deployment può definire il numero di istanze della mia applicazione, gestendo quello che succede se una di queste istante crasha. Le istanze sono chiamate `replica` ed incrementare il numero di repliche si chiama operazione di `scale`.
+Per esempio il deployment può definire il numero di istanze della mia applicazione, gestendo quello che succede se una di queste istanze crasha. Le istanze sono chiamate `replica` ed incrementare il numero di repliche si chiama operazione di `scale`.
 
 Si può creare un deployment manualmente in maniera analoga a quello che si fa con la creazione del pod, ma questa volta si da il nome al deployment e quest'ultimo poi si occuperà di creare il relativo pod:
 
@@ -288,7 +289,7 @@ kubectl exec -it mongo-sfs-2 -n my-namespace -- mongosh
 
 ### DaemonSet
 
-Utile quando si vuole eseguire un pod su **ogni nodo** del cluster (Logging, Monitoring). Il pod sul nodo è come un agent che agisce sul nodo per una applicazione, come fa per esempio Fluend Prometheus per monitorare lo stato del cluster cl suo Prometheus Node Exporter. Questo significa che quando si aggiunge un nuovo nodo al cluster, automaticamente il DaemonSet crea un pod su quel nodo.
+Utile quando si vuole eseguire un pod su **ogni nodo** del cluster (Logging, Monitoring). Il pod sul nodo è come un agent che agisce sul nodo per una applicazione, come fa per esempio Fluend o Prometheus, per monitorare lo stato del cluster col suo Prometheus Node Exporter. Questo significa che quando si aggiunge un nuovo nodo al cluster, automaticamente il DaemonSet crea un pod su quel nodo.
 
 Caratteristiche:
 
@@ -309,7 +310,7 @@ Ha lo scopo di eseguire un singolo task fino al compimento, senza dover rimanere
 
 Ci sono alcune configurazioni interessanti:
 
-- **completions**: quante volte esegue il jopb, cioè quanti pod esegue
+- **completions**: quante volte esegue il job, cioè quanti pod esegue
   - **default**: 1. Dopo una esecuzione riuscita si considera il job completato
 - **parallelism**: quanti pod in parallelo può eseguire
   - **default**: 1. Si esegue un pod alla volta
@@ -410,12 +411,12 @@ Essendo dei componenti automaticamente creati, ha senso controllarli quando:
 
 - Un service è stato creato ma i pod non ricevono traffico. Potrebbe esserci un problema nel selector o un problema nell'esecuzione del service, per cui vale la pena eseguirlo nuovamente
 - Puoi vedere quanti pod sono registrati come endpoint e verificare se sono tutti in salute (stato `Ready: true`)
-- Se stai facendo un Rollig update o scaling, guardare gli endpoint ti permette di verificare la transizione
+- Se stai facendo un Rolling update o scaling, guardare gli endpoint ti permette di verificare la transizione
 - Se stai facendo delle regole di Network Policies o Firewall, puoi verificare gli effettivi IP dei vari pod
 
 ### Ingress
 
-L'ingress è un risorsa di kubernetes che permette di gestire il traffico HTTP/HTTPS in entrata tramite delle regole di configurazione. Tramite questo routing del traffico, permette tramite un solo componente di gestire come esporre le proprie applicazioni nel cluster.
+L'ingress è un risorsa di kubernetes che permette di gestire il traffico HTTP/HTTPS in entrata tramite delle regole di configurazione. Questo routing del traffico permette di gestire come esporre tutte le proprie applicazioni nel cluster tramite un solo componente.
 
 Richiede un Ingress controller come NGINX o Traefik. Questo è un componente attivo che legge le risorse Ingress e le implementa, gestendo routing, TLS, redirect, load balancing. Questo tipo di componente deve essere installato sul cluster, non è presente di default.
 
@@ -435,7 +436,7 @@ Si tratta di un componente che permette di gestire i certificati, la scadenza, i
 
 L'issuer è sostanzalmente la configurazione di chi si occuperà di creare il certificato, ma non lo crea direttamente, anzi, l'issuer può essere utilizzato per diversi Ingress. Inoltre, utilizzando nell'ingress l'annotation `cert-manager.io/cluster-issuer: <nome-del-mio-issuer>` oppure `cert-manager.io/issuer: <nome-del-mio-issuer>`, Cert-Manager in automatico prenderà dalla configurazione di quell'ingress i valori di `tls.hosts` e `tls.secretName` e li userà per creare automaticamente il certificato, senza che tu debba scrivere il relativo yaml a mano.
 
-Invece di usare l'Helm Repo che è il metodo tradizionale, per Cert-Manager consigliano di usare OCI Registry che è un registro standard per i package, anche quelli di K9S. Questo non richiede di fare `add repo` e `update`, ma si può usare direttamente questo comando:
+Invece di usare l'Helm Repo che è il metodo tradizionale, per Cert-Manager consigliano di usare OCI Registry che è un registro standard per i package, anche quelli di Kubernetes. Questo non richiede di fare `add repo` e `update`, ma si può usare direttamente questo comando:
 
 ```shell
 helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.18.2 --namespace cert-manager --create-namespace --set crds.enabled=true
@@ -456,7 +457,7 @@ Quello descritto è il processo automatico di creazione di PV, si possono anche 
 
 ### Storage Class
 
-Definisce come creareun PersistentVolume per K8S in modo dinamico. Si possono creare delle storage class personalizzate oppure utilizzare quelle di default e solitamente ce n'è una marcata come "default".
+Definisce come creare un PersistentVolume per K8S in modo dinamico. Si possono creare delle storage class personalizzate oppure utilizzare quelle di default e solitamente ce n'è una marcata come "default".
 
 Le configurazioni più importanti sono:
 
@@ -498,7 +499,6 @@ All'interno di un pod si può mettere l'accesso al PVC utilizzando
 
 - **volumes**: per indicare quali PVC sono utilizzati dal Pod e dichiarandone un nome nel contesto del POD
 - **volumeMounts**: associa un PVC, utilizzando il nome precedentemente dichiarato, ad un path del file system dentro al pod
-  Pael
 
 ### Persistent Volume
 
@@ -648,12 +648,12 @@ spec:
 Questa è una condizione che serve ad impedire che certi pod vengano schedulati su certi nodi, con delle condizioni di esclusione. Lo scopo è quello di marcare dei nodi come se fossero esclusivi per certi pod: "non puoi usare questo nodo a meno che non hai una certa proprietà". Al contrario dell'affinity che ha il concetto inclusivo, questo ha un concetto esclusivo.
 Ci sono due proprietà che hanno due obiettivi diversi e collaborano per ottenere il risultato:
 
-- **Taint**: è una proprietà da mettere sul nodo ed è come una spacie di label con <chiave>=<valore>:<effetto>. Per esempio dedicated=support:NoSchedule, dove l'effetto si applica sempre al nodo, a meno che su un pod ci sia la Toleration per quella <chiave>=<valore>. Per la stessa chiave/valore si potrebbero avere sia l'effetto NoSchedule che NoExecute, ma sarebbe ridondante quindi è meglio evitarlo.
+- **Taint**: è una proprietà da mettere sul nodo ed è come una spacie di label con `<chiave>=<valore>:<effetto>`. Per esempio `dedicated=support:NoSchedule`, dove l'effetto si applica sempre al nodo, a meno che su un pod ci sia la Toleration per quella `<chiave>=<valore>`. Per la stessa chiave/valore si potrebbero avere sia l'effetto `NoSchedule` che `NoExecute`, ma sarebbe ridondante quindi è meglio evitarlo.
 - L'effetto può essere:
-  - **NoSchedule**: non viene schedulato alcun pod che non ha il giusto valore di Toleration
+  - **NoSchedule**: non viene schedulato alcun pod che non abbia il giusto valore di Toleration
   - **PreferNoSchedule**: lo schedule cercherà di non usare il nodo per i pod che non hanno il giusto valore di Toleration, ma non è un vincolo stretto che deve essere garantito
   - **NoExecute**: se esistono pod già in esecuzione che non rispettano il giusto valore di Toleration, vengono chiusi e non verranno schedulati nuovi pod sul nodo senza la corretta Toleration. Quindi è come NoSchedule ed inoltre chiude i pod che attualmente stanno girando
-- **Toleration**: è una proprietà del pod che permette di evitare l'effetto del Taint presente su un certo nodo. Tramite delle regole di toleration si definiscono i tre valori <chiave>=<valore>:<effetto> che il pod può aggirare
+- **Toleration**: è una proprietà del pod che permette di evitare l'effetto del Taint presente su un certo nodo. Tramite delle regole di toleration si definiscono i tre valori `<chiave>=<valore>:<effetto>` che il pod può aggirare
 
 ```yaml
 apiVersion: v1
@@ -701,11 +701,12 @@ spec:
 
 #### Autoscaling
 
-Quando le risorse scarseggiano e non si trovano nodi disponibili che soddisfano le condizioni di risorse necessarie, se il cluster è configurato su un Cloud Service, si può attivare l'autoscaling orizzontale, cioè automaticamente viene creato un nuovo nodo per poter assegnare il pod che è stato richiesto in quel momento. Questo è molto utile per automatizzare e minimizzare l'utilizzo di nodi, avendo solamente i nodi attivi che effettivamente servono quando servono.
+Quando le risorse scarseggiano e non si trovano nodi disponibili che soddisfano le condizioni di risorse necessarie, se il cluster è configurato su un Cloud Service, si può attivare l'autoscaling orizzontale, cioè automaticamente viene creato un nuovo nodo per poter assegnare il pod che è stato richiesto in quel momento. Questo è molto utile per automatizzare e minimizzare l'utilizzo di nodi, avendo in esecuzione solamente i nodi attivi effettivamente necessari.
 
 ### Priority & Preemption
 
-Queste configurazioni permettono di dare una priorità ai pod che devono essere terminati quando le risorse disponibili non sono sufficienti durante lo scheduling: la richiesta di esecuzione di un pod con più alta priorità può forzare la chiusura di quelli con più bassa priorità. Al contrario, se in fase di esecuzione le risorse scarseggiano, i pod con bassa priorità non verranno terminati automaticamente.
+Queste configurazioni permettono di dare una priorità ai pod che devono essere terminati quando le risorse disponibili non sono sufficienti durante lo scheduling: la richiesta di esecuzione di un pod con più alta priorità può forzare la chiusura di quelli con più bassa priorità. Al contrario, se in fase di esecuzione le risorse scarseggiano, i pod con bassa priorità non verranno terminati automaticamente. Questo perchè, come sempre in Kubernetes, le regole sono dichiarative e valgono solo al momento in cui vengono eseguite, non in seguito runtime.
+
 Questo comportamento viene gestito tramite le `PriorityClass` che hanno un valore: più il valore è alto più la classe è "importante". Queste PriorityClass vengono assegnate ai Pod per creare questa scala di priorità. Ogni PriorityClass ha una "Preemption Policy" che è la logica con cui una classe con alta priorità forza la chiusura di pod con classi di bassa priorità per liberare risorse quando necessario.
 
 I pod che non definiscono una priorityClass sono considerati a priorità 0, quindi la più bassa e possono sempre essere preemptied da pod con una priorità definita più alta. Si può creare una PriorityClass di default (`globalDefault: true`) per quelli che non l'hanno definita. Sulla PriorityClass si può anche mettere la configurazion `preemptionPolicy: Never` per evitare che di terminare i pod con minore priorità quando un pod con questa classe viene schedulato (invece di `preemptionPolicy: PreemptLowerPriority` che è quella di default).
@@ -744,7 +745,7 @@ spec:
 
 ### Topology Spread Constraints
 
-Si di una configurazione che permette di regolare la distribuzione dei pod nei nodi in maniera più distribuita ed equilibrata. Puoi definire che un deployment distribuisca i suoi pod in vari nodi o in varie zone invece che tutti nello stesso nodo. Senza questa configurazione, kubernetes non ha una regola e potrebbe eseguire tutti i pod sullo stesso nodo.
+Si tratta di una configurazione che permette di regolare la distribuzione dei pod nei nodi in maniera più distribuita ed equilibrata. Puoi definire che un deployment distribuisca i suoi pod in vari nodi o in varie zone invece che tutti nello stesso nodo. Senza questa configurazione, kubernetes non ha una regola e potrebbe eseguire tutti i pod sullo stesso nodo.
 
 Le zone sono solitamente definite dal Cloud provider che marca i nodi con l'etichetta "topology.kubernetes.io/zone" le zone geografiche in cui i nodi risiedono effettivamente.
 
@@ -780,7 +781,7 @@ spec:
 
 ### PodDisruptionBudget (PDB)
 
-Questa è una risorsa specifica di kubernetes che permette di definire delle regole su quanti pod possono essere interrotti contemporaneamente durante un "Disruption" volontario, come un aggiornamento del nodo, autoscaling o manutenzione. Permette di definer una soglia minima di disponibilità per un gruppo, in questo modo se tutti i pod di un nodo devono essere terminati, non vengono terminati insieme ma si aspetta sempre di averne un certo numero in esecuzione prima di terminarne altri: quindi ne termino alcuni che si riavviano su un altro nodo e una volta avviati posso terminarne altri fino a completare il processo.
+Questa è una risorsa specifica di kubernetes che permette di definire delle regole su quanti pod possono essere interrotti contemporaneamente durante un "Disruption" volontario, come un aggiornamento del nodo, autoscaling o manutenzione. Permette di definere una soglia minima di disponibilità per un gruppo, in questo modo se tutti i pod di un nodo devono essere terminati, non vengono terminati insieme ma si aspetta sempre di averne un certo numero in esecuzione prima di terminarne altri: quindi ne termino alcuni che si riavviano su un altro nodo e una volta avviati posso terminarne altri fino a completare il processo.
 
 Tramite un selettore a livello di label si definisce su quale gruppo il PDB lavora, poi si definisce se si vogliono avere un `minAvailable` numero di pod oppure un `maxUnavailable`, ma non puoi configurare entrambi.
 
@@ -842,7 +843,7 @@ L'autorizzazione viene invece gestita tramite:
 - **Role**: componenti che definiscono le risorse a cui puoi accedere e che operazioni puoi fare su quelle risorse (`verbs`)
   - Il `Role` è ristretto al relativo namespace, mentre se si vuole che quella regola valga per tutto il cluster si deve creare un `ClusterRole`. Le risorse Cluster-wide come "nodes", "persistentvolumes", "namespaces" possono essere gestite solamente da un `ClusterRole`
 - **RoleBinding**: associa un ruolo ad uno User o ServiceAccount assegnandogli effettivamente dei permessi specifici
-  - Il `RoleBinding` può essere usato per associare sia un `Role` che un `ClusterRole`. Se si associa un `ClusterRole` tramite `RoleBinding` allora se ne limiteranno i permessi al namespace del `RoleBinding`. Se altrimenti si vuole dare i permessi Cluster-wide si deve usare `ClusterRoleBinding`
+  - Il `RoleBinding` può essere usato per associare sia un `Role` che un `ClusterRole`. Precisazione: anche se si associa un `ClusterRole` (quindi Cluster-wide), ma usando `RoleBinding` allora se ne limiteranno i permessi al namespace del `RoleBinding`. Se altrimenti si vuole dare i permessi Cluster-wide si deve usare `ClusterRoleBinding`
 
 Ogni role ha tre campi fondamentali: apiGroups, resources, verbs
 
@@ -924,7 +925,7 @@ I passaggi per installare una chart sono i seguenti:
 - Aggiornare i repo all'ultima versione sul tuo client helm
 - Installare il componente tramite quella chart
   - Darai un nome alla Release, cioè all'installazione
-  - Punterai alla chart tramite "<nome repo al momento di helm repo add>/<chartname dentro il repo, visibile su Chart.yaml>"
+  - Punterai alla chart tramite `<nome repo al momento di helm repo add>/<chartname dentro il repo, visibile su Chart.yaml>`
 
 Per esempio questa è l'installazione di Traefik:
 
@@ -957,7 +958,7 @@ Se vuoi aggiornare il tuo componente perchè hai cambiato qualcosa al tuo file d
 helm upgrade traefik traefik/traefik --namespace=traefik -f traefik-values.yaml
 ```
 
-Puoi disistallare un componente tramite helm, rimuovendolo completamente:
+Puoi disinstallare un componente tramite helm, rimuovendolo completamente (alcune chart non disinstallano le CRD, ma ti indicano le istruzioni per disinstallarle manualmente nel caso servisse):
 
 ```shell
 helm uninstall traefik --namespace=traefik

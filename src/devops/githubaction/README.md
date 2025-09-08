@@ -5,7 +5,7 @@
 ## Descrizione
 
 GitHub Action è un sistema che permette di eseguire dei workflow `yaml` definiti nella cartella `.github/workflows` del tuo repository che vengono eseguiti sulla base di certi eventi (on push di un commit per esempio).
-L'esecuzione viene fatta su una macchina virtuale, chiamata runnner, solitamente fornita da GitHub, ma potrebbe essere anche Self-Hosted.
+L'esecuzione viene fatta su una macchina virtuale, chiamata runner, solitamente fornita da GitHub, ma potrebbe essere anche Self-Hosted.
 
 Lo scopo è quello di automatizzare processi legati al ciclo di vita del software (come versionamento, testing, deploy...), ma anche eseguire azioni su sistemi esterni con cui ci si può integrare.
 
@@ -24,13 +24,13 @@ Alcuni casi d'uso:
   - condizioni che scatenano l'esecuzione del flusso, possono anche essere limitate (come on push, ma solamente se si modificano certe risorse
 - Job:
   - è l'insieme di processi che si innescano, in maniera parallela se non ci sono particolari dipendenze.
-  - ogni job viene eseguito su un runner che è una virtual machine separata, che viene definito e solitamente è una macchina virtuale linux
-  - i file creati in un job non sono accessibili da altri job, ma job può rendere accessibili gli outputs, la cache e gli artifacts
+  - ogni job viene eseguito su un runner, che è una virtual machine separata definita nella configurazione dell'action (solitamente è una macchina virtuale linux)
+  - i file creati in un job non sono accessibili da altri job, ma job si può rendere accessibili gli outputs, la cache e gli artifacts
 - Step:
   - sono le singole unità che vengono compiute, una dopo l'altra, nel job.
   - gli step possono produrre output ed utilizzare gli output degli step precedenti. Per accedere agli output di uno step, quello step deve definire un "id"
   - si possono fare condizioni di esecuzione sulla base dei risultati degli step precedenti (solo se uno step specifico è completato con un successo eseguo il seguente step)
-  - gli step si possono basare su delle action o delle istruzioni "run" come se fossi nella shell del runner
+  - gli step si possono basare su delle action o delle istruzioni "run" che sono come delle istruzioni lanciate direttamente dalla shell del runner
 - Action:
   - Le action possono essere sviluppate e pubblicate da terze parti oppure internamente
   - la action di checkout `actions/checkout` del codice di default ha un "fetch-depth" di 1 per renderlo più leggero, se vuoi l'history devi definire il relativo parametro
@@ -165,7 +165,7 @@ permissions:
   pull-requests: write
 ```
 
-Questo token è spesso sufficiente per le operazioni all'interno del proprio contesto di repository, ma se non fosso abbastanza allora si deve creare un PAT (Personal Access Token) con dei permessi ulteriori e metterlo come secret utilizzabile dal workflow.
+Questo token è spesso sufficiente per le operazioni all'interno del proprio contesto di repository, ma se non fosse abbastanza allora si deve creare un PAT (Personal Access Token) con dei permessi ulteriori e metterlo come secret utilizzabile dal workflow.
 
 Si usa un PAT quando:
 

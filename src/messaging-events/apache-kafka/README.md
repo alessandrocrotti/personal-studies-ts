@@ -7,14 +7,16 @@
   - [Installazione](#installazione)
   - [Interfaccia web](#interfaccia-web)
   - [Utilizzo](#utilizzo)
+    - [Admin](#admin)
+    - [Producer / Consumer](#producer--consumer)
 
 ## Descrizione
 
-Si tratta di un broker distribuito che gestisce lo streaming di eventi. Simile ad un broker AMQP come RabbitMQ, ma il funzionamento è un po differente.
+Si tratta di un broker distribuito che gestisce lo streaming di eventi. Simile ad un broker AMQP come RabbitMQ, ma il funzionamento è un po' differente.
 
 - Non usa il protocollo AMQP, ma un protocollo proprietario
 - Gli eventi non vengono rimossi una volta consumati, anzi rimangono con un tempo di vita o in modo permanente per essere riletti più volte
-- Si possono consumare coe fossero messaggi, ma si può gestire lo stream di eventi anche in modo più articolato per fare query
+- Si possono consumare come fossero messaggi, ma si può gestire lo stream di eventi anche in modo più articolato per fare query
 
 ### Struttura
 

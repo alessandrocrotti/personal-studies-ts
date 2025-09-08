@@ -81,7 +81,7 @@ async function headersExample() {
 async function rpcExample() {
   const queueName = "rpc-queue";
 
-  // Start the RPC server
+  // Start the RPC server, which listens for requests and defines the logic to process received messages
   await consumeRpcRequests(queueName, async (msg) => {
     // Example: return the reversed string
     return msg.split("").reverse().join("");

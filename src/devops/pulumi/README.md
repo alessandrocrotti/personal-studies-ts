@@ -34,9 +34,9 @@ Pulumi ha deversi progetti interni:
 
 Essendo la funzione base di Pulumi che ti permette di creare codice in maniera automatica sul cloud, è anche quella più importante da conosce. Ci sono diversi comandi utili, ma vale la pena vedere solo quelli principalmente usati.
 
-Il principio alla base di questo componente è quello di evitare di creare o gestire elementi tramite interfaccia, per rendere il tutto più automatizzato possibile. Questo di va a combinare anche con IDP, ma nel caso più semplice, vale anche solo la pena verificare come creare un cluster Kubernetes totalmente gestito da Pulumi. Ci sono altre funzioni e componenti cloud che possono essere automatizzati, vale la pena valutarli progetto per progetto.
+Il principio alla base di questo componente è quello di evitare di creare o gestire elementi tramite interfaccia, per rendere il tutto più automatizzato possibile. Questo si va a combinare anche con IDP, ma nel caso più semplice, vale anche solo la pena verificare come creare un cluster Kubernetes totalmente gestito da Pulumi. Ci sono altre funzioni e componenti cloud che possono essere automatizzati, vale la pena valutarli progetto per progetto.
 
-Ogni progetto di pulumi può avere una o più stack. Gli stack solitamente rappresentano un progetto su un certo ambiente (dev, prod) con le relative configurazioni. Ogni stack è indipendente e permette di gestire le risorse di quel progetto basandosi sulle specifiche configurazioni di quello stack.
+Ogni progetto di pulumi può avere uno o più stack. Gli stack solitamente rappresentano un progetto su un certo ambiente (dev, prod) con le relative configurazioni. Ogni stack è indipendente e permette di gestire le risorse di quel progetto basandosi sulle specifiche configurazioni di quello stack.
 
 Step:
 
@@ -46,7 +46,7 @@ Step:
 - Creare un progetto: ogni progetto ha un template con cui Pulumi stesso crea la base di tale progetto, il progetto più semplice da gestire localmente è quello di kubernetes in typescript. Durante l'inizializzazione ti chiede anche lo stack che vuoi, solitamente "dev". Successivamente si possono creare anche altri Stack se necessari. Il progetto potrebbe richiedere configurazioni addizionali sul tsconfig.json nel caso si gestisse il progetto su più file e cartelle
   - `pulumi new kubernetes-typescript` (senza il parametro "kubernetes-typescript", pulumi ti permette di sceglierne uno dalla sua lista durante la creazione)
 - Aggiungere qualche risorsa al tuo progetto: questo dipende dal tuo scopo
-- Eseguire il progetto sullo stack che vuoi: pulumi ha una configurazione che ricorda lo stack di default che stai usando se non definisci esplicitamente l'option `-s`. Eseguire lo stack significa indicare a pulumi che deve portare lo stato attuale allo stato dichiarato dal tuo codice. Ti presenterà un riassunto delle modifiche che saranno apportate e tu potrai confermare se proceder
+- Eseguire il progetto sullo stack che vuoi: pulumi ha una configurazione che ricorda lo stack di default che stai usando se non definisci esplicitamente l'option `-s`. Eseguire lo stack significa indicare a pulumi che deve portare lo stato attuale allo stato dichiarato dal tuo codice. Ti presenterà un riassunto delle modifiche che saranno apportate e tu potrai confermare se procedere
   - `pulumi up`
 - Rimuovere le risorse del tuo progetto: se vuoi rimuovere le risorse dal cloud, come per esempio cancellare il tuo cluster kubernetes o le risorse su esso (dipende dal codice del tuo progetto Pulumi), puoi distruggerle. Questo non cancella lo stack stesso che può quindi essere ricreato e, inoltre, mantiene tutta la sua history.
   - `pulumi destroy`
@@ -103,11 +103,11 @@ Localmente si può utilizzare Pulumi per gestire il proprio minikube. Pulumi ste
 minikube start -p minikube-pulumi
 ```
 
-IMPORTANTE: se si volesse aggiungere risorse già esistenti a pulumi, non si devono creare ma importare. Tramite CLI si possono definire nello state di Pulumi delle risorse esistenti e quindi gestirle nel codice del proprio progetto come se fossero state create da Pulumi stesso. Questo per mette il vantaggio di adattare un progetto esistente, anche se è preferibile partire con un progetto pulito.
+IMPORTANTE: se si volesse aggiungere risorse già esistenti a pulumi, non si devono creare ma importare. Tramite CLI si possono definire nello state di Pulumi delle risorse esistenti e quindi gestirle nel codice del proprio progetto come se fossero state create da Pulumi stesso. Questo permette di adattare un progetto esistente, anche se è preferibile partire con un progetto pulito.
 
 Il progetto creato per pulumi ha lo scopo di gestire le risorse del `devops/kubernetes/my-example-cluster` interamente tramite pulumi, inclusa l'installazione dei componenti tramite Helm.
 
-Creare un progetto tramite Typescript significa anche scegliere se svilupparlo usando le classi oppure lo script classico. Il suggerimento è sempre di passare ad una gestione tramite classi, che permette di strutturare il codice meglio nel caso di progetti grandi. Quindo ogni classe deve estendere la `pulumi.ComponentResource` che gestisce il componente su pulumi.
+Creare un progetto tramite Typescript significa anche scegliere se svilupparlo usando le classi oppure lo script classico. Il suggerimento è sempre di passare ad una gestione tramite classi, che permette di strutturare il codice meglio nel caso di progetti grandi. Quindi ogni classe deve estendere la `pulumi.ComponentResource` che gestisce il componente su pulumi.
 
 ### Pulumi Secrets
 
@@ -134,9 +134,9 @@ kubectl delete crd -l app.kubernetes.io/name=cert-manager
 
 ### MongoDB
 
-Si può utilizzare l'Helm Chart come "Release" in modo da considerare l'intera installazione come un unico componente a livello di pulumi. Questo significa che si deve intervenire sui `values` della chart per modificarlo e non si può accedere puntualmente nel codice di Pulumi ai singoli componenti generati dalla chart.
-L'alternativa sarebbe crearla come "Chart" che permette a Pulumi di collegare ad ogni componente generato da Helm ad un componente di Pulumi, ma vale la pena farlo solamente se effettivamente devi accedere a quei componenti nel codice.
+Si può utilizzare l'Helm Chart come `k8s.helm.v3.Release` in modo da considerare l'intera installazione come un unico componente a livello di pulumi. Questo significa che si deve intervenire sui `values` della chart per modificarlo e non si può accedere puntualmente nel codice di Pulumi ai singoli componenti generati dalla chart.
+L'alternativa sarebbe crearla come `k8s.helm.v3.Chart` che permette a Pulumi di collegare ad ogni componente generato da Helm ad un componente di Pulumi, ma vale la pena farlo solamente se effettivamente devi accedere a quei componenti nel codice.
 
 ### Traefik
 
-Come per MongoDB, installato utilizzando l'Helm Chart come "Release".
+Come per MongoDB, installato utilizzando l'Helm Chart come `k8s.helm.v3.Release`.

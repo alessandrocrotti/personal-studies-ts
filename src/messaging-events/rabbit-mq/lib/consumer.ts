@@ -90,6 +90,13 @@ export async function consumeHeadersExchange(exchange: string, bindingHeaders: R
   );
 }
 
+/**
+ * Questa è una generica funzione per consumare richieste RPC da una coda RabbitMQ.
+ * Quando usi questa funzione, devi definire anche la funzione `onRequest` che processa il messaggio ricevuto e restituisce una risposta.
+ * Questo permette di dare una qualsiasi generica logica di business per processare le richieste RPC.
+ * @param queue la coda principale su cui sia producer che consumer si connettono
+ * @param onRequest la funzione RPC che si applica al messaggio ricevuto e si restituisce nel messaggio di risposta
+ */
 export async function consumeRpcRequests(queue: string, onRequest: (msg: string) => Promise<string> | string) {
   const connection = await getConnection();
   const channel = await connection.createChannel();
@@ -97,9 +104,13 @@ export async function consumeRpcRequests(queue: string, onRequest: (msg: string)
   await channel.assertQueue(queue, { durable: false });
   channel.consume(queue, async (msg) => {
     if (msg) {
+      // Ottengo il messaggio di richiesta
       const content = msg.content.toString();
+      // Applico la logica di business definita in `onRequest`
       const reply = await onRequest(content);
+      // Invio la risposta al client tramite la coda di reply specificata nelle properties del messaggio di richiesta
       channel.sendToQueue(msg.properties.replyTo, Buffer.from(reply), { correlationId: msg.properties.correlationId });
+      // Confermo di aver processato il messaggio sulla coda principale
       channel.ack(msg);
       console.log(`RPC request processed: ${content} -> ${reply}`);
     }

@@ -23,10 +23,10 @@ Docker è un sistema per eseguire dei programmi in the _container_. I _container
 
 Differenza tra Docker Container e Virtual Machine:
 
-- la virtual machine emula anche il kernel del sistema operativo, cioè la parte che gestisce la comunicazione tra software e hardware
+- la virtual machine ha un sistema operativo completo del kernel, cioè la parte che gestisce la comunicazione tra software e hardware, e usa hypervisor per emulare l'hardware
   - Più lento nell'avvio e nelle performance
   - Utilizza molta più memoria e spazio sul disco
-- il Docker Container usano il kernel della macchina su cui sono installati
+- il Docker Container un sistema operativo parziale senza kernel e con il minimo indispensabile per eseguire le applicazioni, come kernel viene usato quello del sistema operativo della macchina su cui è installato Docker
   - tutto molto più veloce e vicino alle performance della macchina su cui è installato
   - Utilizza molta meno memoria e spazio su disco
 
@@ -38,7 +38,7 @@ Una volta installato, girerà un servizio Docker Deamon che permette di eseguire
 
 ## Containers VS Images
 
-Le Images sono come dei template per i container dove sono specificate le configurazioni con cui creare il container (come file system, users, comandi, variabili d'ambiente...). Sono come la ricetta per creare un container e sono ciò che devi scaricare e condividere per poter utilizzare la tua applicazione su altre macchine.
+Le Images sono come dei template per i container dove sono specificate le configurazioni con cui creare il container (come sistema operativo, file system, users, comandi, variabili d'ambiente...). Sono come la ricetta per creare un container e sono ciò che devi scaricare e condividere per poter utilizzare la tua applicazione su altre macchine.
 
 ```shell
 # Lista delle images scaricate
@@ -84,7 +84,8 @@ docker run nginx
 Se ora visiti http://localhost non raggiungi la pagina di NGINX, perchè il container non pubblica nessuna porta su cui è in ascolto
 
 ```shell
-# CTRL+C per interropere l'esecuzione del container precedente e lanciamolo nuovamente esponendo la porta 80. Verrà creato un nuovo container in questo modo. Se i volesse esporre sulla porta 5000 invece che 80, si deve fare -p 5000:80.
+# CTRL+C per interropere l'esecuzione del container precedente e lanciamolo nuovamente esponendo la porta 80.
+# Verrà creato un nuovo container in questo modo. Se i volesse esporre sulla porta 5000 invece che 80, si deve fare -p 5000:80.
 docker run -p 80:80 nginx
 ```
 
@@ -145,11 +146,12 @@ docker tag my-image my-image:latest
 ## Debug sui Container
 
 Si può utilizzare Docker Desktop e, dentro un container, c'è la sezione "Exec" dove utilizzare una shell all'interno del container.
-Alternativamente si possono lanciare i comandi dentro il container utilizzando;
+Alternativamente si possono lanciare i comandi dentro il container utilizzando:
 
 ```shell
 # Aprire una bash del terminale dentro il container
-# Le option "i" servervono per poter avere input e output, quindi poter interagire con la shell, t server per "TTY" cioè utilizzare l'autocompletamente e l'history della shell dentro il container
+# Le option "i" servervono per poter avere input e output, quindi poter interagire con la shell,
+# "t" serve per "TTY" cioè utilizzare l'autocompletamento e l'history della shell dentro il container
 docker exec -it my-nginx /bin/bash
 ```
 
@@ -214,7 +216,7 @@ Questi Layer sono immutabili e non si influenzano l'un l'altro: se io eseguo un 
 
 I vantaggi dei layer:
 
-- Caching intelligente: se un layer non è stato modificato, non viene rieseguito. Essendo layer sovrapposti, se un layer sottostante cambia, i layer sovrastanti devono essere rieseguiti
+- Caching intelligente: se un layer non è stato modificato, non viene rieseguito. Essendo layer sovrapposti, se un layer precedente cambia, i layer successivi devono essere rieseguiti
   - se un comando interagisce col tuo file system host, come `COPY . /app`, Docker è in grado di rieseguire il comando solo se cambia qualcosa dentro `.`. Facendo il checksum della cartella e confrontandolo per verificare se è cambiato qualcosa
 - Risparmio dello spazio: i layer in comune tra più image vengono condivisi
 
@@ -228,7 +230,7 @@ Best practices:
 
 Dockerfile sono dedicati a singole immagini e comunque componenti singoli. Le applicazioni solitamente sono più complesse, fatte da un insieme di componenti.
 
-Tramite il `docker-compose.yml` si possono creare una serie di service, che sono i componenti della nostra applicazione, e tramite i comandi di docker composi si possono gestire tutti insieme (ovviamente ogni comando può essere fatto in background usando l'option `-d`):
+Tramite il `docker-compose.yml` si possono creare una serie di service, che sono i componenti della nostra applicazione, e tramite i comandi di docker compose si possono gestire tutti insieme (ovviamente ogni comando può essere eseguito in background usando l'option `-d`):
 
 ```shell
 # Build delle immagini di ogni service
@@ -247,7 +249,7 @@ Le immagini che crei, possono essere pubblicate su un registry pubblico o privat
 
 Ci vuole un account su Docker Hub per poter pubblicare le immagini. Su Docker Hub esiste il concetto di Repository che rappresenta una immagine. Dentro un repository ci possono essere tanti tag della stessa immagine, per avere varie versioni di essa.
 
-Pubblicare sul registri richiede che:
+Pubblicare sul registry richiede che:
 
 - L'immagine venga buildata in locale, puoi farlo sia con Dockerfile che con DockerCompose
 - Taggare l'immagine utilizzando il pattern `<your_docker_id>/<image_name>:<tag>`
@@ -263,14 +265,16 @@ docker tag my-example-image-fe allecrotti/my-example-image-fe:latest
 docker image ls
 ```
 
-- Pubblicare l'immagine taggata sul repository di DockerHub come repository pubblico
+- Pubblicare l'immagine taggata sul registry di DockerHub come repository pubblico
 
 ```shell
+# Questo è un repository per my-example-image-be sullo user allecrotti
 docker push allecrotti/my-example-image-be:latest
+# Questo è un altro repository per my-example-image-fe sullo user allecrotti
 docker push allecrotti/my-example-image-fe:latest
 ```
 
-- Se si vuole utilizzare un repository privato, lo si può creare prima come privato o modificare la visibilità di uno esistente in privato (ma ogni utente base ha un solo repository privato)
+- Se si vuole utilizzare un repository privato, lo si può creare prima come privato o modificare la visibilità di uno esistente in privato (ma ogni utente base ha un solo repository privato gratuito)
 
 A questo punto è possibilie utilizzare l'immagine pubblicata al posto di quella buildata localmente:
 

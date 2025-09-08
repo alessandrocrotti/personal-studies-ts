@@ -5,10 +5,13 @@
   - [Installazione](#installazione)
   - [Interfaccia web](#interfaccia-web)
   - [Utilizzo](#utilizzo)
+    - [Producer/Consumer](#producerconsumer)
+    - [Exchange](#exchange)
+    - [RPC: Remote Procedure Calls](#rpc-remote-procedure-calls)
 
 # Descrizione
 
-Si tratta di un Broker di messaggi su protocollo AMQP. Gestiste la connessione con _producer_ e _consumer_ per gestire integrazioni asyncrone tra sistemi diversi.
+Si tratta di un Broker di messaggi su protocollo AMQP. Gestisce la connessione con _producer_ e _consumer_ per utilizzare integrazioni asincrone tra sistemi diversi.
 
 ## Installazione
 

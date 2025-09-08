@@ -34,7 +34,7 @@ Descrizione dei framework utilizzati in contesti NodeJS e Typescript
 
 Quando si vuole fare un progetto partendo da zero, si devono scegliere 2 strade, se usare CommonJS o ES-Module:
 
-- **CommonJS** è la gestione più vecchia, ma anche più stabile del codice JS. Ci sono diversi tool che lavorano bene e spesso non si hanno problemi nelle configurazioni. Per i progetti backend solitamente va benissimo, mentre i frontend utilizzano ES-Module. Normalmente tutti usano questo attualmente
+- **CommonJS** è la gestione più vecchia, ma anche più stabile del codice JS. Ci sono diversi tool che lavorano bene e spesso non si hanno problemi nelle configurazioni. Per i progetti backend solitamente va benissimo, mentre i frontend utilizzano ES-Module. Normalmente tutti i backend usano questo attualmente
 - **ES-Module** è la gestione più moderna a moduli ES, dove si possono usare import/export invece di required, ci sono più restrizioni e più specificità nelle configurazioni, ma anche le funzionalità aggiuntive. Solitamente utilizzato per i progetti frontend, ma attraverso dei builder che trasformano il codice in modo che sia compatibile coi browser. Forse in futuro si potrebbe passare a questo, ma per questione di retrocompatibilità non è ancora in atto questo processo
 
 Configurazioni importanti:
@@ -48,7 +48,7 @@ Configurazioni importanti:
     - `"module": "NodeNext",` e `"moduleResolution": "nodenext",`, è compatibile con ES-Modules. **Sarebbe la configurazione preferibile**
   - Se si vuole esplicitare che un file è da interpretare come CommonJS devi mettere l'estensione `.cjs` o `.cts`, altrimenti i `.js` o `.ts` vengono intepretati secondo le relative configurazione di `type` e `module` in `package.json` e `tsconfig.json`
 - **ES-Module**
-  - e in `package.json` non è presente nessun attributo `type` oppure è `"type": "module",` allora si sta usando ES-Module
+  - e in `package.json` è `"type": "module",` allora si sta usando ES-Module
   - la compilazione potrebbe avere dei problemi tramite `tsc` perchè gli import risultanti non hanno l'estensione esplicita e questo crea problemi. Si deve quindi passare per dei builder come `esbuild`.
     - Quando si configura il `tsconfig.json` con `"module": "NodeNext",` e `"moduleResolution": "nodenext",` e si mette nel `package.json` `"type": "module",`, gli import sono automaticamente con l'estensione e anche `tsc` compila correttamente
   - in `tsconfig.json` vale la pena mettere `"module": "NodeNext",` se si vuole usare ES-Module

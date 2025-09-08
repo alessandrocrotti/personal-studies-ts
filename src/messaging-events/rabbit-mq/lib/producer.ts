@@ -41,6 +41,12 @@ export async function sendToHeadersExchange(exchange: string, headers: Record<st
   console.log(`Message sent to headers exchange "${exchange}" with headers ${JSON.stringify(headers)}: ${message}`);
 }
 
+/**
+ * Invia una richiesta RPC inviando un messaggio sulla coda principale e una coda replyTo temporanea su cui leggere il risultato.
+ * @param requestQueue coda principale dove inviare la richiesta
+ * @param message string del messaggio da inviare
+ * @returns
+ */
 export async function sendRpcRequest(requestQueue: string, message: string): Promise<string> {
   const connection = await getConnection();
   const channel = await connection.createChannel();
@@ -50,9 +56,11 @@ export async function sendRpcRequest(requestQueue: string, message: string): Pro
   const correlationId = uuidv4();
 
   return new Promise((resolve) => {
+    // Listen for messages on the reply queue
     channel.consume(
       replyQueue,
       (msg) => {
+        // Check if the correlationId matches. This message is the result of our RPC request
         if (msg && msg.properties.correlationId === correlationId) {
           // Resolve let the caller going on when you have await. This means the deleteQueue will be completed asynchronously.
           resolve(msg.content.toString());
