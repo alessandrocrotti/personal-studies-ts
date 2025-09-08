@@ -52,7 +52,7 @@ GRANT ALL PRIVILEGES ON personal_studies_prisma.* TO 'personal_studies_prisma_us
 FLUSH PRIVILEGES;
 ```
 
-NOTA: con Prisma è necessario l'account di root perchè utilizza delle istruzioni per creare uno shadow db temporaneo. L'alternativa e dare i permessi di creazione e distruzione db all'utente dedicato
+NOTA: con Prisma è necessario l'account di root perchè utilizza delle istruzioni per creare uno shadow db temporaneo. L'alternativa è dare i permessi di creazione e distruzione db all'utente dedicato
 
 ## Funzionamento
 

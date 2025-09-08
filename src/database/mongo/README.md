@@ -129,7 +129,7 @@ db.ordini.aggregate([
 ]);
 ```
 
-Ovviamente anche questo da usare con parsimonia, perchè le relazioni in un database non relazionale non dovrebbero essere così tanto usate. Rallentano le performance, soprattutto se non si usano index, se il match del JOIN non è perfetto, risulterà un valore di array vuoto.
+Ovviamente anche questo da usare con parsimonia, perchè le relazioni in un database non relazionale non dovrebbero essere così tanto usate. Rallentano le performance, soprattutto se non si usano index. Se il match del JOIN non è perfetto, risulterà un valore di array vuoto.
 
 Se si vuole ritornare dentro il campo risultante "datiCliente" un oggetto singolo, utile quando si fa match con una chiave per cui sei certo restituisca 0 o 1 elemento, si può usare l'operator `$unwind`. Questo operatore crea un documento per ogni elemento dentro un array, quindi se l'array contiene solo un elemento, il risultato sarà comunque un solo documento.
 
@@ -178,5 +178,5 @@ La ragione è che:
 
 - Mongoose è un Object Data Modeling valido solamente per la tua applicazione nodeJS, non è trasversale a chiunque usi quel database di Mongo, quindi può creare complessità e disallineamente
 - Inoltre la JSON Schema validation è valida solo per le Insert e Update e volendo si può anche mettere la validazione solo per le Insert, in questo modo le modifiche dello schema non intaccano i dati già esistenti
-- Se si vuole si può bypassare la Document Validation sul singolo insert/update se fosse necessario, mentre con Mongoose non si può
-- Questa flessibilità non c'è in Mongoose. Poi avendo un JSON Schema comune, ogni client può usarlo per creare le sua classi automaticamente.
+- Se si vuole si può bypassare la Document Validation sul singolo insert/update se fosse necessario, mentre con Mongoose non si può; questa flessibilità non c'è in Mongoose
+- Avendo un JSON Schema comune, ogni client può usarlo per creare le sua classi automaticamente.
