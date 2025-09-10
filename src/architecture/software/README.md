@@ -17,6 +17,8 @@
       - [Operazioni Idempotenti](#operazioni-idempotenti)
       - [Gestione dei dati](#gestione-dei-dati)
       - [Container orchestration](#container-orchestration)
+      - [Suggerimenti pratici](#suggerimenti-pratici)
+        - [Repository infra-local](#repository-infra-local)
     - [CQRS (Command Query Responsability Segregation) e Event Sourcing](#cqrs-command-query-responsability-segregation-e-event-sourcing)
       - [CQRS](#cqrs)
       - [Event Sourcing](#event-sourcing)
@@ -305,6 +307,31 @@ Questa strategia introduce la complessità nella gestione della coerenza dei dat
 #### Container orchestration
 
 Solitamente un microservizio viene eseguito tramite un container. In locale è semplice quando si ha una singola esecuzione per ogni service sulla stessa macchina, ma in un cluster è più complesso. Solitamente ci sono più istanze del microservice che girano su nodi diversi, con un load balance (reverse proxy) che gestisce il traffico. Il cluster stesso si occupa di mantenere lo stato coerente dei microservizi (se un container muore, viene eseguito un nuovo container per ripristinare lo stato). Solitamente si usa Kubernetes, ma ci sono altri software e configurazioni specifiche del proprio Cloud Provider.
+
+#### Suggerimenti pratici
+
+##### Repository infra-local
+
+Avere molti microservizi appartenenti allo stesso progetto potrebbe rendere caotico e complesso orchestrarli in locale. Sui server sarà tutto configurato in modo che ogni servizio venga deployato e comunichi con tutti i componenti del tuo cluster, ma in locale non hai questa struttura configurata solitamente. Per questo motivo può essere comodo avere un `infra-local` repository che orchestri localmente i microservizi, lo startup, le ENV, i componenti comuni.
+
+Ipotizziamo di avere un progetto con:
+
+- `service-a` e `service-b`
+  - in NodeJS (ma il linguaggio è poco rilevante)
+  - entrambi hanno bisogno di un DB relazionale (lo stesso)
+  - comunicano tra di loro tramite un message broker
+
+Localmente non hai nulla di tutto ciò, oppure hai il DB e message broker, ma di altri progetti che non vuoi mischiare. La cosa migliore sarebbe avere un `docker-compose.yml` che orchestri tutti i service dell'applicazione:
+
+- il DB ed eventualmente lo inizializza
+- il Message Broker
+- l'ingress come Traefik o NGINX che permetta di avere un unico entrypoint con cui comunicare con tutti i microservizi
+- il service-a e il service-b tramite il suo Dockerfile in cui semplicemente si incapsula il codice dell'applicazione e tramite ENV si punta agli altri servizi (DB e Message broker)
+
+Essendo che il service-a e il service-b hanno il loro repository dedicato, ci sono vari modi per gestire il puntamento tra `infra-local` e quei repo:
+
+- si usa una convenzione, in cui i 3 repo sono tutti allo stesso livello, ognuno nella relativa cartella col nome del repository e il `docker-compose.yml` in `infra-local` può puntare agevolmente al relativo Dockerfile con la convenzione assunta `build: ../service-a`. Questo deve comunque essere definito in un file README.md
+- si configurano i service-a e service-b come Git submodules di `infra-local` in modo che risultino dentro il repo `infra-local` ma siano repo separati. Un po' complesso per l'obiettivo
 
 ### CQRS (Command Query Responsability Segregation) e Event Sourcing
 
