@@ -543,14 +543,29 @@ Ci possono essere 3 tipi di relazione tra i **Bounded Context**:
   - Downstream riceve le informazioni
 - **Free**: nessuna dipendenza tra **Bounded Context**
 
+Il **modello** che qui viene menzionato è l'insieme delle regole, concetti e comportamenti del proprio dominio, ma per chiarire in cosa si riflette realmente e per semplificare, il **modello** è il codice stesso del dominio con le sue classi, interfacce e funzioni. Quando si sceglie di condividere parte del modello, si intende concretamente che si importano le classi da un microservizio ad un altro o alternativamente se ne fa una copia. Quindi se io voglio usare il modello di un altro microservizio, posso avere un monorepo con vari microservizi al suo interno e quindi posso importarli nel mio microservizio, oppure devo pubblicare un package privato del microservizio da importare e importarlo oppure farmi una copia e quindi aggiornare questa copia quando viene cambiata.
+
 Quando diversi **Bounded Context** devono interagire, non hanno lo stesso **Obiquitous Language** anche se si parla dello stesso concetto, per cui ci vuole un modo per comunicare tra contesti diversi: le **Context Map**. Questi sono vari pattern di **Context Map**:
 
 - **Shared kernel**: due **Bounded Context** condividono parte del modello e quindi del linguaggio
-- **Customer-Supplier**: Il downstream (supplier) influenza l'upstream (customer), magari perchè supplier è un contesto esterno, quindi il customer adatta il suo modello al supplier
+  - Questo crea un legame forte tra due progetti che significa letteralmente condividere parte del codice o in un monorepo o importando un package comune
+- **Customer-Supplier**: l'upstream (supplier) influenza il downstream (customer), magari perchè supplier è un contesto esterno, quindi il customer adatta il suo modello al supplier
 - **Conformist**: Il downstream adotta il modello dell'upstream senza modificarlo, quindi il downstream ne adotta anche il linguaggio
-- **Anticorruption Layer (ACL)**: il downstream traduce il modello dell'upstream nel proprio, quindi il linguaggio rimane diviso
+  - Crea un accoppiamento forte, dove se il modello dell'upstream cambia devo immediatamente aggiornare quello del downstream, perchè in questi contesti non si usa un ACL
 - **Open Host Service**: un contesto espone un protocollo/API standard per tutti e il linguaggio è definito dal contratto dell'api
+  - Usato quando si vuole esporre dei servizi pubblici e usati da tanti domini, indipendentemente da quali essi siano. Il microservizio che espone è neutro rispetto a chi lo utilizza. Tipo il SSO di Azure è di questo tipo, permette di interfacciarsi e fare le operazioni genericamente da tutti i domini degli utilizzatori
+  - Spesso combinato col **Published Language**
 - **Published Language**: i dati/eventi condivisi usano un linguaggio comune e documentato per le integrazioni
+  - Non è una relazione, ma semplicemente l'esposizione di uno schema pubblico che permette a tutti di interagire con il tuo servizio upstream, come OpenAPI
+  - Normalmente utilizzato per API pubbliche o condivise da molti progetti
+  - Permette di validare i dati e generare i client automaticamente
+- **Anticorruption Layer (ACL)**: il downstream traduce il modello dell'upstream nel proprio, quindi il linguaggio rimane diviso
+  - Ha la funzione di creare un layer dove posso: rimappare i DTO in oggetti di dominio, validare i campi per essere indipendente dalla fonte esterna.
+  - Solitamente si usa più con le chiamate esterne o con modelli molto instabili che possono cambiare spesso anche se interni, mentre è meno usato per servizi interni soprattutto se ci lavorano gli stessi team
+  - Vive nel dominio stesso, ma solitamente nel layer più esterno (Application Layer)
+  - Logicamente l'ACL lavora nel flusso inbound quando ricevi response da chiamate esterne, perchè qui non hai il controllo su quello che ricevi. Se invece esponi una API, sei tu che scegli la tua struttura DTO e le validazioni, quindi non serve l'ACL
+  - Quindi in un contesto di questo tipo, si ha `ClientService` che fa la chiamata e riceve la risposta, sotto c'è `ClientAdapter` che lavora per costruire la DTO della request dagli oggetti di domain (flusso outbound), sotto c'è `ClientACL` che mappa/valida la response negli oggetti di domain.
+  - **IMPORTANTE**: questa non è una relazione, ma un componente che si applica ad una delle altre relazioni per rendendere ulteriormente indipendenti (solitamente Customer-Supplier). Viene quindi sempre implementato dal Downstream che è la parte che deve adattarsi all'Upstream e quindi deve proteggersi
 
 Alla fine di tutto lo strategic layer si è prodotto i seguenti documenti:
 
@@ -652,8 +667,10 @@ Questo processo garantisce che i dati inviati e ricevuti siano gli stessi, ma ri
 
 ### Authentication / Authorization
 
-- L'authorization è quell'operazione che risponde alla domanda _"puoi accedere a questa risorsa?_" e quindi definisce cosa puoi fare.
 - L'authentication è quella operazione che risponde alla domanda _"sei davvero chi dici di essere?"_ implementando il login e definendo che utente sta navigando l'applicazione.
+  - Sostanzialmente questo è il login all'applicazione e le informazioni che identificano l'utente
+- L'authorization è quell'operazione che risponde alla domanda _"puoi accedere a questa risorsa?_" e quindi definisce cosa puoi fare.
+  - Sostanzialmente questo rappresenta cosa l'utente loggato può fare rispetto al suo ruolo e i suoi permessi. Serve quando si hanno utenti diversi con ruoli differenti che lavorano sulla stessa applicazione e attraverso l'authorization permetti di fare cose diverse. Quindi sia il frontend che il backend devono gestire il sistema di autorizzazione per mostrare e permettere di utilizzare una certa funzione solo a chi è stato dato il relativo permesso
 
 #### Password-based
 
