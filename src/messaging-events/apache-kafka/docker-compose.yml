@@ -3,24 +3,40 @@ name: personal-studies-kafka
 services:
   kafka:
     image: apache/kafka:4.0.0
-    container_name: kafka-kraft
     ports:
       - "9092:9092" # Accesso esterno dal tuo host
     environment:
+      # Configurazione per KRaft mode (senza ZooKeeper)
+      # ID del nodo Kafka, deve essere un intero unico per ogni broker, serve per il quorum controller e replica
       KAFKA_NODE_ID: 1
+      # Ruolo del broker, può essere "broker", "controller" o entrambi
       KAFKA_PROCESS_ROLES: broker,controller
+      # Definizione degli endpoint che il broker espone: INTERNAL per comunicazioni interne, EXTERNAL per accesso esterno, CONTROLLER per il controller. 0.0.0.0 significa che ascolta su tutte le interfacce
       KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      # Definizione di come il broker si presenta agli altri broker e ai client esterni. INTERNAL usa il nome del servizio Docker "kafka" e la porta 29092 e serve per gli altri broker/container, EXTERNAL usa localhost e la porta 9092 per i client esterni (come Kafka UI)
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      # Mappa di sicurezza dei protocolli per ogni KAFKA_LISTENERS. In locale va bene usare PLAINTEXT, ma in produzione dovresti considerare SSL o SASL
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      # Specifica quale listener usare per le comunicazioni INTERNAL tra broker (deve corrispondere a uno dei KAFKA_LISTENERS definiti sopra)
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      # Specifica quale listener usare per le comunicazioni CONTROLLER tra broker (deve corrispondere a uno dei KAFKA_LISTENERS definiti sopra)
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      # Definizione del quorum dei votanti per il controller, in questo caso c'è un solo broker con ID 1 che funge anche da controller. Deve essere nel formato <nodeId>@<host>:<port> e host deve essere "kafka" perché è il nome del servizio Docker interno tra broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      # ID del cluster, deve essere un UUID unico per il cluster Kafka. Puoi generarlo con `kafka-storage.sh random-uuid`
       KAFKA_CLUSTER_ID: kraft-cluster-12345
+      # Directory per i log dei dati di Kafka, montata come volume per persistenza
       KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # Configurazioni aggiuntive per ottimizzare le prestazioni in un ambiente di sviluppo
+      # Definisce il fattore di replica per i topic interni come __consumer_offsets. In un ambiente di produzione, dovrebbe essere almeno 3
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # Definisce il fattore di replica per i log di stato delle transazioni. In un ambiente di produzione, dovrebbe essere almeno 3
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      # Definisce il numero minimo di repliche in sync per i log di stato delle transazioni. In un ambiente di produzione, dovrebbe essere almeno 2
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      # Delay iniziale per il bilanciamento del carico dei consumer group, 0 per disabilitarlo in sviluppo e accellerare i test, in produzione potrebbe essere 3000 (3 secondi)
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # Numero di partizioni predefinite per i nuovi topic creati senza specificare il numero di partizioni
       KAFKA_NUM_PARTITIONS: 1
     volumes:
       - kafka_data:/var/lib/kafka/data
@@ -29,18 +45,17 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
     ports:
       - "8181:8080" # Kafka UI accessibile su http://localhost:8181
     environment:
       KAFKA_CLUSTERS_0_NAME: local
+      # Usa "kafka:29092" per connettersi al broker Kafka all'interno della rete Docker, usa il valore KAFKA_ADVERTISED_LISTENERS INTERNAL, dove "kafka" è il nome del servizio Docker
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_ZOOKEEPER: "" # Non serve in modalità KRaft
+    depends_on:
+      - kafka
 
 volumes:
   kafka_data:
-    name: kafka-data-volume
   kafka_secrets:
-    name: kafka-secrets-volume
   kafka_config:
-    name: kafka-config-volume

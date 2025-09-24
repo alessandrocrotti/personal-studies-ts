@@ -3,7 +3,6 @@ name: personal-studies-rabbitmq
 services:
   rabbitmq:
     image: rabbitmq:4.1.1-management
-    container_name: rabbitmq
     ports:
       - "5672:5672" # Porta AMQP per le applicazioni
       - "15672:15672" # Interfaccia web di gestione
@@ -15,4 +14,3 @@ services:
 
 volumes:
   rabbitmq_data:
-    name: personal-studies-rabbitmq-data # Volume per i dati persistenti di RabbitMQ con nome specifico

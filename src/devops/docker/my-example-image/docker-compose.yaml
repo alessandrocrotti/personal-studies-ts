@@ -3,7 +3,6 @@ services:
     image: my-example-image-be
     # Per evitare di scaricare una immagine presente sul registry con lo stesso nome di quella locale per errore
     pull_policy: never
-    container_name: my-example-image-be
     build:
       context: ./backend
       dockerfile: Dockerfile.multistage
@@ -19,7 +18,6 @@ services:
     image: my-example-image-fe
     # Per evitare di scaricare una immagine presente sul registry con lo stesso nome di quella locale per errore
     pull_policy: never
-    container_name: my-example-image-fe
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -30,7 +28,6 @@ services:
 
   mongodb:
     image: mongo:8.0.10
-    container_name: my-example-image-mongo
     ports:
       - 27017:27017
     volumes:
@@ -40,7 +37,6 @@ services:
 
   mongo-express:
     image: mongo-express:1.0.2
-    container_name: my-example-image-mongo-express
     ports:
       - 8081:8081
     env_file:
@@ -50,4 +46,3 @@ services:
 
 volumes:
   mongo-data:
-    name: my-example-image-mongo-data
