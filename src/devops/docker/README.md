@@ -237,9 +237,13 @@ Tramite il `docker-compose.yml` si possono creare una serie di service, che sono
 docker compose build
 # Creare e avviare i container legati alle immagini dei service
 docker compose up
-# Stoppare e rimuovere i container legati elle immagini dei service
+# Stoppare e rimuovere i container legati alle immagini dei service, mantenendo i volume creati
 docker compose down
+# Stoppare e rimuovere i container legati alle immagini dei service, rimuovendo anche i volume creati
+docker compose down -v
 ```
+
+**IMPORTANTE**: In generale è consigliato evitare di usare `container_name` e name dei volume, perchè questo diventano globali per docker e se un altro file docker o docker-compose usa lo stesso nome, fallisce l'esecuzione. Lasciando vuoti questi name, verranno creati utilizzando il `name:` del file docker-compose.yml oppure il parametro `-p "project-name"` passato al comando `docker compose up`. Il `name` è sostanzialmente il default project
 
 ## Registry
 
