@@ -23,7 +23,7 @@ In `package.json` there are many other scripts where you can run specific code.
 
 ## Test
 
-You can run automatic test using `jest`
+You can run automatic test using `jest`.
 
 ```Bash
 # Run all automatic test
