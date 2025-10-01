@@ -1,30 +1,33 @@
-# Progetto di studio in Typescript
+# Study Project in Typescript
 
-Progetto totalmente personale, utilizzato come appunti ed esecuzione di algoritmi basilari
+Totally personal project with study purpose-only. This repo contains my notes, code, exercises and PoC of all technologies I've experimented.
+All notes are in Italian just because they should be addressed to myself.
 
-## Installazione
+## Installation
 
-Utilizza `pnpm`
+Use `pnpm`
 
 ```Bash
 pnpm install
 ```
 
-## Esecuzione
+## Execution
 
-Lanciando il seguente comando, si avvia l'esecuzione dell'applicazione per il file `index.ts` e ad ogni salvataggio e modifica del file sorgente, l'applicazione viene rieseguita in tempo reale.
+Running the following command, you can run the application for the file `/src/index.ts` with hot-reload on each saving.
 
 ```Bash
 pnpm dev
 ```
 
+In `package.json` there are many other scripts where you can run specific code.
+
 ## Test
 
-Se si vogliono eseguire dei test automatici, è installata la libreria `jest`
+You can run automatic test using `jest`
 
 ```Bash
-# Esegui tutti i test automatici
+# Run all automatic test
 pnpm test
-# Esecuzione di un singolo test. Importante utilizzare "/" e non "\" perchè pnpm non lo interpreta correttamente
+# Run single test file. Important using "/" instead of "\"
 pnpm test ./path/to/file.test.ts
 ```
