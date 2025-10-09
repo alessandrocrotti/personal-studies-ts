@@ -72,7 +72,7 @@ async function cacheResponse() {
 
       // Con le versioni avanzate di Redis (come enterprise o redis-stack) puoi anche definire i tipi complessi.
       // In questo caso gli avresti passato una stringa che potevi indicare come se fosse di tipo JSON
-      await redis.set(cacheKey, JSON.stringify(data), { EX: 300 }); // cache per 5 minuti
+      await redis.set(cacheKey, JSON.stringify(data), { expiration: { type: "EX", value: 300 } }); // cache per 5 minuti
 
       res.json({
         from: "live",
@@ -102,7 +102,7 @@ async function cacheResponse() {
       }
 
       const risultato = `Titolo: ${data.title}\nContenuto: ${data.body}`;
-      await redis.set(cacheKey, risultato, { EX: 300 }); // cache per 5 minuti
+      await redis.set(cacheKey, risultato, { expiration: { type: "EX", value: 300 } }); // cache per 5 minuti
 
       res.send(`Post ${id} (live): ${risultato}`);
     } catch (err) {
