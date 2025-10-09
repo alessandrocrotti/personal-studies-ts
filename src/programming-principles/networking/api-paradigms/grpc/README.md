@@ -17,7 +17,7 @@ Il principio delle **RPC** in generale è quello di permettere ad un client di c
 
 - Il client chiama una procedura remota (es. `getUser(id)`)
 - Il server esegue la funzione e restituisce il risultato
-- Il la comunicazione e la serializzazione sono astratte: dal punto di vista del codice si deve ragionare ad alto livello come se ci fossero funzioni e non chiamate ad url
+- La comunicazione e la serializzazione sono astratte: dal punto di vista del codice si deve ragionare ad alto livello come se ci fossero funzioni e non chiamate ad url
 
 **gRPC** è una implementazione di questo paradigma che si basa su questi componenti:
 

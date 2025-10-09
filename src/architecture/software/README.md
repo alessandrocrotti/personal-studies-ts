@@ -34,7 +34,7 @@
       - [Strategic DDD](#strategic-ddd)
       - [Tactical DDD](#tactical-ddd)
   - [Protocolli](#protocolli)
-    - [Firma Digitale](#firma-digitale)
+    - [Firma Digitale / Digital Signature](#firma-digitale--digital-signature)
     - [Authentication / Authorization](#authentication--authorization)
       - [Password-based](#password-based)
         - [Sessione](#sessione)
@@ -301,7 +301,7 @@ Questa strategia introduce la complessità nella gestione della coerenza dei dat
 - Usare i pattern **Scheduler Agent Supervisor** e **Compensating Transaction** per mantenere la coerenza tra servizi ed eventuali principi di checkpoint quando si eseguono workflow che eseguono insieme più step transazionali
 - Salvare nel proprio microservizio solo i dati necessari
 - Usare il modello **event-driven** per pubblicare eventi da un microservizio che altri microservizi posso consumare e utilizzare (pub/sub)
-- Se un microservizio invia degli eventi, dovrebbe pubblicare uno schema (JSON Schema, proto o strumenti come [asyncapi](https://www.asyncapi.com/en)) che formalizza gli eventi e come utilizzarli da parte dei subscriber, un contratto sostanzialmente. Tramite lo schema ogni servizio si crea la sua struttura, indipendentemente dal linguaggio e senza condividere classi che creerebbero un accoppiamento. In questo modo il publisher può validare il messaggio prima di inviarlo e il subscriber deserializzarlo alla ricezione
+- Se un microservizio invia degli eventi, dovrebbe pubblicare uno schema (JSON Schema, proto o strumenti come [asyncapi](https://www.asyncapi.com/en)) utilizzando uno Schema Registry che formalizza gli eventi e come utilizzarli da parte dei subscriber, un contratto sostanzialmente. Tramite lo schema ogni servizio si crea la sua struttura, indipendentemente dal linguaggio e senza condividere classi che creerebbero un accoppiamento. In questo modo il publisher può validare il messaggio prima di inviarlo e il subscriber deserializzarlo alla ricezione
 - Se i messaggi sono numerosi, possono essere un collo di bottiglia e devono essere gestiti con aggregation o batch per ridurre il carico
 
 #### Container orchestration
@@ -399,7 +399,7 @@ Complessità:
 - Eventual Consistency: tra la scrittura di un evento e l'aggiornamento del db in lettura è necessario un periodo di sincronizzazione che rende NON Atomica la transazione, quindi ci possono essere dei momenti di non consistenza. Se necessario, si possono adottare delle metodologie per ridurre questo problema
 - Aumento dello storage necessario visto l'utilizzo di 2 database
 - Aumento della complessità e della competenza necessaria per gestire 2 database
-- Il processo di sicronizzazione dei dati inserisce un punto aggiuntivo da sviluppare e che può avere errori e che deve essere analizzato quando ci sono problemi
+- Il processo di sincronizzazione dei dati inserisce un punto aggiuntivo da sviluppare e che può avere errori e che deve essere analizzato quando ci sono problemi
 - I Command potrebbero cambiare nel tempo, ma questi rimangono salvati nello stream, significa che vanno versionati e gestiti i cambiamenti di versione nel tempo
 
 Componenti:
@@ -444,7 +444,7 @@ Le metodologie sono approcci che danno delle linee guida al comportamento da ten
 
 ### SemVer (Semantic Versioning)
 
-[SemVer](https://semver.org/) è un sistema di versionamento a 3 cifre `{major}.{minor}.{patch}-{tag}+{{major}.{minor}.{patch}-{tag}+{buildmetadata}}` comune in moltissimi progetti. Il vantaggio è che tramite la sintassi della versione si riesce a capire i rischi che comporta un upgrade ad una certa versione successiva.
+[SemVer](https://semver.org/) è un sistema di versionamento a 3 cifre `{major}.{minor}.{patch}-{tag}+{buildmetadata}` comune in moltissimi progetti. Il vantaggio è che tramite la sintassi della versione si riesce a capire i rischi che comporta un upgrade ad una certa versione successiva.
 
 - **Major**: Viene incrementato quando si introduce una nuova funzionalità che rompe le nostre API di progetto. Quindi quando si aggiungono delle modifiche che non sono retrocompatibili. **Breaking changes**
   - Quando questo numero è incrementato, Minor e Patch vengono riportate a 0
@@ -563,8 +563,8 @@ Quando diversi **Bounded Context** devono interagire, non hanno lo stesso **Obiq
   - Ha la funzione di creare un layer dove posso: rimappare i DTO in oggetti di dominio, validare i campi per essere indipendente dalla fonte esterna.
   - Solitamente si usa più con le chiamate esterne o con modelli molto instabili che possono cambiare spesso anche se interni, mentre è meno usato per servizi interni soprattutto se ci lavorano gli stessi team
   - Vive nel dominio stesso, ma solitamente nel layer più esterno (Application Layer)
-  - Logicamente l'ACL lavora nel flusso inbound quando ricevi response da chiamate esterne, perchè qui non hai il controllo su quello che ricevi. Se invece esponi una API, sei tu che scegli la tua struttura DTO e le validazioni, quindi non serve l'ACL
-  - Quindi in un contesto di questo tipo, si ha `ClientService` che fa la chiamata e riceve la risposta, sotto c'è `ClientAdapter` che lavora per costruire la DTO della request dagli oggetti di domain (flusso outbound), sotto c'è `ClientACL` che mappa/valida la response negli oggetti di domain.
+  - Logicamente l'ACL lavora nel sia nel mapping inbound (`fromExternalToDomain`) che outbound (`fromDomainToExternal`). Praticamente se espongo una API che mi richiede un sistema esterno/legacy oppure io chiamo una API di un sistema esterno/legacy, l'ACL mi serve per mappare gli oggetti di request e response per come sono nel mio dominio e per come sono all'esterno.
+  - Quindi in un contesto di questo tipo, si ha `ClientService` che fa la chiamata e riceve la risposta, sotto c'è `ClientACL` che lavora per costruire la DTO della request dagli oggetti di domain (flusso outbound) e poi mappa/valida la response negli oggetti di domain.
   - **IMPORTANTE**: questa non è una relazione, ma un componente che si applica ad una delle altre relazioni per rendendere ulteriormente indipendenti (solitamente Customer-Supplier). Viene quindi sempre implementato dal Downstream che è la parte che deve adattarsi all'Upstream e quindi deve proteggersi
 
 Alla fine di tutto lo strategic layer si è prodotto i seguenti documenti:
@@ -583,13 +583,13 @@ Alla fine di tutto lo strategic layer si è prodotto i seguenti documenti:
 
 Una volta definiti i confini, si inizia la modellazione vera e propria degli elementi del **Bounded Context** per poi creare le classi, metodi, interfacce. Questi sono alcuni degli oggetti:
 
-- **Entity**: sostanzalmente una classe con una identità (ID). Il suo stato può cambiare una volta creata (cambiano gli attributi), ma l'entity è la stessa visto che l'ID è lo stesso (wsempio: un utente)
+- **Entity**: sostanzalmente una classe con una identità (ID). Il suo stato può cambiare una volta creata (cambiano gli attributi), ma l'entity è la stessa visto che l'ID è lo stesso (esempio: un utente)
   - Le entità dovrebbero incorporare la loro logica di business e non essere solo dei contenitory di get/set
 - **Value Object**: è una classe che non ha idendità e solitamente esiste in relazione ad un altro oggetto. Non avendo un ID, due value object sono uguali quando i loro attributi sono uguali (esempio: un indirizzo di un utente). Sono oggetti immutabili una volta creati.
-  - Esempi possono esere i colori, le date, gli importi
+  - Esempi possono essere i colori, le date, gli importi
 - **Aggregate**: sono un insieme di entity e value object che sono tutte dipendenti da una singola Root Entity. Questo permette di gestirli insieme perchè sono strettamente legati a quell'entity.
   - L'aggregate contiene la logica che definisce come le entity al suo interno interagiscono, quando tale logica non è dipendente dall'entity stessa ma dall'interazione con le altre all'interno dell'aggregate
-  - L'aggregate contiene le regole di **Invarianza**, cioè quelle regole di validazione che rende l'intero aggregate con tutti le sue entity valido per i principi dell'applicazione (un Agggregate che gestisce un BankAccount valida che non si possa prelevare più del saldo corrente)
+  - L'aggregate contiene le regole di **Invarianza**, cioè quelle regole di validazione che rende l'intero aggregate con tutti le sue entity valido per i principi dell'applicazione (un Aggregate che gestisce un BankAccount valida che non si possa prelevare più del saldo corrente)
   - Nel modello ci si riferisce direttamente alla Root Entity per riferirsi all'aggregato nel suo insieme
   - Le entity e i value object che dipendono dal Root Entity e quindi non sono indipendenti, devono essere messi dentro la stessa cartella dell'aggregate perchè quello è il loro contesto di esistenza; la logica con cui si muovono e per cui esistono è definita lì
 - **Service**: un service è un oggetto che contiene della logica che non ha stato e non è legata a entity e value object. Sostanzalmente sono i metodi che effettuano logiche generiche
@@ -617,7 +617,7 @@ Questa potrebbe essere una mappatura dei concetti di DDD in una Clean Architectu
 
 ```
 src/
-├── domain/                      # Core del modello di dominio
+├── domain/                     # Core del modello di dominio
 │   ├── entities/               # Entità con identità (es. Order, Customer)
 │   ├── aggregates/             # Root + regole di consistenza (es. OrderAggregate)
 │   ├── value-objects/          # Oggetti immutabili senza identità (es. Money, Address)
@@ -653,13 +653,13 @@ src/
 
 ## Protocolli
 
-### Firma Digitale
+### Firma Digitale / Digital Signature
 
 Non è un protocollo in senso stretto, ma più un processo che si occupa di rendere sicuro un flusso di dati attraverso la firma di un hash utilizzando la chiave privata/pubblica di un certificato:
 
 - Si sceglie un protocollo di hashing, per esempio SHA256 + Base64, e si applica questo protocollo per ottenere una stringa hash da una stringa originale (che potrebbe essere un body di una request)
 - Questo hash viene firmato tramite la chiave privata di un certificato, ottenendo una striga criptata
-- Il destinatario otterrà la stringa in chiaro da cui l'hash è stato generato e l'algoritmo utilizzato, per cui ricostruirà l'hash come ha fatto il mittente
+- Il destinatario otterrà sia la stringa in chiaro da cui l'hash è stato generato e l'algoritmo utilizzato, sia la firma digitale. Tramite hash e stringa in chiaro ricostruirà l'hash come ha fatto il mittente
 - Inoltre, sempre il destinatario, utilizzando la chiave pubblica decripterà l'hash firmato e inviato dal mittente per confrontarlo con quello che si è costruito
 - Se il risultato è identico, il file è corretto, altrimenti il file è stato manipolato e non è sicuro
 
@@ -680,7 +680,7 @@ Si inserisce un nome utente e una password "segreta". Il sistema non deve mai sa
 - L'hash viene salvato a database associato allo username
 - Nel processo di autenticazione si applica lo stesso algoritmo allo username e la password inseriti e si verifica che l'hash risultante sia lo stesso di quella salvato a database
 
-Questo processa ha delle vulnerabilità date da: phishing, brute force, riutilizzo della stessa password su vari siti. Per rafforzare questa vulnerabilità intrinseca, si usa:
+Questo processo ha delle vulnerabilità date da: phishing, brute force, riutilizzo della stessa password su vari siti. Per rafforzare questa vulnerabilità intrinseca, si usa:
 
 - **Autenticazione a 2 Fattori o Multi Fattore (2FA / MFA)**: serve un secondo elemento per avere l'approvazione su un dispositivo personale, come la ricezione di un OTP temporaneo sul telefono
 - **Autenticazione biometrica**: è necessaria l'impronta digitale o il riconoscimento facciale

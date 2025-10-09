@@ -57,13 +57,13 @@ Questa struttura mette alla base il database, rendendo difficile il testing e cr
 
 Tutte queste architetture tendono a creare una architettura a cerchi, dove il dominio è la parte centrale e rappresenta le logiche di business dell'applicazione, questa è la parte più astratta e indipendente. Nei cerchi più esterni ci sono i livelli che comunicano con l'esterno, sia inbound che outbound. I livelli esterno possono dipendere dai livelli interni, ma i livelli interni non possono dipendere dai livelli esterni.
 
-Il dominio contiene sia gli oggetti che le logiche strettamente legate al business, ma slegate a concetti esterni come la persistenza a DB o framework esterni. Questo permette di modificare i livelli superiori senza influenzare il dominio. In questo modo la struttura è più manutenibile a lungo termine, anche se più complessa e verbosa da scrivere.
+Il dominio contiene sia gli oggetti che le logiche strettamente legate al business, ma slegate dai concetti esterni come la persistenza a DB o framework esterni. Questo permette di modificare i livelli superiori senza influenzare il dominio. In questo modo la struttura è più manutenibile a lungo termine, anche se più complessa e verbosa da scrivere.
 
 La comunicazione/flusso può essere rispetto al domain:
 
 - **Inbound**: dall'esterno si fa una richiesta verso il domain per avere informazioni o eseguire una azione. Questo flusso sarà poi inverso per la risposta dal domain verso l'esterno, ma questa parte è meno rilevante e complessa
   - per esempio: una chiamata Rest richiede al domain i dati prodotto oppure di applicare ad un prodotto uno sconto. La creazione della Response solitamente è semplicemente un risultato di questa operazione
-- **Outbound**: dall'interno il dominio deve fare una richiesta o eseguire una azione verso l'esterno. L'esterno può essere un altro microservizio, un database o altro. L'idea è che questa comunicazione si verso un altro componente che possa essere "sostituibile"
+- **Outbound**: dall'interno il dominio deve fare una richiesta o eseguire una azione verso l'esterno. L'esterno può essere un altro microservizio, un database o altro. L'idea è che questa comunicazione sia verso un altro componente che possa essere "sostituibile"
   - per esempio: il domain deve salvare su DB un prodotto, quindi chiama un elemento esterno come il DB su cui salva i dati. Il DB è considerato esterno e sostituibile perchè il domain non dovrebbe preoccuparsi della logica con cui i dati persistono, ma solo che esista un componente che chiamando una certa funzione se ne occupi.
 
 Il concetto di layer in queste architetture è sempre concentrico e bisogna capire che più un livello è centrale più è considerato di Alto Livello e quindi più astratto e indipendente da quelli di Basso Livello e più esterni che si occupano concretamente di uno scopo preciso in un modo specifico. Si potrebbe anche visualizzare come un cono (ma nessuno utilizza questa rappresentazione ufficialmente)
@@ -268,8 +268,8 @@ I livelli sono:
   - Cerchio più esterno, solitamente si gestiscono qui DB e servizi esterni, ma anche la configurazione del framework di frontend SENZA le specifiche regole di routing e controller
 - **Interface Adapters**: ricevono input dal mondo esterno e gestisce le risposte
   - Analogo al Adapter Inbound di Exagonal
-  - Più interno perchè all'esterno c'è la struttura del framework che gestisce l'inbound, questo livello ha più lo scopo di gestire i dati in ingresso attraverso il controllee. Combina gli use cases tramite le interfacce per **comporre** la logica e fornire una risposta attraverso il presenter (componente che genera il view model)
-  - Non viene **effettuata** logica a questo livello, viene delegata agli use cases, al massimo ci sono delle mappature degli input e output per gestire l'interazione tra esterno e interno (`controllor riceve -> use case elabora -> presenter crea la response`)
+  - Più interno perchè all'esterno c'è la struttura del framework che gestisce l'inbound, questo livello ha più lo scopo di gestire i dati in ingresso attraverso il controller. Combina gli use cases tramite le interfacce per **comporre** la logica e fornire una risposta attraverso il presenter (componente che genera il view model)
+  - Non viene **effettuata** logica a questo livello, viene delegata agli use cases, al massimo ci sono delle mappature degli input e output per gestire l'interazione tra esterno e interno (`controller riceve -> use case elabora -> presenter crea la response`)
 - **Application / Use Cases**: sono orchestratori che definiscono comportamenti che non appartengono alla singola entity
   - Analogo degli Application Service di Onion
   - Non usa logica di business profonda, ma un workflow di logiche delle entities (per esempio non decide come calcolare il totale dell'ordine, ma quando farlo e con che dati )

@@ -31,7 +31,7 @@ Descrizione:
 - Esiste un Data Schema predefinito e fisso. Non si può modificare runtime, ma solamente da operazioni di "alterazione" che sono delicate
 - La scalabilità è perlopiù verticale, per gestire maggiore traffico si deve aumentare la singola macchina/nodo aumentando CPU, RAM, SSD. Ci sono configurazioni orizzontali per i relazionali, ma sono complesse e non native.
 - Difficile da usare con BigData visto che è solitamente scalabile solo verticalmente
-- Le operazioni sul relazionale sono **ACID** (Atomicità, Consistenza, Isolamento Durata) quindi danno una garanzia della consistenza dei dati
+- Le operazioni sul relazionale sono **ACID** (Atomicità, Consistenza, Isolamento, Durata) quindi danno una garanzia della consistenza dei dati
 
 Concetti fondamentali:
 
@@ -222,6 +222,6 @@ Potendone scegliere solo 2 su 3, si configurano questi 3 casi:
   - **MongoDB** offre questa soluzione utilizzando il principio **Single-Master**. Esiste un nodo Primario dove vengono fatte le scritture, e ci sono N repliche Secondarie che replicano le operazioni di scrittura del Primario rimanendo sempre allineate. Di default anche le letture vengono fatte dal nodo Primario, ma si può configurare di leggere da i Secondari. Quando il nodo Primario diventa non disponibile, il nodo secondario col log di operazioni più recente diventa il primario e tutti gli altri i suoi secondari. Una volta terminato questa riconfigurazione, il database torna disponibile. Nel frangente non si possono effettuare più operazioni di scrittura.
 - **Database AP**: offre Availability e Partition Tolerance, ma non Consistency. Quando si verifica una partizione, tutti i nodi sono Available, a quelli che non sono stati aggiornati a causa della partizione restituiranno un dato precedente. Quando la partizione viene risolta, si sincronizzano i dati e si riparano le incoerenze.
   - Obiettivo: si preferisce mostrare dati non coerenti piuttosto che un errore. Es. bacheca dei social network.
-  - **Apache Cassandra** è un database a colonne senza un nodo master, tutti i nodi devono essere disponibili continuamente. Fornisce comunque una consistenza finale, permettendo scritture nei vari nodi ed effettuando una riconciliazione delle incongruenze il più rapidamente possibile. I dati diventano inconsistenti solo in caso si partizione di rete, che si risolve quando la partizione si risolve. Essendo sempre disponibile, ha alte prestazioni.
+  - **Apache Cassandra** è un database a colonne senza un nodo master, tutti i nodi devono essere disponibili continuamente. Fornisce comunque una consistenza finale, permettendo scritture nei vari nodi ed effettuando una riconciliazione delle incongruenze il più rapidamente possibile. I dati diventano inconsistenti solo in caso di partizione di rete, che si risolve quando la partizione si risolve. Essendo sempre disponibile, ha alte prestazioni.
 - **Database CA**: offre Consistency e Availability, ma non Partition Tolerance. Questo database non permette di essere distribuito su più nodi, visto che essere distribuito implicitamente porta alla possibilità di partizione.
   - Tipicamente i **database relazionali** offrono questa soluzione

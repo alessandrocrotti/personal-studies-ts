@@ -66,7 +66,7 @@ pnpm dev:graphql
 Alternativamente si può con questo comando lanciare il server da solo:
 
 ```shell
-pnpm ts-node src/networking/api-paradigms/graphql/server.ts
+pnpm ts-node src/programming-principles/networking/api-paradigms/graphql/server.ts
 ```
 
 Il server sarà disponibile su `http://localhost:4000/graphql`.
@@ -89,7 +89,7 @@ Il server sarà disponibile su `http://localhost:4000/graphql`.
 Assicurati che il server sia in esecuzione, poi per eseguire delle chiamate client:
 
 ```shell
-pnpm ts-node src/networking/api-paradigms/graphql/client.ts
+pnpm ts-node src/programming-principles/networking/api-paradigms/graphql/client.ts
 ```
 
 Vedrai la risposta della query nel terminale del client.

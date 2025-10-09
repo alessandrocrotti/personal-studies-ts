@@ -12,7 +12,7 @@ Qui ci sono i dettagli e come implementare delle API con vari tipi di strutture.
 ## GraphQL
 
 - Simili alle **REST** ma permettono di creare logiche dove il client richiede specifici dati nella response tramite query dichiarative dove decide cosa vuole come response
-- Può sia interrogare tramite query che effettuare modifiche sul server tramite mutation
+- Si può sia interrogare tramite query che effettuare modifiche sul server tramite mutation
 - Ottimizza il bandwidth e le performance
 - Aumenta la complessità, ma è anche più adatta per contesti molto complessi con body molto grandi
 
