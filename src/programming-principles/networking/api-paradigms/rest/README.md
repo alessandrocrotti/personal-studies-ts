@@ -205,7 +205,7 @@ Questo tipo di struttura è molto comune nelle API REST
 
 ## OpenAPI/Swagger
 
-OpenAPI è lo standard per descrivere formalmente una API RESTFul in ogni sua forma. Inizialmente esisteva Swagger che è un insieme di tool per documentare le API RESTful, che è stata formalizzata nello standard OpenAPI. Sostanzialmente si bassa su uno YAML o JSON che descrive tramite vari attributi codificati una API. Ci sono 2 versioni:
+OpenAPI è lo standard per descrivere formalmente una API RESTFul in ogni sua forma. Inizialmente esisteva Swagger che è un insieme di tool per documentare le API RESTful, che è stata formalizzata nello standard OpenAPI. Sostanzialmente si basa su uno YAML o JSON che descrive tramite vari attributi codificati una API. Ci sono 2 versioni:
 
 - 3.0.0: ancora ampiamente utilizzata perchè non tutti i tool hanno introdotto la nuova versione; ha uno schema più semplice e non gestisce alcuni componenti come i WebHook, ma ancora una scelta valida
 - 3.1.0: nuova versione che permette di usare if/then/else, descrivere WebHook e ha alcune migliorie nella struttura
