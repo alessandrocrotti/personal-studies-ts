@@ -7,6 +7,7 @@
     "test:watch": "jest --watch",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
+    "dev:my-exercise": "nodemon --exec ts-node src/exercises/my-exercise/index.ts",
     "dev:dsa-w3c": "nodemon --exec ts-node src/programming-principles/dsa/w3c/index.ts",
     "dev:design-patterns": "nodemon --exec ts-node src/programming-principles/design-patterns/<folder>/<file>.ts",
     "dev:solid": "nodemon --exec ts-node src/programming-principles/solid/<folder>/<file>.ts",

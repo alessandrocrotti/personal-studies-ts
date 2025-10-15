@@ -1,3 +1,3 @@
-import helloWorld from "./hello-world/index";
+import helloWorld from "./exercises/hello-world/index";
 
 helloWorld();
